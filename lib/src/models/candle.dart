@@ -12,4 +12,6 @@ class Candle {
     required this.close,
     required this.volume,
   });
+
+  // TODO: add from json named custructor
 }

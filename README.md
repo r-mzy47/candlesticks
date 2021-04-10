@@ -1,7 +1,5 @@
 # candlesticks
 
-A flutter candlesticks chart
+A flutter candlesticks chart.
 
-<p align="center">
-    <img src="https://file.io/4KCmA9In9zAM"/></a>
-</p>
+![Gif](https://github.com/r-mzy47/candlesticks/blob/master/example.gif "Fancy Gif")
