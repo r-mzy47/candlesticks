@@ -29,7 +29,6 @@ class CandlestickWidget extends LeafRenderObjectWidget {
     candlestickRenderObject.index = index;
     candlestickRenderObject._candleWidth = candleWidth;
     candlestickRenderObject.markNeedsPaint();
-
     super.updateRenderObject(context, renderObject);
   }
 }
