@@ -4,6 +4,9 @@ import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:flutter/material.dart';
 import 'models/candle.dart';
 
+
+/// StatefulWidget that holds Chart's State (index of 
+/// current position and candles width) and manages gestures.
 class Candlesticks extends StatefulWidget {
   final List<Candle> candles;
 
@@ -99,6 +102,9 @@ class _CandlesticksState extends State<Candlesticks> {
   }
 }
 
+/// This widget calculates the highest and lowest price of visible candles.
+/// Updates right-hand side numbers.
+/// And pass values down to [CandleStickWidget].
 class Chart extends StatelessWidget {
   final Function onScaleUpdate;
   final Function onHorizontalDragUpdate;
@@ -152,7 +158,7 @@ class Chart extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: CandlestickWidget(
+                    child: CandleStickWidget(
                       candles: candles,
                       candleWidth: candleWidth,
                       index: index,

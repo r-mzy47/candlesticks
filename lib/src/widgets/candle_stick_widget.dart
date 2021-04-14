@@ -2,13 +2,15 @@ import 'package:candlesticks/src/models/candle.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 
-class CandlestickWidget extends LeafRenderObjectWidget {
+/// This widget extends [LeafRenderObjectWidget]
+/// And uses CandleStickRenderObject for painting the chart.
+class CandleStickWidget extends LeafRenderObjectWidget {
   final List<Candle> candles;
   final int index;
   final double candleWidth;
   final double high;
   final double low;
-  CandlestickWidget({
+  CandleStickWidget({
     required this.candles,
     required this.index,
     required this.candleWidth,
@@ -18,7 +20,7 @@ class CandlestickWidget extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return CandlestickRenderObject(
+    return CandleStickRenderObject(
       candles,
       index,
       candleWidth,
@@ -30,8 +32,8 @@ class CandlestickWidget extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(
       BuildContext context, covariant RenderObject renderObject) {
-    CandlestickRenderObject candlestickRenderObject =
-        renderObject as CandlestickRenderObject;
+    CandleStickRenderObject candlestickRenderObject =
+        renderObject as CandleStickRenderObject;
     candlestickRenderObject.index = index;
     candlestickRenderObject._candleWidth = candleWidth;
     candlestickRenderObject._high = high;
@@ -41,14 +43,16 @@ class CandlestickWidget extends LeafRenderObjectWidget {
   }
 }
 
-class CandlestickRenderObject extends RenderBox {
+/// This render object is responsible for 
+/// drawing the configured chart on the canvas.
+class CandleStickRenderObject extends RenderBox {
   late List<Candle> _candles;
   late int _index;
   late double _candleWidth;
   late double _low;
   late double _high;
 
-  CandlestickRenderObject(
+  CandleStickRenderObject(
     List<Candle> candles,
     int index,
     double candleWidth,

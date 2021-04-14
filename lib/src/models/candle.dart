@@ -13,5 +13,10 @@ class Candle {
     required this.volume,
   });
 
-  // TODO: add from json named custructor
+  Candle.fromJson(Map<String, dynamic> json)
+      : high = json['high'],
+        low = json['low'],
+        open = json['open'],
+        close = json['close'],
+        volume = json['volume'];
 }
