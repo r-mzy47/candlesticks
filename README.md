@@ -25,16 +25,15 @@ $ flutter pub get
 import 'package:candlesticks/candlesticks.dart';
 ```
 
-# Candle
+### Candle
 
 [Candle] class contains five required double variables that hold a single candle data: high, low, open, close and volume.
 It can be instantiated using its named constructor.
 
 ```dart
-    final candle =  Candle(open: 1780.36, high: 1873.93, low: 1755.34, close: 1848.56, volume: 0);
+final candle =  Candle(open: 1780.36, high: 1873.93, low: 1755.34, close: 1848.56, volume: 0);
 ```
 
-# Candlesticks
+### Candlesticks
 
-[Candlesticks] widget requires only a list of candles and that's it.
-a good practice is to put [Candlesticks] inside the [AspectRatio] widget.
+[Candlesticks] widget requires only a list of candles. And that's it. It is recommended to wrap [Candlesticks] with the [AspectRatio] widget.
