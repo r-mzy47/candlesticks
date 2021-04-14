@@ -4,8 +4,7 @@ import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:flutter/material.dart';
 import 'models/candle.dart';
 
-
-/// StatefulWidget that holds Chart's State (index of 
+/// StatefulWidget that holds Chart's State (index of
 /// current position and candles width) and manages gestures.
 class Candlesticks extends StatefulWidget {
   final List<Candle> candles;

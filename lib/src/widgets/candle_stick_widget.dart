@@ -43,7 +43,7 @@ class CandleStickWidget extends LeafRenderObjectWidget {
   }
 }
 
-/// This render object is responsible for 
+/// This render object is responsible for
 /// drawing the configured chart on the canvas.
 class CandleStickRenderObject extends RenderBox {
   late List<Candle> _candles;
@@ -84,11 +84,13 @@ class CandleStickRenderObject extends RenderBox {
     _low = low;
   }
 
+  /// set size as large as possible
   @override
   void performLayout() {
     size = Size(constraints.maxWidth, constraints.maxHeight);
   }
 
+  /// draws a single candle
   void paintCandle(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
     Color color = candle.open < candle.close
