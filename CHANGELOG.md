@@ -1,3 +1,7 @@
+## [0.2.2] - Apr 14, 2021
+
+* add documentation
+
 ## [0.2.1] - Apr 13, 2021
 
 * [Improvement] scaling animation
