@@ -1,4 +1,4 @@
-## [0.2.3] - Apr 14, 2021
+## [0.2.4] - Apr 14, 2021
 
 - add documentation
 
