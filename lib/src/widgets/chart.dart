@@ -1,7 +1,10 @@
 import 'dart:math';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
+import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import '../models/candle.dart';
+import 'package:candlesticks/src/constant/scales.dart';
 
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
@@ -9,7 +12,7 @@ import '../models/candle.dart';
 /// And pass values down to [CandleStickWidget].
 class Chart extends StatelessWidget {
   /// onScaleUpdate callback
-  ///  called when user scales chart using buttons or scale gesture
+  /// called when user scales chart using buttons or scale gesture
   final Function onScaleUpdate;
 
   /// onHorizontalDragUpdate
@@ -17,7 +20,7 @@ class Chart extends StatelessWidget {
   final Function onHorizontalDragUpdate;
 
   /// candleWidth controls the width of the single candles.
-  ///  range: [2...10]
+  /// range: [2...10]
   final double candleWidth;
 
   /// list of all candles to display in chart
@@ -48,70 +51,70 @@ class Chart extends StatelessWidget {
           low = min(candles[i + index].low, low);
           high = max(candles[i + index].high, high);
         }
-        return Row(
-          children: [
-            Expanded(
-              child: GestureDetector(
-                onScaleUpdate: (ScaleUpdateDetails scaleUpdateDetails) {
-                  if (scaleUpdateDetails.scale == 1.0) {
-                    return;
-                  }
-                  onScaleUpdate(scaleUpdateDetails.scale);
-                },
-                onHorizontalDragUpdate: (detais) {
-                  double x = detais.delta.dx;
-                  onHorizontalDragUpdate(x);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(
-                        255, 25, 27, 32), //Color.fromARGB(255, 18, 32, 47),
-                    border: Border.all(
-                      color: Color.fromARGB(255, 132, 142, 156),
-                      width: 1,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: CandleStickWidget(
-                      candles: candles,
-                      candleWidth: candleWidth,
-                      index: index,
-                      high: high,
-                      low: low,
-                    ),
-                  ),
-                ),
+        double range = high - low;
+        double tileHeight = 0;
+        int scaleIndex = 0;
+        for (int i = 0; i < scales.length; i++) {
+          if (range / scales[i] > 40) {
+            tileHeight = range / scales[i];
+            scaleIndex = i;
+          }
+        }
+        high =
+            ((high ~/ scales[scaleIndex] + 1) * scales[scaleIndex]).toDouble();
+        low = ((low ~/ scales[scaleIndex]) * scales[scaleIndex]).toDouble();
+        return Container(
+          color: Color.fromARGB(255, 25, 27, 32),
+          child: Stack(
+            children: [
+              PriceColumn(
+                tileHeight: tileHeight,
+                high: high,
+                scaleIndex: scaleIndex,
+                width: constraints.maxWidth,
+                height: constraints.maxHeight,
               ),
-            ),
-            Container(
-              width: 50,
-              color: Color.fromARGB(255, 25, 27, 32),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "-${high.toInt()}",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 132, 142, 156),
-                        fontSize: 12,
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onScaleUpdate: (ScaleUpdateDetails scaleUpdateDetails) {
+                        if (scaleUpdateDetails.scale == 1.0) {
+                          return;
+                        }
+                        onScaleUpdate(scaleUpdateDetails.scale);
+                      },
+                      onHorizontalDragUpdate: (detais) {
+                        double x = detais.delta.dx;
+                        onHorizontalDragUpdate(x);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Color.fromARGB(255, 132, 142, 156),
+                            width: 1,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: CandleStickWidget(
+                            candles: candles,
+                            candleWidth: candleWidth,
+                            index: index,
+                            high: high,
+                            low: low,
+                          ),
+                        ),
                       ),
                     ),
-                    Text(
-                      "-${low.toInt()}",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 132, 142, 156),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  SizedBox(
+                    width: 50,
+                  ),
+                ],
               ),
-            ),
-          ],
+            ],
+          ),
         );
       },
     );

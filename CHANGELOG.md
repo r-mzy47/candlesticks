@@ -1,3 +1,7 @@
+## [0.3.0] - May 5, 2021
+
+- [Feature] add interactive price column
+
 ## [0.2.4] - Apr 14, 2021
 
 - add documentation
