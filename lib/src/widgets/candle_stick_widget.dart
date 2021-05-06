@@ -94,8 +94,8 @@ class CandleStickRenderObject extends RenderBox {
   void paintCandle(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
     Color color = candle.open < candle.close
-        ? Color.fromARGB(255, 71, 209, 253)
-        : Colors.red;
+        ? Color.fromARGB(255, 2, 192, 119)
+        : Color.fromARGB(255, 207, 48, 74);
     Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke

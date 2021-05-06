@@ -1,3 +1,10 @@
+## [0.4.0] - May 6, 2021
+
+- [Feature] add volume chart
+- [Improvement] add scaling high and low price with animation
+- [Improvement] performance improvement
+- [BugFix] tune price column
+
 ## [0.3.0] - May 5, 2021
 
 - [Feature] add interactive price column

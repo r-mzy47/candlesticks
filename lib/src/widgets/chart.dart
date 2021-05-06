@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
+import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../models/candle.dart';
@@ -38,6 +39,25 @@ class Chart extends StatelessWidget {
     required this.index,
   });
 
+  double log10(num x) => log(x) / ln10;
+
+  double getRoof(double number) {
+    int log = log10(number).floor();
+    return (number ~/ pow(10, log) + 1) * pow(10, log).toDouble();
+  }
+
+  String priceToString(double price) {
+    int log = log10(price).floor();
+    if (log > 9)
+      return "${price ~/ 1000000000}B";
+    else if (log > 6)
+      return "${price ~/ 1000000}M";
+    else if (log > 3)
+      return "${price ~/ 1000}K";
+    else
+      return "$price";
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -51,70 +71,154 @@ class Chart extends StatelessWidget {
           low = min(candles[i + index].low, low);
           high = max(candles[i + index].high, high);
         }
-        double range = high - low;
         double tileHeight = 0;
         int scaleIndex = 0;
+        double chartHeight = constraints.maxHeight * 3 / 4 - 40;
         for (int i = 0; i < scales.length; i++) {
-          if (range / scales[i] > 40) {
-            tileHeight = range / scales[i];
+          double newHigh = ((high ~/ scales[i] + 1) * scales[i]).toDouble();
+          double newLow = ((low ~/ scales[i]) * scales[i]).toDouble();
+          double range = newHigh - newLow;
+          if (chartHeight / (range / scales[i]) > 30) {
+            tileHeight = chartHeight / (range / scales[i]);
             scaleIndex = i;
+            break;
           }
         }
+
         high =
             ((high ~/ scales[scaleIndex] + 1) * scales[scaleIndex]).toDouble();
         low = ((low ~/ scales[scaleIndex]) * scales[scaleIndex]).toDouble();
-        return Container(
-          color: Color.fromARGB(255, 25, 27, 32),
-          child: Stack(
-            children: [
-              PriceColumn(
-                tileHeight: tileHeight,
-                high: high,
-                scaleIndex: scaleIndex,
-                width: constraints.maxWidth,
-                height: constraints.maxHeight,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onScaleUpdate: (ScaleUpdateDetails scaleUpdateDetails) {
-                        if (scaleUpdateDetails.scale == 1.0) {
-                          return;
-                        }
-                        onScaleUpdate(scaleUpdateDetails.scale);
-                      },
-                      onHorizontalDragUpdate: (detais) {
-                        double x = detais.delta.dx;
-                        onHorizontalDragUpdate(x);
-                      },
+
+        double volumeHigh = 0;
+        for (int i = 0;
+            (i + 1) * candleWidth < constraints.maxWidth - 50;
+            i++) {
+          if (i + index >= candles.length || i + index < 0) continue;
+          volumeHigh = max(candles[i + index].volume, volumeHigh);
+        }
+
+        return TweenAnimationBuilder(
+          tween: Tween(begin: low, end: high),
+          duration: Duration(milliseconds: 200),
+          builder: (context, high, _) {
+            return TweenAnimationBuilder(
+              tween: Tween(begin: low, end: low),
+              duration: Duration(milliseconds: 200),
+              builder: (context, low, _) {
+                return Column(
+                  children: [
+                    Expanded(
+                      flex: 3,
                       child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Color.fromARGB(255, 132, 142, 156),
-                            width: 1,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: CandleStickWidget(
-                            candles: candles,
-                            candleWidth: candleWidth,
-                            index: index,
-                            high: high,
-                            low: low,
-                          ),
+                        color: Color.fromARGB(255, 25, 27, 32),
+                        child: Stack(
+                          children: [
+                            PriceColumn(
+                              tileHeight: tileHeight,
+                              high: high as double,
+                              scaleIndex: scaleIndex,
+                              width: constraints.maxWidth,
+                              height: constraints.maxHeight * 3 / 4,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onScaleUpdate: (ScaleUpdateDetails
+                                        scaleUpdateDetails) {
+                                      if (scaleUpdateDetails.scale == 1.0) {
+                                        return;
+                                      }
+                                      onScaleUpdate(scaleUpdateDetails.scale);
+                                    },
+                                    onHorizontalDragUpdate: (detais) {
+                                      double x = detais.delta.dx;
+                                      onHorizontalDragUpdate(x);
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.symmetric(
+                                          vertical: BorderSide(
+                                            color: Color.fromARGB(
+                                                255, 132, 142, 156),
+                                            width: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 20),
+                                        child: CandleStickWidget(
+                                          candles: candles,
+                                          candleWidth: candleWidth,
+                                          index: index,
+                                          high: high,
+                                          low: low as double,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 50,
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 50,
-                  ),
-                ],
-              ),
-            ],
-          ),
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        color: Color.fromARGB(255, 25, 27, 32),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.symmetric(
+                                    vertical: BorderSide(
+                                      color: Color.fromARGB(255, 132, 142, 156),
+                                      width: 1,
+                                    ),
+                                  ),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 10.0),
+                                  child: VolumeWidget(
+                                    candles: candles,
+                                    barWidth: candleWidth,
+                                    index: index,
+                                    high: getRoof(volumeHigh),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "-${priceToString(getRoof(volumeHigh))}",
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 132, 142, 156),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              width: 50,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                );
+              },
+            );
+          },
         );
       },
     );

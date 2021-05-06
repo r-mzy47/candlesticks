@@ -29,7 +29,7 @@ class MyHomePage extends StatelessWidget {
       ),
       body: Center(
         child: AspectRatio(
-          aspectRatio: 1.5,
+          aspectRatio: 1.2,
           child: Candlesticks(
             candles: candles,
           ),

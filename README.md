@@ -10,7 +10,7 @@ A flutter candlesticks chart for android, ios and the web; It contains optimized
 
 ```yaml
 dependencies:
-  candlesticks: ^0.3.0
+  candlesticks: ^0.4.0
 ```
 
 2. Get the package using your IDE's GUI or via command line with

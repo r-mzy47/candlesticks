@@ -27,37 +27,10 @@ class _CandlesticksState extends State<Candlesticks> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Column(
       children: [
-        TweenAnimationBuilder(
-          tween: Tween(begin: 6.toDouble(), end: candleWidth),
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeInOutCirc,
-          builder: (_, width, __) {
-            return Chart(
-              onScaleUpdate: (double scale) {
-                setState(() {
-                  candleWidth *= scale;
-                  candleWidth = min(candleWidth, 10);
-                  candleWidth = max(candleWidth, 2);
-                  candleWidth.toInt();
-                });
-              },
-              onHorizontalDragUpdate: (double x) {
-                setState(() {
-                  index += x ~/ 2;
-                  index = max(index, -10);
-                  index = min(index, widget.candles.length - 1);
-                });
-              },
-              candleWidth: width as double,
-              candles: widget.candles,
-              index: index,
-            );
-          },
-        ),
-        Align(
-          alignment: Alignment.topLeft,
+        Container(
+          color: Color.fromARGB(255, 30, 32, 38),
           child: Padding(
             padding: const EdgeInsets.all(2.0),
             child: Row(
@@ -66,7 +39,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   width: 30,
                   height: 30,
                   child: RawMaterialButton(
-                    fillColor: Colors.blue,
+                    fillColor: Color.fromARGB(255, 30, 32, 38),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
@@ -76,7 +49,15 @@ class _CandlesticksState extends State<Candlesticks> {
                         candleWidth = max(candleWidth, 2);
                       });
                     },
-                    child: Icon(Icons.remove),
+                    child: Icon(
+                      Icons.remove,
+                      color: Color.fromARGB(
+                        255,
+                        132,
+                        142,
+                        156,
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -86,21 +67,57 @@ class _CandlesticksState extends State<Candlesticks> {
                   width: 30,
                   height: 30,
                   child: RawMaterialButton(
-                    fillColor: Colors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        candleWidth += 2;
-                        candleWidth = min(candleWidth, 10);
-                      });
-                    },
-                    child: Icon(Icons.add),
-                  ),
+                      fillColor: Color.fromARGB(255, 30, 32, 38),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          candleWidth += 2;
+                          candleWidth = min(candleWidth, 10);
+                        });
+                      },
+                      child: Icon(
+                        Icons.add,
+                        color: Color.fromARGB(
+                          255,
+                          132,
+                          142,
+                          156,
+                        ),
+                      )),
                 ),
               ],
             ),
+          ),
+        ),
+        Expanded(
+          child: TweenAnimationBuilder(
+            tween: Tween(begin: 6.toDouble(), end: candleWidth),
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOutCirc,
+            builder: (_, width, __) {
+              return Chart(
+                onScaleUpdate: (double scale) {
+                  setState(() {
+                    candleWidth *= scale;
+                    candleWidth = min(candleWidth, 10);
+                    candleWidth = max(candleWidth, 2);
+                    candleWidth.toInt();
+                  });
+                },
+                onHorizontalDragUpdate: (double x) {
+                  setState(() {
+                    index += x ~/ 2;
+                    index = max(index, -10);
+                    index = min(index, widget.candles.length - 1);
+                  });
+                },
+                candleWidth: width as double,
+                candles: widget.candles,
+                index: index,
+              );
+            },
           ),
         ),
       ],
