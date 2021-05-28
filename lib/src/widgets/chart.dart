@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
+import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,6 +16,10 @@ class Chart extends StatelessWidget {
   /// onScaleUpdate callback
   /// called when user scales chart using buttons or scale gesture
   final Function onScaleUpdate;
+
+
+  final ScrollController scrollController;
+
 
   /// onHorizontalDragUpdate
   /// callback calls when user scrolls horizontally along the chart
@@ -37,6 +42,7 @@ class Chart extends StatelessWidget {
     required this.candleWidth,
     required this.candles,
     required this.index,
+    required this.scrollController,
   });
 
   double log10(num x) => log(x) / ln10;
@@ -73,7 +79,8 @@ class Chart extends StatelessWidget {
         }
         double tileHeight = 0;
         int scaleIndex = 0;
-        double chartHeight = constraints.maxHeight * 3 / 4 - 40;
+        final maxHeight = constraints.maxHeight - 20;
+        double chartHeight = maxHeight * 3 / 4 - 40;
         for (int i = 0; i < scales.length; i++) {
           double newHigh = ((high ~/ scales[i] + 1) * scales[i]).toDouble();
           double newLow = ((low ~/ scales[i]) * scales[i]).toDouble();
@@ -105,116 +112,127 @@ class Chart extends StatelessWidget {
               tween: Tween(begin: low, end: low),
               duration: Duration(milliseconds: 200),
               builder: (context, low, _) {
-                return Column(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Container(
-                        color: Color.fromARGB(255, 25, 27, 32),
-                        child: Stack(
-                          children: [
-                            PriceColumn(
-                              tileHeight: tileHeight,
-                              high: high as double,
-                              scaleIndex: scaleIndex,
-                              width: constraints.maxWidth,
-                              height: constraints.maxHeight * 3 / 4,
-                            ),
-                            Row(
+                return Container(
+                  color: Color.fromARGB(255, 25, 27, 32),
+                  child: Stack(
+                    children: [
+
+                          TimeRow( candles: candles, scrollController: scrollController, candleWidth: candleWidth,),
+                        
+                      
+                      Column(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Stack(
                               children: [
-                                Expanded(
-                                  child: GestureDetector(
-                                    onScaleUpdate: (ScaleUpdateDetails
-                                        scaleUpdateDetails) {
-                                      if (scaleUpdateDetails.scale == 1.0) {
-                                        return;
-                                      }
-                                      onScaleUpdate(scaleUpdateDetails.scale);
-                                    },
-                                    onHorizontalDragUpdate: (detais) {
-                                      double x = detais.delta.dx;
-                                      onHorizontalDragUpdate(x);
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        border: Border.symmetric(
-                                          vertical: BorderSide(
-                                            color: Color.fromARGB(
-                                                255, 132, 142, 156),
-                                            width: 1,
+                                PriceColumn(
+                                  tileHeight: tileHeight,
+                                  high: high as double,
+                                  scaleIndex: scaleIndex,
+                                  width: constraints.maxWidth,
+                                  height: maxHeight * 3 / 4,
+                                ),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onScaleUpdate: (ScaleUpdateDetails
+                                            scaleUpdateDetails) {
+                                          if (scaleUpdateDetails.scale == 1.0) {
+                                            return;
+                                          }
+                                          onScaleUpdate(
+                                              scaleUpdateDetails.scale);
+                                        },
+                                        onHorizontalDragUpdate: (detais) {
+                                          double x = detais.delta.dx;
+                                          onHorizontalDragUpdate(x);
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.symmetric(
+                                              vertical: BorderSide(
+                                                color: Color.fromARGB(
+                                                    255, 132, 142, 156),
+                                                width: 1,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 20),
+                                            child: CandleStickWidget(
+                                              candles: candles,
+                                              candleWidth: candleWidth,
+                                              index: index,
+                                              high: high,
+                                              low: low as double,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 20),
-                                        child: CandleStickWidget(
-                                          candles: candles,
-                                          candleWidth: candleWidth,
-                                          index: index,
-                                          high: high,
-                                          low: low as double,
+                                    ),
+                                    SizedBox(
+                                      width: 50,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.symmetric(
+                                        vertical: BorderSide(
+                                          color: Color.fromARGB(
+                                              255, 132, 142, 156),
+                                          width: 1,
                                         ),
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(top: 10.0),
+                                      child: VolumeWidget(
+                                        candles: candles,
+                                        barWidth: candleWidth,
+                                        index: index,
+                                        high: getRoof(volumeHigh),
                                       ),
                                     ),
                                   ),
                                 ),
                                 SizedBox(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "-${priceToString(getRoof(volumeHigh))}",
+                                        style: TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 132, 142, 156),
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   width: 50,
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(height: 20,),
+                        ],
                       ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Container(
-                        color: Color.fromARGB(255, 25, 27, 32),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.symmetric(
-                                    vertical: BorderSide(
-                                      color: Color.fromARGB(255, 132, 142, 156),
-                                      width: 1,
-                                    ),
-                                  ),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 10.0),
-                                  child: VolumeWidget(
-                                    candles: candles,
-                                    barWidth: candleWidth,
-                                    index: index,
-                                    high: getRoof(volumeHigh),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "-${priceToString(getRoof(volumeHigh))}",
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 132, 142, 156),
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              width: 50,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
+                    ],
+                  ),
                 );
               },
             );

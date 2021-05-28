@@ -20,7 +20,7 @@ class _CandlesticksState extends State<Candlesticks> {
   /// index of the newest candle to be displayed
   /// changes when user scrolls along the chart
   int index = -10;
-
+  ScrollController scrollController = new ScrollController();
   /// candleWidth controls the width of the single candles.
   ///  range: [2...10]
   double candleWidth = 6;
@@ -108,12 +108,14 @@ class _CandlesticksState extends State<Candlesticks> {
                     candleWidth.toInt();
                   });
                 },
+                scrollController: scrollController,
                 onHorizontalDragUpdate: (double x) {
                   setState(() {
                     index += x ~/ 2;
                     index = max(index, -10);
                     index = min(index, widget.candles.length - 1);
                   });
+                  scrollController.jumpTo(index * candleWidth);
                 },
                 candleWidth: width as double,
                 candles: widget.candles,
