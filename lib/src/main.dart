@@ -27,6 +27,8 @@ class _CandlesticksState extends State<Candlesticks> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.candles.length == 0)
+    return Container(child: Center(child: CircularProgressIndicator(),),);
     return Column(
       children: [
         Container(

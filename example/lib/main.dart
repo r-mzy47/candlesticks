@@ -1,6 +1,6 @@
+import 'package:example/repository.dart';
 import 'package:flutter/material.dart';
 import 'package:candlesticks/candlesticks.dart';
-import './repo.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,7 +20,24 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
+  @override
+  _MyHomePageState createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  List<Candle> candles = [];
+
+  @override
+  void initState() {
+    fetchCandles(symbol: "BTCUSDT", interval: "1h").then((value) {
+      setState(() {
+        candles = value;
+      });
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

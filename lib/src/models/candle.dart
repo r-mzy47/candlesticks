@@ -2,6 +2,7 @@
 /// It contains five required double variables that hold a single candle data: high, low, open, close and volume.
 /// It can be instantiated using its default constructor or fromJson named custructor.
 class Candle {
+  final DateTime date;
   /// The highet price during this candle lifetime
   /// It if always more than low, open and close
   final double high;
@@ -17,6 +18,7 @@ class Candle {
   final double volume;
 
   Candle({
+    required this.date,
     required this.high,
     required this.low,
     required this.open,
@@ -24,10 +26,11 @@ class Candle {
     required this.volume,
   });
 
-  Candle.fromJson(Map<String, dynamic> json)
-      : high = json['high'],
-        low = json['low'],
-        open = json['open'],
-        close = json['close'],
-        volume = json['volume'];
+  Candle.fromJson(List<dynamic>json)
+      : date = DateTime.fromMillisecondsSinceEpoch(json[0]),
+        high = double.parse(json[2]),
+        low = double.parse(json[3]),
+        open = double.parse(json[1]),
+        close = double.parse(json[4]),
+        volume = double.parse(json[5]);
 }
