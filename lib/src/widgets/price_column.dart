@@ -37,7 +37,7 @@ class PriceColumn extends StatelessWidget {
                   children: [
                     Container(
                       width: width - 50,
-                      height: 0.5,
+                      height: 0.3,
                       color: Color.fromARGB(255, 132, 142, 156),
                     ),
                     Text(
