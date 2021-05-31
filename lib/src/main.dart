@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:candlesticks/src/constant/intervals.dart';
 import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/widgets/chart.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class _CandlesticksState extends State<Candlesticks> {
   /// changes when user scrolls along the chart
   int index = -10;
   ScrollController scrollController = new ScrollController();
+
   /// candleWidth controls the width of the single candles.
   ///  range: [2...10]
   double candleWidth = 6;
@@ -28,7 +30,11 @@ class _CandlesticksState extends State<Candlesticks> {
   @override
   Widget build(BuildContext context) {
     if (widget.candles.length == 0)
-    return Container(child: Center(child: CircularProgressIndicator(),),);
+      return Container(
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
     return Column(
       children: [
         Container(
@@ -69,25 +75,48 @@ class _CandlesticksState extends State<Candlesticks> {
                   width: 30,
                   height: 30,
                   child: RawMaterialButton(
-                      fillColor: Color.fromARGB(255, 30, 32, 38),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
+                    fillColor: Color.fromARGB(255, 30, 32, 38),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        candleWidth += 2;
+                        candleWidth = min(candleWidth, 10);
+                      });
+                    },
+                    child: Icon(
+                      Icons.add,
+                      color: Color.fromARGB(
+                        255,
+                        132,
+                        142,
+                        156,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          candleWidth += 2;
-                          candleWidth = min(candleWidth, 10);
-                        });
-                      },
-                      child: Icon(
-                        Icons.add,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 30,
+                  height: 30,
+                  child: RawMaterialButton(
+                    fillColor: Color.fromARGB(255, 30, 32, 38),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    onPressed: () {},
+                    child: Text(
+                      intervals[5],
+                      style: TextStyle(
                         color: Color.fromARGB(
                           255,
                           132,
                           142,
                           156,
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

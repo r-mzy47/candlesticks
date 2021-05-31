@@ -8,7 +8,6 @@ class TimeRow extends StatelessWidget {
   final double candleWidth;
   final ScrollController scrollController;
 
-
   const TimeRow({
     Key? key,
     required this.candles,
@@ -22,10 +21,7 @@ class TimeRow extends StatelessWidget {
       step = 31;
     else if (candleWidth < 5)
       step = 19;
-    else if (candleWidth < 7)
-      step = 13;
-    
-    
+    else if (candleWidth < 7) step = 13;
 
     return Padding(
       padding: const EdgeInsets.only(right: 51.0),

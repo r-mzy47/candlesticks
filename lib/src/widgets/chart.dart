@@ -17,9 +17,7 @@ class Chart extends StatelessWidget {
   /// called when user scales chart using buttons or scale gesture
   final Function onScaleUpdate;
 
-
   final ScrollController scrollController;
-
 
   /// onHorizontalDragUpdate
   /// callback calls when user scrolls horizontally along the chart
@@ -116,10 +114,11 @@ class Chart extends StatelessWidget {
                   color: Color.fromARGB(255, 25, 27, 32),
                   child: Stack(
                     children: [
-
-                          TimeRow( candles: candles, scrollController: scrollController, candleWidth: candleWidth,),
-                        
-                      
+                      TimeRow(
+                        candles: candles,
+                        scrollController: scrollController,
+                        candleWidth: candleWidth,
+                      ),
                       Column(
                         children: [
                           Expanded(
@@ -197,8 +196,7 @@ class Chart extends StatelessWidget {
                                       ),
                                     ),
                                     child: Padding(
-                                      padding:
-                                          const EdgeInsets.only(top: 10.0),
+                                      padding: const EdgeInsets.only(top: 10.0),
                                       child: VolumeWidget(
                                         candles: candles,
                                         barWidth: candleWidth,
@@ -228,7 +226,9 @@ class Chart extends StatelessWidget {
                               ],
                             ),
                           ),
-                          SizedBox(height: 20,),
+                          SizedBox(
+                            height: 20,
+                          ),
                         ],
                       ),
                     ],
