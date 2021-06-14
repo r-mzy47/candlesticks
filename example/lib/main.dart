@@ -34,6 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
       setState(() {
         candles = value;
       });
+      print(value[0].date.day);
     });
     super.initState();
   }

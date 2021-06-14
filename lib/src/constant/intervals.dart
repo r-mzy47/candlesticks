@@ -1,3 +1,5 @@
+/// chart intervals
+/// TODO: add this intervals to chart in next versions
 final intervals = [
   '1m',
   '3m',

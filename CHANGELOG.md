@@ -1,3 +1,8 @@
+## [0.5.0] - Jun 14, 2021
+
+- [Feature] add animated time row
+- [Feature] add binance api to example
+
 ## [0.4.0] - May 6, 2021
 
 - [Feature] add volume chart

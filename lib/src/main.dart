@@ -9,7 +9,6 @@ import 'models/candle.dart';
 /// current position and candles width).
 class Candlesticks extends StatefulWidget {
   final List<Candle> candles;
-
   Candlesticks({required this.candles});
 
   @override

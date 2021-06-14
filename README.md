@@ -2,7 +2,8 @@
 
 A flutter candlesticks chart for android, ios and the web; It contains optimized animations indicators and socket connection ability.
 
-![Gif](https://github.com/r-mzy47/candlesticks/blob/master/example.gif "bictoin daily chart 2017 - 2020")
+![Gif](https://github.com/r-mzy47/candlesticks/blob/master/example.gif "bitcoin 1h chart from Binance")
+
 
 ## Installation
 
@@ -10,7 +11,7 @@ A flutter candlesticks chart for android, ios and the web; It contains optimized
 
 ```yaml
 dependencies:
-  candlesticks: ^0.4.0
+  candlesticks: ^0.5.0
 ```
 
 2. Get the package using your IDE's GUI or via command line with

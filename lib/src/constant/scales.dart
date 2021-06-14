@@ -1,3 +1,4 @@
+/// price scales
 List<double> scales = [
   0.001,
   0.002,

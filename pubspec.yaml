@@ -1,6 +1,6 @@
 name: candlesticks
 description: A flutter candlesticks chart for android, ios and the web; It contains optimized animations, indicators and socket connection ability.
-version: 0.4.0
+version: 0.5.0
 homepage: https://github.com/r-mzy47/candlesticks
 
 environment:

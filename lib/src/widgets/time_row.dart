@@ -32,7 +32,7 @@ class TimeRow extends StatelessWidget {
         itemExtent: step * candleWidth,
         reverse: true,
         itemBuilder: (context, index) {
-          int candleNumber = (step + 1) ~/ 2 - 10 + index * step;
+          int candleNumber = (step + 1) ~/ 2 - 10 + index * step + -1;
           return Column(
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -43,7 +43,9 @@ class TimeRow extends StatelessWidget {
                 ),
               ),
               Text(
-                "${candleNumber >= 0 ? candles[candleNumber].date.day : candles[step + candleNumber].date.add(candles[step + candleNumber].date.difference(candles[2 * step + candleNumber].date)).day}",
+                "${candleNumber >= 0 ? candles[candleNumber].date.month : candles[step + candleNumber].date.add(candles[step + candleNumber].date.difference(candles[2 * step + candleNumber].date)).month}" +
+                    "/" +
+                    "${candleNumber >= 0 ? candles[candleNumber].date.day : candles[step + candleNumber].date.add(candles[step + candleNumber].date.difference(candles[2 * step + candleNumber].date)).day}",
                 style: TextStyle(
                   color: Color.fromARGB(255, 132, 142, 156),
                   fontSize: 12,
