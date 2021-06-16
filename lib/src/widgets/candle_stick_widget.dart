@@ -99,7 +99,7 @@ class CandleStickRenderObject extends RenderBox {
     Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = _candleWidth / 4;
+      ..strokeWidth = 1;
     var path = Path()
       ..moveTo(size.width + offset.dx - (index + 0.5) * _candleWidth,
           offset.dy + (_high - candle.high) / range)
