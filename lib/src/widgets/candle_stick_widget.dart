@@ -1,4 +1,5 @@
 import 'package:candlesticks/src/models/candle.dart';
+import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 
@@ -94,8 +95,8 @@ class CandleStickRenderObject extends RenderBox {
   void paintCandle(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
     Color color = candle.open < candle.close
-        ? Color.fromARGB(255, 2, 192, 119)
-        : Color.fromARGB(255, 207, 48, 74);
+        ? ColorPalette.green
+        : ColorPalette.red;
     Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke

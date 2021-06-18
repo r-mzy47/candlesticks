@@ -1,4 +1,5 @@
 import 'package:candlesticks/src/models/candle.dart';
+import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 
@@ -83,8 +84,8 @@ class VolumeRenderObject extends RenderBox {
   void paintBar(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
     Color color = candle.open < candle.close
-        ? Color.fromARGB(255, 0, 89, 64)
-        : Color.fromARGB(255, 130, 18, 43);
+        ? ColorPalette.darkGreen
+        : ColorPalette.darkRed;
 
     Paint paint = Paint()
       ..color = color

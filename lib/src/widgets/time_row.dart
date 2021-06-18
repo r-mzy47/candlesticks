@@ -1,4 +1,5 @@
 import 'package:candlesticks/candlesticks.dart';
+import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -39,7 +40,7 @@ class TimeRow extends StatelessWidget {
               Expanded(
                 child: Container(
                   width: 0.5,
-                  color: Color.fromARGB(255, 132, 142, 156),
+                  color: ColorPalette.grayColor,
                 ),
               ),
               Text(
@@ -47,7 +48,7 @@ class TimeRow extends StatelessWidget {
                     "/" +
                     "${candleNumber >= 0 ? candles[candleNumber].date.day : candles[step + candleNumber].date.add(candles[step + candleNumber].date.difference(candles[2 * step + candleNumber].date)).day}",
                 style: TextStyle(
-                  color: Color.fromARGB(255, 132, 142, 156),
+                  color: ColorPalette.grayColor,
                   fontSize: 12,
                 ),
               ),

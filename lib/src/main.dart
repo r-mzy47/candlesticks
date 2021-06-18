@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:candlesticks/src/constant/intervals.dart';
 import 'package:candlesticks/src/models/candle.dart';
+import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:candlesticks/src/widgets/chart.dart';
 import 'package:flutter/material.dart';
 import 'models/candle.dart';
@@ -37,7 +38,7 @@ class _CandlesticksState extends State<Candlesticks> {
     return Column(
       children: [
         Container(
-          color: Color.fromARGB(255, 30, 32, 38),
+          color: ColorPalette.barColor,
           child: Padding(
             padding: const EdgeInsets.all(2.0),
             child: Row(
@@ -46,7 +47,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   width: 30,
                   height: 30,
                   child: RawMaterialButton(
-                    fillColor: Color.fromARGB(255, 30, 32, 38),
+                    fillColor: ColorPalette.barColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
@@ -74,7 +75,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   width: 30,
                   height: 30,
                   child: RawMaterialButton(
-                    fillColor: Color.fromARGB(255, 30, 32, 38),
+                    fillColor: ColorPalette.barColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
@@ -99,7 +100,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   width: 30,
                   height: 30,
                   child: RawMaterialButton(
-                    fillColor: Color.fromARGB(255, 30, 32, 38),
+                    fillColor: ColorPalette.barColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
@@ -111,7 +112,7 @@ class Chart extends StatelessWidget {
               duration: Duration(milliseconds: 200),
               builder: (context, low, _) {
                 return Container(
-                  color: Color.fromARGB(255, 25, 27, 32),
+                  color: ColorPalette.darkBlue,
                   child: Stack(
                     children: [
                       TimeRow(
