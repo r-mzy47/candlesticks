@@ -1,6 +1,8 @@
 import 'dart:math';
+import 'package:candlesticks/src/constant/intervals.dart';
 import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
+import 'package:candlesticks/src/widgets/custom_button.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
@@ -18,6 +20,7 @@ class Chart extends StatelessWidget {
   /// called when user scales chart using buttons or scale gesture
   final Function onScaleUpdate;
 
+  /// scrollController controlls the horizontal time row
   final ScrollController scrollController;
 
   /// onHorizontalDragUpdate
@@ -133,6 +136,47 @@ class Chart extends StatelessWidget {
                                   width: constraints.maxWidth,
                                   height: maxHeight * 3 / 4,
                                 ),
+                                AnimatedPositioned(
+                                  duration: Duration(microseconds: 300),
+                                  right: 0,
+                                  top: maxHeight * 3 / 4 -
+                                      30 -
+                                      ((candles[index >= 0 ? index : 0].close -
+                                                  (low as double)) /
+                                              (high - low)) *
+                                          (maxHeight * 3 / 4 - 40),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: constraints.maxWidth - 50,
+                                        height: 0.3,
+                                        color: ColorPalette.grayColor,
+                                      ),
+                                      Container(
+                                        color: candles[index >= 0 ? index : 0]
+                                                    .close <=
+                                                candles[index >= 0 ? index : 0]
+                                                    .open
+                                            ? ColorPalette.darkRed
+                                            : ColorPalette.darkGreen,
+                                        child: Center(
+                                          child: Text(
+                                            candles[index >= 0 ? index : 0]
+                                                .close
+                                                .round()
+                                                .toString(),
+                                            style: TextStyle(
+                                              color: ColorPalette.grayColor,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                        width: 50,
+                                        height: 20,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                                 Row(
                                   children: [
                                     Expanded(
@@ -153,8 +197,7 @@ class Chart extends StatelessWidget {
                                           decoration: BoxDecoration(
                                             border: Border.symmetric(
                                               vertical: BorderSide(
-                                                color: Color.fromARGB(
-                                                    255, 132, 142, 156),
+                                                color: ColorPalette.grayColor,
                                                 width: 1,
                                               ),
                                             ),
@@ -190,8 +233,7 @@ class Chart extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       border: Border.symmetric(
                                         vertical: BorderSide(
-                                          color: Color.fromARGB(
-                                              255, 132, 142, 156),
+                                          color: ColorPalette.grayColor,
                                           width: 1,
                                         ),
                                       ),
@@ -215,8 +257,7 @@ class Chart extends StatelessWidget {
                                       Text(
                                         "-${priceToString(getRoof(volumeHigh))}",
                                         style: TextStyle(
-                                          color: Color.fromARGB(
-                                              255, 132, 142, 156),
+                                          color: ColorPalette.grayColor,
                                           fontSize: 12,
                                         ),
                                       ),

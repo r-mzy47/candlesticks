@@ -32,6 +32,7 @@ class VolumeWidget extends LeafRenderObjectWidget {
       BuildContext context, covariant RenderObject renderObject) {
     VolumeRenderObject candlestickRenderObject =
         renderObject as VolumeRenderObject;
+    candlestickRenderObject._candles = candles;
     candlestickRenderObject.index = index;
     candlestickRenderObject.barWidth = barWidth;
     candlestickRenderObject.high = high;

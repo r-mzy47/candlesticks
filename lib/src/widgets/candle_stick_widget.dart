@@ -35,6 +35,7 @@ class CandleStickWidget extends LeafRenderObjectWidget {
       BuildContext context, covariant RenderObject renderObject) {
     CandleStickRenderObject candlestickRenderObject =
         renderObject as CandleStickRenderObject;
+    candlestickRenderObject._candles = candles;
     candlestickRenderObject.index = index;
     candlestickRenderObject._candleWidth = candleWidth;
     candlestickRenderObject._high = high;
@@ -94,9 +95,8 @@ class CandleStickRenderObject extends RenderBox {
   /// draws a single candle
   void paintCandle(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
-    Color color = candle.open < candle.close
-        ? ColorPalette.green
-        : ColorPalette.red;
+    Color color =
+        candle.open < candle.close ? ColorPalette.green : ColorPalette.red;
     Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke

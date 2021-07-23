@@ -3,6 +3,7 @@ import 'package:candlesticks/src/constant/intervals.dart';
 import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:candlesticks/src/widgets/chart.dart';
+import 'package:candlesticks/src/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'models/candle.dart';
 
@@ -10,7 +11,17 @@ import 'models/candle.dart';
 /// current position and candles width).
 class Candlesticks extends StatefulWidget {
   final List<Candle> candles;
-  Candlesticks({required this.candles});
+
+  /// callback calls when user changes interval
+  final Future<void> Function(String) onIntervalChange;
+
+  final String interval;
+
+  Candlesticks({
+    required this.candles,
+    required this.onIntervalChange,
+    required this.interval,
+  });
 
   @override
   _CandlesticksState createState() => _CandlesticksState();
@@ -26,6 +37,8 @@ class _CandlesticksState extends State<Candlesticks> {
   /// candleWidth controls the width of the single candles.
   ///  range: [2...10]
   double candleWidth = 6;
+
+  bool showIntervals = false;
 
   @override
   Widget build(BuildContext context) {
@@ -43,78 +56,71 @@ class _CandlesticksState extends State<Candlesticks> {
             padding: const EdgeInsets.all(2.0),
             child: Row(
               children: [
-                SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: RawMaterialButton(
-                    fillColor: ColorPalette.barColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        candleWidth -= 2;
-                        candleWidth = max(candleWidth, 2);
-                      });
-                    },
-                    child: Icon(
-                      Icons.remove,
-                      color: Color.fromARGB(
-                        255,
-                        132,
-                        142,
-                        156,
-                      ),
-                    ),
+                CustomButton(
+                  onPressed: () {
+                    setState(() {
+                      candleWidth -= 2;
+                      candleWidth = max(candleWidth, 2);
+                    });
+                  },
+                  child: Icon(
+                    Icons.remove,
+                    color: ColorPalette.grayColor,
                   ),
                 ),
-                SizedBox(
-                  width: 1,
-                ),
-                SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: RawMaterialButton(
-                    fillColor: ColorPalette.barColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        candleWidth += 2;
-                        candleWidth = min(candleWidth, 10);
-                      });
-                    },
-                    child: Icon(
-                      Icons.add,
-                      color: Color.fromARGB(
-                        255,
-                        132,
-                        142,
-                        156,
-                      ),
-                    ),
+                CustomButton(
+                  onPressed: () {
+                    setState(() {
+                      candleWidth += 2;
+                      candleWidth = min(candleWidth, 10);
+                    });
+                  },
+                  child: Icon(
+                    Icons.add,
+                    color: ColorPalette.grayColor,
                   ),
                 ),
-                SizedBox(
-                  width: 30,
-                  height: 30,
-                  child: RawMaterialButton(
-                    fillColor: ColorPalette.barColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    onPressed: () {},
-                    child: Text(
-                      intervals[5],
-                      style: TextStyle(
-                        color: Color.fromARGB(
-                          255,
-                          132,
-                          142,
-                          156,
-                        ),
-                      ),
+                CustomButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Center(
+                          child: Container(
+                            width: 200,
+                            color: ColorPalette.digalogColor,
+                            child: Wrap(
+                              children: intervals
+                                  .map(
+                                    (e) => Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: CustomButton(
+                                        width: 50,
+                                        color: ColorPalette.lightGold,
+                                        child: Text(
+                                          e,
+                                          style: TextStyle(
+                                            color: ColorPalette.gold,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          widget.onIntervalChange(e);
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: Text(
+                    widget.interval,
+                    style: TextStyle(
+                      color: ColorPalette.grayColor,
                     ),
                   ),
                 ),
@@ -139,6 +145,7 @@ class _CandlesticksState extends State<Candlesticks> {
                 },
                 scrollController: scrollController,
                 onHorizontalDragUpdate: (double x) {
+                  if (x.abs() < 2) return;
                   setState(() {
                     index += x ~/ 2;
                     index = max(index, -10);

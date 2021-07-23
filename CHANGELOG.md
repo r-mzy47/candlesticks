@@ -1,3 +1,10 @@
+## [1.0.0] - Jul 24, 2021
+
+- [Feature] multi interval
+- [Feature] add socket connection to example
+- [Feature] add last price indicator
+- [BugFix] fix error when srcroll to the left end
+
 ## [0.5.0] - Jun 14, 2021
 
 - [Feature] add animated time row
