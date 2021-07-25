@@ -53,16 +53,36 @@ class TimeRow extends StatelessWidget {
                   color: ColorPalette.grayColor,
                 ),
               ),
-              Text(
-                "${_time.month}" + "/" + "${_time.day}",
-                style: TextStyle(
-                  color: ColorPalette.grayColor,
-                  fontSize: 12,
-                ),
-              ),
+              dif.compareTo(Duration(days: 1)) > 0
+                  ? _monthDayText(_time)
+                  : _hourMinuteText(_time),
             ],
           );
         },
+      ),
+    );
+  }
+
+  String numberFormat(int value) {
+    return "${value < 10 ? 0 : ""}$value";
+  }
+
+  Text _monthDayText(DateTime _time) {
+    return Text(
+      numberFormat(_time.day) + "/" + numberFormat(_time.month),
+      style: TextStyle(
+        color: ColorPalette.grayColor,
+        fontSize: 12,
+      ),
+    );
+  }
+
+  Text _hourMinuteText(DateTime _time) {
+    return Text(
+      numberFormat(_time.hour) + ":" + numberFormat(_time.minute),
+      style: TextStyle(
+        color: ColorPalette.grayColor,
+        fontSize: 12,
       ),
     );
   }
