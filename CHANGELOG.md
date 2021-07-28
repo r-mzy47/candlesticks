@@ -1,3 +1,7 @@
+## [1.0.1] - Jul 28, 2021
+
+- [Feature] add intervals optional parameter
+
 ## [1.0.0] - Jul 24, 2021
 
 - [Feature] multi interval

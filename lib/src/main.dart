@@ -17,10 +17,13 @@ class Candlesticks extends StatefulWidget {
 
   final String interval;
 
+  final List<String>? intervals;
+
   Candlesticks({
     required this.candles,
     required this.onIntervalChange,
     required this.interval,
+    this.intervals,
   });
 
   @override
@@ -90,7 +93,7 @@ class _CandlesticksState extends State<Candlesticks> {
                             width: 200,
                             color: ColorPalette.digalogColor,
                             child: Wrap(
-                              children: intervals
+                              children: (widget.intervals ?? intervals)
                                   .map(
                                     (e) => Padding(
                                       padding: const EdgeInsets.all(8.0),

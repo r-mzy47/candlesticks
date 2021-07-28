@@ -37,7 +37,7 @@ final candle =  Candle(date: DateTime.now(), open: 1780.36, high: 1873.93, low: 
 
 ### Candlesticks
 
-[Candlesticks] widget requires a list of candles, a list of intervals as [List<String>] and onIntervalChange function. And that's it. It is recommended to wrap [Candlesticks] with the [AspectRatio] widget.
+[Candlesticks] widget requires a list of candles, current interval as String and onIntervalChange callback. And that's it. It is recommended to wrap [Candlesticks] with the [AspectRatio] widget.
 
 ## Note
 
