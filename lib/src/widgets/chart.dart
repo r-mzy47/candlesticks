@@ -1,8 +1,6 @@
 import 'dart:math';
-import 'package:candlesticks/src/constant/intervals.dart';
 import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
-import 'package:candlesticks/src/widgets/custom_button.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
@@ -10,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../models/candle.dart';
 import 'package:candlesticks/src/constant/scales.dart';
+
+import 'dotted_line.dart';
 
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
@@ -38,6 +38,18 @@ class Chart extends StatelessWidget {
   /// changes when user scrolls along the chart
   final int index;
 
+  final void Function(PointerEvent) onEnter;
+
+  final void Function(PointerEvent) onHover;
+
+  final void Function(PointerEvent) onExit;
+
+  final double hoverX;
+  final double hoverY;
+
+  final void Function(double) onPanDown;
+  final void Function() onPanEnd;
+
   Chart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -45,6 +57,13 @@ class Chart extends StatelessWidget {
     required this.candles,
     required this.index,
     required this.scrollController,
+    required this.onEnter,
+    required this.onExit,
+    required this.onHover,
+    required this.hoverX,
+    required this.onPanDown,
+    required this.onPanEnd,
+    required this.hoverY,
   });
 
   double log10(num x) => log(x) / ln10;
@@ -63,7 +82,11 @@ class Chart extends StatelessWidget {
     else if (log > 3)
       return "${price ~/ 1000}K";
     else
-      return "$price";
+      return "${price.toStringAsFixed(0)}";
+  }
+
+  String numberFormat(int value) {
+    return "${value < 10 ? 0 : ""}$value";
   }
 
   @override
@@ -119,9 +142,18 @@ class Chart extends StatelessWidget {
                   child: Stack(
                     children: [
                       TimeRow(
+                        indicatorX: hoverX,
                         candles: candles,
                         scrollController: scrollController,
                         candleWidth: candleWidth,
+                        indicatorTime: candles[min(
+                                max(
+                                    (constraints.maxWidth - 50 - hoverX) ~/
+                                            candleWidth +
+                                        index,
+                                    0),
+                                candles.length - 1)]
+                            .date,
                       ),
                       Column(
                         children: [
@@ -180,38 +212,24 @@ class Chart extends StatelessWidget {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: GestureDetector(
-                                        onScaleUpdate: (ScaleUpdateDetails
-                                            scaleUpdateDetails) {
-                                          if (scaleUpdateDetails.scale == 1.0) {
-                                            return;
-                                          }
-                                          onScaleUpdate(
-                                              scaleUpdateDetails.scale);
-                                        },
-                                        onHorizontalDragUpdate: (detais) {
-                                          double x = detais.delta.dx;
-                                          onHorizontalDragUpdate(x);
-                                        },
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            border: Border.symmetric(
-                                              vertical: BorderSide(
-                                                color: ColorPalette.grayColor,
-                                                width: 1,
-                                              ),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.symmetric(
+                                            vertical: BorderSide(
+                                              color: ColorPalette.grayColor,
+                                              width: 1,
                                             ),
                                           ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 20),
-                                            child: CandleStickWidget(
-                                              candles: candles,
-                                              candleWidth: candleWidth,
-                                              index: index,
-                                              high: high,
-                                              low: low as double,
-                                            ),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 20),
+                                          child: CandleStickWidget(
+                                            candles: candles,
+                                            candleWidth: candleWidth,
+                                            index: index,
+                                            high: high,
+                                            low: low,
                                           ),
                                         ),
                                       ),
@@ -254,11 +272,20 @@ class Chart extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        "-${priceToString(getRoof(volumeHigh))}",
-                                        style: TextStyle(
-                                          color: ColorPalette.grayColor,
-                                          fontSize: 12,
+                                      Container(
+                                        height: 20,
+                                        child: Center(
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                "-${priceToString(getRoof(volumeHigh))}",
+                                                style: TextStyle(
+                                                  color: ColorPalette.grayColor,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -273,6 +300,76 @@ class Chart extends StatelessWidget {
                           ),
                         ],
                       ),
+                      Positioned(
+                        top: hoverY - 10,
+                        child: Row(
+                          children: [
+                            DottedLine(
+                              lineLength: constraints.maxWidth - 50,
+                              dashColor: ColorPalette.grayColor,
+                            ),
+                            Container(
+                              color: ColorPalette.digalogColor,
+                              child: Center(
+                                child: Text(
+                                  // hoverY.toString(),
+
+                                  hoverY < maxHeight * 0.75
+                                      ? (high -
+                                              (hoverY - 20) /
+                                                  (maxHeight * 0.75 - 40) *
+                                                  (high - low))
+                                          .toStringAsFixed(0)
+                                      : priceToString(getRoof(volumeHigh) *
+                                          (1 -
+                                              (hoverY - maxHeight * 0.75 - 10) /
+                                                  (maxHeight * 0.25 - 10))),
+                                  style: TextStyle(
+                                    color: ColorPalette.grayColor,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              width: 50,
+                              height: 20,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        child: Column(
+                          children: [
+                            DottedLine(
+                              lineLength: constraints.maxHeight - 20,
+                              dashColor: ColorPalette.grayColor,
+                              direction: Axis.vertical,
+                            ),
+                          ],
+                        ),
+                        left: hoverX,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 50, bottom: 20),
+                        child: MouseRegion(
+                          onEnter: onEnter,
+                          onHover: onHover,
+                          onExit: onExit,
+                          child: GestureDetector(
+                            onPanUpdate: (update) {
+                              onHorizontalDragUpdate(update.localPosition.dx);
+                            },
+                            onPanEnd: (update) {
+                              onPanEnd();
+                            },
+                            onPanDown: (update) {
+                              onPanDown(update.localPosition.dx);
+                            },
+                            child: Container(
+                              color: Color.fromARGB(1, 255, 255, 255),
+                            ),
+                          ),
+                        ),
+                      )
                     ],
                   ),
                 );

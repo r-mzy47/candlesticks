@@ -37,6 +37,32 @@ class _CandlesticksState extends State<Candlesticks> {
   int index = -10;
   ScrollController scrollController = new ScrollController();
 
+  double hoverX = 0.0;
+  double hoverY = 0.0;
+  bool showInfo = false;
+
+  double lastX = 0;
+  int lastIndex = -10;
+
+  void _incrementEnter(PointerEvent details) {
+    setState(() {
+      showInfo = true;
+    });
+  }
+
+  void _incrementExit(PointerEvent details) {
+    setState(() {
+      showInfo = false;
+    });
+  }
+
+  void _updateLocation(PointerEvent details) {
+    setState(() {
+      hoverX = details.localPosition.dx;
+      hoverY = details.localPosition.dy;
+    });
+  }
+
   /// candleWidth controls the width of the single candles.
   ///  range: [2...10]
   double candleWidth = 6;
@@ -146,15 +172,31 @@ class _CandlesticksState extends State<Candlesticks> {
                     candleWidth.toInt();
                   });
                 },
+                onPanEnd: () {
+                  lastIndex = index;
+                },
+                hoverX: hoverX + (index - lastIndex) * candleWidth,
+                hoverY: hoverY,
+                onEnter: _incrementEnter,
+                onHover: _updateLocation,
+                onExit: _incrementExit,
                 scrollController: scrollController,
                 onHorizontalDragUpdate: (double x) {
-                  if (x.abs() < 2) return;
+                  // if (x.abs() < candleWidth) return;
                   setState(() {
-                    index += x ~/ 2;
+                     x = x - lastX;
+                    // hoverX += candleWidth * x ~/ candleWidth;
+                    index = lastIndex + x ~/ candleWidth;
                     index = max(index, -10);
                     index = min(index, widget.candles.length - 1);
                   });
-                  scrollController.jumpTo(index * candleWidth);
+                  if (index == lastIndex)
+                    return;
+                  scrollController.jumpTo((index + 10) * candleWidth);
+                },
+                onPanDown: (double value) {
+                  lastX = value;
+                  lastIndex = index;
                 },
                 candleWidth: width as double,
                 candles: widget.candles,

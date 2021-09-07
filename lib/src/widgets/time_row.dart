@@ -3,17 +3,20 @@ import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-
+import 'dart:math' as math;
 class TimeRow extends StatelessWidget {
   final List<Candle> candles;
   final double candleWidth;
   final ScrollController scrollController;
-
+  final double indicatorX;
+  final DateTime indicatorTime;
   const TimeRow({
     Key? key,
     required this.candles,
     required this.candleWidth,
     required this.scrollController,
+    required this.indicatorX,
+    required this.indicatorTime,
   }) : super(key: key);
 
   /// Calculates number of candles between two time indicator
@@ -52,7 +55,7 @@ class TimeRow extends StatelessWidget {
   /// Day/month text widget
   Text _monthDayText(DateTime _time) {
     return Text(
-      numberFormat(_time.day) + "/" + numberFormat(_time.month),
+       numberFormat(_time.month)+ "/" + numberFormat(_time.day),
       style: TextStyle(
         color: ColorPalette.grayColor,
         fontSize: 12,
@@ -71,35 +74,62 @@ class TimeRow extends StatelessWidget {
     );
   }
 
+  String dateFormatter(DateTime date) {
+    return "${date.year}-${numberFormat(date.month)}-${numberFormat(date.day)} ${numberFormat(date.hour)}:${numberFormat(date.minute)}";
+  }
+
   @override
   Widget build(BuildContext context) {
     int step = _stepCalculator();
     final dif = candles[0].date.difference(candles[step].date);
     return Padding(
       padding: const EdgeInsets.only(right: 51.0),
-      child: ListView.builder(
-        itemCount: candles.length,
-        scrollDirection: Axis.horizontal,
-        controller: scrollController,
-        itemExtent: step * candleWidth,
-        reverse: true,
-        itemBuilder: (context, index) {
-          DateTime _time = _timeCalculator(step, index, dif);
-          return Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Expanded(
-                child: Container(
-                  width: 0.5,
-                  color: ColorPalette.grayColor,
+      child: Stack(
+        children: [
+
+          ListView.builder(
+            itemCount: candles.length,
+            scrollDirection: Axis.horizontal,
+            controller: scrollController,
+            itemExtent: step * candleWidth,
+            reverse: true,
+            itemBuilder: (context, index) {
+              DateTime _time = _timeCalculator(step, index, dif);
+              return Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                    child: Container(
+                      width: 0.5,
+                      color: ColorPalette.grayColor,
+                    ),
+                  ),
+                  dif.compareTo(Duration(days: 1)) > 0
+                      ? _monthDayText(_time)
+                      : _hourMinuteText(_time),
+                ],
+              );
+            },
+          ),
+          Positioned(
+            bottom: 0,
+            left: math.max(indicatorX - 50, 0),
+            child: Container(
+              color: ColorPalette.digalogColor,
+              child: Center(
+                child: Text(
+                  dateFormatter(indicatorTime),
+                  style: TextStyle(
+                    color: ColorPalette.grayColor,
+                    fontSize: 12,
+                  ),
                 ),
               ),
-              dif.compareTo(Duration(days: 1)) > 0
-                  ? _monthDayText(_time)
-                  : _hourMinuteText(_time),
-            ],
-          );
-        },
+              width: 100,
+              height: 20,
+            ),
+          ),
+        ],
       ),
     );
   }
