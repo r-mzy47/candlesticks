@@ -1,3 +1,8 @@
+## [1.1.0] - Jul 28, 2021
+
+- [Improvement] scrolling experience improvement
+- [Feature] onHover price and time indicators
+ 
 ## [1.0.1] - Jul 28, 2021
 
 - [Feature] add intervals optional parameter
