@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:math' as math;
+
 class TimeRow extends StatelessWidget {
   final List<Candle> candles;
   final double candleWidth;
@@ -55,7 +56,7 @@ class TimeRow extends StatelessWidget {
   /// Day/month text widget
   Text _monthDayText(DateTime _time) {
     return Text(
-       numberFormat(_time.month)+ "/" + numberFormat(_time.day),
+      numberFormat(_time.month) + "/" + numberFormat(_time.day),
       style: TextStyle(
         color: ColorPalette.grayColor,
         fontSize: 12,
@@ -86,7 +87,6 @@ class TimeRow extends StatelessWidget {
       padding: const EdgeInsets.only(right: 51.0),
       child: Stack(
         children: [
-
           ListView.builder(
             itemCount: candles.length,
             scrollDirection: Axis.horizontal,

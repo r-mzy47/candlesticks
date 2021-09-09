@@ -182,16 +182,13 @@ class _CandlesticksState extends State<Candlesticks> {
                 onExit: _incrementExit,
                 scrollController: scrollController,
                 onHorizontalDragUpdate: (double x) {
-                  // if (x.abs() < candleWidth) return;
                   setState(() {
-                     x = x - lastX;
-                    // hoverX += candleWidth * x ~/ candleWidth;
+                    x = x - lastX;
                     index = lastIndex + x ~/ candleWidth;
                     index = max(index, -10);
                     index = min(index, widget.candles.length - 1);
                   });
-                  if (index == lastIndex)
-                    return;
+                  if (index == lastIndex) return;
                   scrollController.jumpTo((index + 10) * candleWidth);
                 },
                 onPanDown: (double value) {
