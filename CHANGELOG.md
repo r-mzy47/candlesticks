@@ -1,4 +1,8 @@
-## [1.1.0] - Jul 28, 2021
+## [1.1.1] - Sep 10, 2021
+
+- [Improvement] replace [DashLine] widget
+ 
+## [1.1.0] - Sep 9, 2021
 
 - [Improvement] scrolling experience improvement
 - [Feature] onHover price and time indicators

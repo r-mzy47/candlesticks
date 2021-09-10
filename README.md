@@ -1,5 +1,6 @@
 # candlesticks
 
+[![pub package](https://img.shields.io/badge/pub-v1.1.1-orange.svg)](https://pub.dev/packages/candlesticks)
 A flutter candlesticks chart for android, ios and the web; It contains optimized animations, indicators (soon) and socket connection ability.
 
 ![Gif](https://github.com/r-mzy47/candlesticks/blob/master/example.gif "Bitcoin chart")
