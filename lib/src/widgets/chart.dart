@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import '../models/candle.dart';
 import 'package:candlesticks/src/constant/scales.dart';
 
-import 'dotted_line.dart';
+import 'dash_line.dart';
 
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
@@ -304,9 +304,11 @@ class Chart extends StatelessWidget {
                         top: hoverY - 10,
                         child: Row(
                           children: [
-                            DottedLine(
-                              lineLength: constraints.maxWidth - 50,
-                              dashColor: ColorPalette.grayColor,
+                            DashLine(
+                              length: constraints.maxWidth - 50,
+                              color: ColorPalette.grayColor,
+                              direction: Axis.horizontal,
+                              thickness: 1.5,
                             ),
                             Container(
                               color: ColorPalette.digalogColor,
@@ -337,10 +339,11 @@ class Chart extends StatelessWidget {
                       Positioned(
                         child: Column(
                           children: [
-                            DottedLine(
-                              lineLength: constraints.maxHeight - 20,
-                              dashColor: ColorPalette.grayColor,
+                            DashLine(
+                              length: constraints.maxHeight - 20,
+                               color: ColorPalette.grayColor,
                               direction: Axis.vertical,
+                              thickness: 1.5,
                             ),
                           ],
                         ),
