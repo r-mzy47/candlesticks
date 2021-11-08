@@ -11,6 +11,7 @@ class CandleStickWidget extends LeafRenderObjectWidget {
   final double candleWidth;
   final double high;
   final double low;
+
   CandleStickWidget({
     required this.candles,
     required this.index,
@@ -95,8 +96,7 @@ class CandleStickRenderObject extends RenderBox {
   /// draws a single candle
   void paintCandle(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
-    Color color =
-        candle.open < candle.close ? ColorPalette.green : ColorPalette.red;
+    Color color = candle.isBull ? ColorPalette.green : ColorPalette.red;
     Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke

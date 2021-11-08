@@ -10,6 +10,7 @@ class VolumeWidget extends LeafRenderObjectWidget {
   final int index;
   final double barWidth;
   final double high;
+
   VolumeWidget({
     required this.candles,
     required this.index,
@@ -84,9 +85,7 @@ class VolumeRenderObject extends RenderBox {
   /// draws a single candle
   void paintBar(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
-    Color color = candle.open < candle.close
-        ? ColorPalette.darkGreen
-        : ColorPalette.darkRed;
+    Color color = candle.isBull ? ColorPalette.darkGreen : ColorPalette.darkRed;
 
     Paint paint = Paint()
       ..color = color

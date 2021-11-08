@@ -23,6 +23,8 @@ class Candle {
   /// security traded during a given period of time.
   final double volume;
 
+  bool get isBull => open <= close;
+
   Candle({
     required this.date,
     required this.high,

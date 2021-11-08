@@ -11,6 +11,7 @@ class TimeRow extends StatelessWidget {
   final ScrollController scrollController;
   final double indicatorX;
   final DateTime indicatorTime;
+
   const TimeRow({
     Key? key,
     required this.candles,

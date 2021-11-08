@@ -21,7 +21,7 @@ class DashLine extends StatelessWidget {
       height: isVertical ? length : thickness,
       width: isVertical ? thickness : length,
       child: ListView.builder(
-        scrollDirection: direction,
+          scrollDirection: direction,
           itemCount: length ~/ 5,
           itemBuilder: (context, index) {
             if (index % 2 == 0) {

@@ -6,6 +6,7 @@ class CustomButton extends StatelessWidget {
   final Widget child;
   final double? width;
   final Color? color;
+
   const CustomButton({
     Key? key,
     required this.child,

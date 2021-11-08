@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../models/candle.dart';
 import 'package:candlesticks/src/constant/scales.dart';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dash_line.dart';
 
 /// This widget manages gestures
@@ -89,6 +89,45 @@ class Chart extends StatelessWidget {
     return "${value < 10 ? 0 : ""}$value";
   }
 
+  String dateFormatter(DateTime date) {
+    return "${date.year}-${numberFormat(date.month)}-${numberFormat(date.day)} ${numberFormat(date.hour)}:${numberFormat(date.minute)}";
+  }
+
+  RichText getCandleInfo(Candle candle) {
+    return RichText(
+      text: TextSpan(
+        text: dateFormatter(candle.date),
+        style: TextStyle(color: ColorPalette.grayColor, fontSize: 10),
+        children: <TextSpan>[
+          TextSpan(text: " O:"),
+          TextSpan(
+              text: candle.open.toStringAsFixed(2),
+              style: TextStyle(
+                  color:
+                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
+          TextSpan(text: " H:"),
+          TextSpan(
+              text: candle.high.toStringAsFixed(2),
+              style: TextStyle(
+                  color:
+                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
+          TextSpan(text: " L:"),
+          TextSpan(
+              text: candle.low.toStringAsFixed(2),
+              style: TextStyle(
+                  color:
+                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
+          TextSpan(text: " C:"),
+          TextSpan(
+              text: candle.close.toStringAsFixed(2),
+              style: TextStyle(
+                  color:
+                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -137,6 +176,12 @@ class Chart extends StatelessWidget {
               tween: Tween(begin: low, end: low),
               duration: Duration(milliseconds: 200),
               builder: (context, low, _) {
+                final currentCandle = candles[min(
+                    max(
+                        (constraints.maxWidth - 50 - hoverX) ~/ candleWidth +
+                            index,
+                        0),
+                    candles.length - 1)];
                 return Container(
                   color: ColorPalette.darkBlue,
                   child: Stack(
@@ -146,14 +191,7 @@ class Chart extends StatelessWidget {
                         candles: candles,
                         scrollController: scrollController,
                         candleWidth: candleWidth,
-                        indicatorTime: candles[min(
-                                max(
-                                    (constraints.maxWidth - 50 - hoverX) ~/
-                                            candleWidth +
-                                        index,
-                                    0),
-                                candles.length - 1)]
-                            .date,
+                        indicatorTime: currentCandle.date,
                       ),
                       Column(
                         children: [
@@ -182,15 +220,16 @@ class Chart extends StatelessWidget {
                                       Container(
                                         width: constraints.maxWidth - 50,
                                         height: 0.3,
-                                        color: ColorPalette.grayColor,
+                                        color: candles[index >= 0 ? index : 0]
+                                                .isBull
+                                            ? ColorPalette.green
+                                            : ColorPalette.red,
                                       ),
                                       Container(
                                         color: candles[index >= 0 ? index : 0]
-                                                    .close <=
-                                                candles[index >= 0 ? index : 0]
-                                                    .open
-                                            ? ColorPalette.darkRed
-                                            : ColorPalette.darkGreen,
+                                                .isBull
+                                            ? ColorPalette.darkGreen
+                                            : ColorPalette.darkRed,
                                         child: Center(
                                           child: Text(
                                             candles[index >= 0 ? index : 0]
@@ -300,54 +339,69 @@ class Chart extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Positioned(
-                        top: hoverY - 10,
-                        child: Row(
-                          children: [
-                            DashLine(
-                              length: constraints.maxWidth - 50,
-                              color: ColorPalette.grayColor,
-                              direction: Axis.horizontal,
-                              thickness: 1.5,
-                            ),
-                            Container(
-                              color: ColorPalette.digalogColor,
-                              child: Center(
-                                child: Text(
-                                  hoverY < maxHeight * 0.75
-                                      ? (high -
-                                              (hoverY - 20) /
-                                                  (maxHeight * 0.75 - 40) *
-                                                  (high - low))
-                                          .toStringAsFixed(0)
-                                      : priceToString(getRoof(volumeHigh) *
-                                          (1 -
-                                              (hoverY - maxHeight * 0.75 - 10) /
-                                                  (maxHeight * 0.25 - 10))),
-                                  style: TextStyle(
+                      kIsWeb
+                          ? Positioned(
+                              top: hoverY - 10,
+                              child: Row(
+                                children: [
+                                  DashLine(
+                                    length: constraints.maxWidth - 50,
                                     color: ColorPalette.grayColor,
-                                    fontSize: 12,
+                                    direction: Axis.horizontal,
+                                    thickness: 1.5,
                                   ),
-                                ),
+                                  Container(
+                                    color: ColorPalette.digalogColor,
+                                    child: Center(
+                                      child: Text(
+                                        hoverY < maxHeight * 0.75
+                                            ? (high -
+                                                    (hoverY - 20) /
+                                                        (maxHeight * 0.75 -
+                                                            40) *
+                                                        (high - low))
+                                                .toStringAsFixed(0)
+                                            : priceToString(
+                                                getRoof(volumeHigh) *
+                                                    (1 -
+                                                        (hoverY -
+                                                                maxHeight *
+                                                                    0.75 -
+                                                                10) /
+                                                            (maxHeight * 0.25 -
+                                                                10))),
+                                        style: TextStyle(
+                                          color: ColorPalette.grayColor,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                    width: 50,
+                                    height: 20,
+                                  ),
+                                ],
                               ),
-                              width: 50,
-                              height: 20,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        child: Column(
-                          children: [
-                            DashLine(
-                              length: constraints.maxHeight - 20,
-                               color: ColorPalette.grayColor,
-                              direction: Axis.vertical,
-                              thickness: 1.5,
-                            ),
-                          ],
-                        ),
-                        left: hoverX,
+                            )
+                          : Container(),
+                      kIsWeb
+                          ? Positioned(
+                              child: Column(
+                                children: [
+                                  DashLine(
+                                    length: constraints.maxHeight - 20,
+                                    color: ColorPalette.grayColor,
+                                    direction: Axis.vertical,
+                                    thickness: 1.5,
+                                  ),
+                                ],
+                              ),
+                              left: hoverX,
+                            )
+                          : Container(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 12),
+                        child: getCandleInfo(currentCandle),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),

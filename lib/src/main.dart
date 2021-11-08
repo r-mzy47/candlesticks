@@ -12,7 +12,7 @@ import 'models/candle.dart';
 class Candlesticks extends StatefulWidget {
   final List<Candle> candles;
 
-  /// callback calls when user changes interval
+  /// callback calls wshen user changes interval
   final Future<void> Function(String) onIntervalChange;
 
   final String interval;
