@@ -1,3 +1,7 @@
+## [1.2.0] - Nov 8, 2021
+
+- [Feature] show selected candle info
+
 ## [1.1.1] - Sep 10, 2021
 
 - [Improvement] replace [DashLine] widget
