@@ -4,6 +4,7 @@ import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:candlesticks/src/widgets/chart.dart';
 import 'package:candlesticks/src/widgets/custom_button.dart';
+import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/material.dart';
 import 'models/candle.dart';
 
@@ -79,84 +80,22 @@ class _CandlesticksState extends State<Candlesticks> {
       );
     return Column(
       children: [
-        Container(
-          color: ColorPalette.barColor,
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Row(
-              children: [
-                CustomButton(
-                  onPressed: () {
-                    setState(() {
-                      candleWidth -= 2;
-                      candleWidth = max(candleWidth, 2);
-                    });
-                  },
-                  child: Icon(
-                    Icons.remove,
-                    color: ColorPalette.grayColor,
-                  ),
-                ),
-                CustomButton(
-                  onPressed: () {
-                    setState(() {
-                      candleWidth += 2;
-                      candleWidth = min(candleWidth, 10);
-                    });
-                  },
-                  child: Icon(
-                    Icons.add,
-                    color: ColorPalette.grayColor,
-                  ),
-                ),
-                CustomButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return Center(
-                          child: Container(
-                            width: 200,
-                            color: ColorPalette.digalogColor,
-                            child: Wrap(
-                              children: (widget.intervals ?? intervals)
-                                  .map(
-                                    (e) => Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: CustomButton(
-                                        width: 50,
-                                        color: ColorPalette.lightGold,
-                                        child: Text(
-                                          e,
-                                          style: TextStyle(
-                                            color: ColorPalette.gold,
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          widget.onIntervalChange(e);
-                                          Navigator.of(context).pop();
-                                        },
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: Text(
-                    widget.interval,
-                    style: TextStyle(
-                      color: ColorPalette.grayColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        ToolBar(
+            onZoomInPressed: () {
+              setState(() {
+                candleWidth += 2;
+                candleWidth = min(candleWidth, 10);
+              });
+            },
+            onZoomOutPressed: () {
+              setState(() {
+                candleWidth -= 2;
+                candleWidth = max(candleWidth, 2);
+              });
+            },
+            interval: widget.interval,
+            intervals: widget.intervals ?? intervals,
+            onIntervalChange: widget.onIntervalChange),
         Expanded(
           child: TweenAnimationBuilder(
             tween: Tween(begin: 6.toDouble(), end: candleWidth),

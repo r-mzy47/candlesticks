@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:candlesticks/src/theme/color_palette.dart';
+import 'package:candlesticks/src/widgets/candle_info_text.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
@@ -91,41 +92,6 @@ class Chart extends StatelessWidget {
 
   String dateFormatter(DateTime date) {
     return "${date.year}-${numberFormat(date.month)}-${numberFormat(date.day)} ${numberFormat(date.hour)}:${numberFormat(date.minute)}";
-  }
-
-  RichText getCandleInfo(Candle candle) {
-    return RichText(
-      text: TextSpan(
-        text: dateFormatter(candle.date),
-        style: TextStyle(color: ColorPalette.grayColor, fontSize: 10),
-        children: <TextSpan>[
-          TextSpan(text: " O:"),
-          TextSpan(
-              text: candle.open.toStringAsFixed(2),
-              style: TextStyle(
-                  color:
-                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
-          TextSpan(text: " H:"),
-          TextSpan(
-              text: candle.high.toStringAsFixed(2),
-              style: TextStyle(
-                  color:
-                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
-          TextSpan(text: " L:"),
-          TextSpan(
-              text: candle.low.toStringAsFixed(2),
-              style: TextStyle(
-                  color:
-                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
-          TextSpan(text: " C:"),
-          TextSpan(
-              text: candle.close.toStringAsFixed(2),
-              style: TextStyle(
-                  color:
-                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
-        ],
-      ),
-    );
   }
 
   @override
@@ -401,7 +367,7 @@ class Chart extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
-                        child: getCandleInfo(currentCandle),
+                        child: CandleInfoText(candle: currentCandle),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
