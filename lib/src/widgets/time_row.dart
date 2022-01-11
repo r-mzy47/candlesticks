@@ -101,7 +101,7 @@ class TimeRow extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Container(
-                      width: 0.5,
+                      width: 0.05,
                       color: ColorPalette.grayColor,
                     ),
                   ),
