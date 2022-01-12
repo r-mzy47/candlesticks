@@ -1,12 +1,13 @@
 import 'dart:math';
+import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/theme/color_palette.dart';
+import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_info_text.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import '../models/candle.dart';
 import 'package:candlesticks/src/constant/scales.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -67,86 +68,73 @@ class Chart extends StatelessWidget {
     required this.hoverY,
   });
 
-  double log10(num x) => log(x) / ln10;
-
-  double getRoof(double number) {
-    int log = log10(number).floor();
-    return (number ~/ pow(10, log) + 1) * pow(10, log).toDouble();
+  double calcutePriceScale(double height, double high, double low) {
+    for (int i = 0; i < scales.length; i++) {
+      double newHigh = (high ~/ scales[i] + 1) * scales[i];
+      double newLow = (low ~/ scales[i]) * scales[i];
+      double range = newHigh - newLow;
+      if (height / (range / scales[i]) > MIN_PRICETILE_HEIGHT) {
+        return scales[i];
+      }
+    }
+    return 0;
   }
 
-  String priceToString(double price) {
-    int log = log10(price).floor();
-    if (log > 9)
-      return "${price ~/ 1000000000}B";
-    else if (log > 6)
-      return "${price ~/ 1000000}M";
-    else if (log > 3)
-      return "${price ~/ 1000}K";
-    else
-      return "${price.toStringAsFixed(0)}";
-  }
-
-  String numberFormat(int value) {
-    return "${value < 10 ? 0 : ""}$value";
-  }
-
-  String dateFormatter(DateTime date) {
-    return "${date.year}-${numberFormat(date.month)}-${numberFormat(date.day)} ${numberFormat(date.hour)}:${numberFormat(date.minute)}";
+  double calcutePriceIndicatorTopPadding(
+      double chartHeight, double low, double high) {
+    return chartHeight +
+        10 -
+        (candles[index >= 0 ? index : 0].close - low) /
+            (high - low) *
+            chartHeight;
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        double high = 0;
-        double low = double.infinity;
-        for (int i = 0;
-            (i + 1) * candleWidth < constraints.maxWidth - 50;
-            i++) {
-          if (i + index >= candles.length || i + index < 0) continue;
-          low = min(candles[i + index].low, low);
-          high = max(candles[i + index].high, high);
-        }
-        double tileHeight = 0;
-        int scaleIndex = 0;
-        final maxHeight = constraints.maxHeight - 20;
-        double chartHeight = maxHeight * 3 / 4 - 40;
-        for (int i = 0; i < scales.length; i++) {
-          double newHigh = ((high ~/ scales[i] + 1) * scales[i]).toDouble();
-          double newLow = ((low ~/ scales[i]) * scales[i]).toDouble();
-          double range = newHigh - newLow;
-          if (chartHeight / (range / scales[i]) > 30) {
-            tileHeight = chartHeight / (range / scales[i]);
-            scaleIndex = i;
-            break;
-          }
+        // determine charts width and height
+        final double maxWidth = constraints.maxWidth - PRICE_BAR_WIDTH;
+        final double maxHeight = constraints.maxHeight - DATE_BAR_HEIGHT;
+
+        // visible candles start and end indexes
+        final int candlesStartIndex = max(index, 0);
+        final int candlesEndIndex =
+            min(maxWidth ~/ candleWidth + index, candles.length - 1);
+
+        // visible candles highest and lowest price
+        double candlesHighPrice = 0;
+        double candlesLowPrice = double.infinity;
+        for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
+          candlesLowPrice = min(candles[i].low, candlesLowPrice);
+          candlesHighPrice = max(candles[i].high, candlesHighPrice);
         }
 
-        high =
-            ((high ~/ scales[scaleIndex] + 1) * scales[scaleIndex]).toDouble();
-        low = ((low ~/ scales[scaleIndex]) * scales[scaleIndex]).toDouble();
+        // calcute priceScale
+        double chartHeight = maxHeight * 0.75 - 2 * MAIN_CHART_VERTICAL_PADDING;
+        double priceScale =
+            calcutePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
 
+        // high and low calibrations revision
+        candlesHighPrice = (candlesHighPrice ~/ priceScale + 1) * priceScale;
+        candlesLowPrice = (candlesLowPrice ~/ priceScale) * priceScale;
+
+        // calcute highest volume
         double volumeHigh = 0;
-        for (int i = 0;
-            (i + 1) * candleWidth < constraints.maxWidth - 50;
-            i++) {
-          if (i + index >= candles.length || i + index < 0) continue;
-          volumeHigh = max(candles[i + index].volume, volumeHigh);
+        for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
+          volumeHigh = max(candles[i].volume, volumeHigh);
         }
 
         return TweenAnimationBuilder(
-          tween: Tween(begin: low, end: high),
+          tween: Tween(begin: candlesLowPrice, end: candlesHighPrice),
           duration: Duration(milliseconds: 200),
-          builder: (context, high, _) {
+          builder: (context, double high, _) {
             return TweenAnimationBuilder(
-              tween: Tween(begin: low, end: low),
+              tween: Tween(begin: candlesHighPrice, end: candlesLowPrice),
               duration: Duration(milliseconds: 200),
-              builder: (context, low, _) {
+              builder: (context, double low, _) {
                 final currentCandle = candles[min(
-                    max(
-                        (constraints.maxWidth - 50 - hoverX) ~/ candleWidth +
-                            index,
-                        0),
+                    max((maxWidth - hoverX) ~/ candleWidth + index, 0),
                     candles.length - 1)];
                 return Container(
                   color: ColorPalette.darkBlue,
@@ -166,25 +154,24 @@ class Chart extends StatelessWidget {
                             child: Stack(
                               children: [
                                 PriceColumn(
-                                  tileHeight: tileHeight,
-                                  high: high as double,
-                                  scaleIndex: scaleIndex,
+                                  low: candlesLowPrice,
+                                  high: candlesHighPrice,
+                                  priceScale: priceScale,
                                   width: constraints.maxWidth,
-                                  height: maxHeight * 3 / 4,
+                                  chartHeight: chartHeight,
                                 ),
                                 AnimatedPositioned(
                                   duration: Duration(microseconds: 300),
                                   right: 0,
-                                  top: maxHeight * 3 / 4 -
-                                      30 -
-                                      ((candles[index >= 0 ? index : 0].close -
-                                                  (low as double)) /
-                                              (high - low)) *
-                                          (maxHeight * 3 / 4 - 40),
+                                  top: calcutePriceIndicatorTopPadding(
+                                    chartHeight,
+                                    low,
+                                    high,
+                                  ),
                                   child: Row(
                                     children: [
                                       Container(
-                                        width: constraints.maxWidth - 50,
+                                        width: maxWidth,
                                         height: 0.3,
                                         color: candles[index >= 0 ? index : 0]
                                                 .isBull
@@ -208,8 +195,8 @@ class Chart extends StatelessWidget {
                                             ),
                                           ),
                                         ),
-                                        width: 50,
-                                        height: 20,
+                                        width: PRICE_BAR_WIDTH,
+                                        height: PRICE_INDICATOR_HEIGHT,
                                       ),
                                     ],
                                   ),
@@ -240,7 +227,7 @@ class Chart extends StatelessWidget {
                                       ),
                                     ),
                                     SizedBox(
-                                      width: 50,
+                                      width: PRICE_BAR_WIDTH,
                                     ),
                                   ],
                                 ),
@@ -267,7 +254,8 @@ class Chart extends StatelessWidget {
                                         candles: candles,
                                         barWidth: candleWidth,
                                         index: index,
-                                        high: getRoof(volumeHigh),
+                                        high:
+                                            HelperFunctions.getRoof(volumeHigh),
                                       ),
                                     ),
                                   ),
@@ -277,13 +265,13 @@ class Chart extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Container(
-                                        height: 20,
+                                      SizedBox(
+                                        height: DATE_BAR_HEIGHT,
                                         child: Center(
                                           child: Row(
                                             children: [
                                               Text(
-                                                "-${priceToString(getRoof(volumeHigh))}",
+                                                "-${HelperFunctions.priceToString(HelperFunctions.getRoof(volumeHigh))}",
                                                 style: TextStyle(
                                                   color: ColorPalette.grayColor,
                                                   fontSize: 12,
@@ -301,7 +289,7 @@ class Chart extends StatelessWidget {
                             ),
                           ),
                           SizedBox(
-                            height: 20,
+                            height: DATE_BAR_HEIGHT,
                           ),
                         ],
                       ),
@@ -311,10 +299,10 @@ class Chart extends StatelessWidget {
                               child: Row(
                                 children: [
                                   DashLine(
-                                    length: constraints.maxWidth - 50,
+                                    length: maxWidth,
                                     color: ColorPalette.grayColor,
                                     direction: Axis.horizontal,
-                                    thickness: 1.5,
+                                    thickness: 0.5,
                                   ),
                                   Container(
                                     color: ColorPalette.digalogColor,
@@ -327,8 +315,9 @@ class Chart extends StatelessWidget {
                                                             40) *
                                                         (high - low))
                                                 .toStringAsFixed(0)
-                                            : priceToString(
-                                                getRoof(volumeHigh) *
+                                            : HelperFunctions.priceToString(
+                                                HelperFunctions.getRoof(
+                                                        volumeHigh) *
                                                     (1 -
                                                         (hoverY -
                                                                 maxHeight *
@@ -357,7 +346,7 @@ class Chart extends StatelessWidget {
                                     length: constraints.maxHeight - 20,
                                     color: ColorPalette.grayColor,
                                     direction: Axis.vertical,
-                                    thickness: 1.5,
+                                    thickness: 0.5,
                                   ),
                                 ],
                               ),
