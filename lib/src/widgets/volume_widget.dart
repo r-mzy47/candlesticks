@@ -10,12 +10,16 @@ class VolumeWidget extends LeafRenderObjectWidget {
   final int index;
   final double barWidth;
   final double high;
+  final Color bullColor;
+  final Color bearColor;
 
   VolumeWidget({
     required this.candles,
     required this.index,
     required this.barWidth,
     required this.high,
+    required this.bearColor,
+    required this.bullColor,
   });
 
   @override
@@ -25,6 +29,8 @@ class VolumeWidget extends LeafRenderObjectWidget {
       index,
       barWidth,
       high,
+      bearColor,
+      bullColor,
     );
   }
 
@@ -34,9 +40,11 @@ class VolumeWidget extends LeafRenderObjectWidget {
     VolumeRenderObject candlestickRenderObject =
         renderObject as VolumeRenderObject;
     candlestickRenderObject._candles = candles;
-    candlestickRenderObject.index = index;
-    candlestickRenderObject.barWidth = barWidth;
-    candlestickRenderObject.high = high;
+    candlestickRenderObject._index = index;
+    candlestickRenderObject._barWidth = barWidth;
+    candlestickRenderObject._high = high;
+    candlestickRenderObject._bearColor = bearColor;
+    candlestickRenderObject._bullColor = bullColor;
     candlestickRenderObject.markNeedsPaint();
     super.updateRenderObject(context, renderObject);
   }
@@ -49,31 +57,23 @@ class VolumeRenderObject extends RenderBox {
   late int _index;
   late double _barWidth;
   late double _high;
+  late Color _bearColor;
+  late Color _bullColor;
 
   VolumeRenderObject(
     List<Candle> candles,
     int index,
     double barWidth,
     double high,
+    Color bearColor,
+    Color bullColor,
   ) {
     _candles = candles;
     _index = index;
     _barWidth = barWidth;
     _high = high;
-  }
-
-  set index(int index) {
-    if (_index == index) return;
-    _index = index;
-  }
-
-  set barWidth(double barWidth) {
-    if (_barWidth == barWidth) return;
-    _barWidth = barWidth;
-  }
-
-  set high(double high) {
-    _high = high;
+    _bearColor = bearColor;
+    _bullColor = bullColor;
   }
 
   /// set size as large as possible
@@ -85,7 +85,7 @@ class VolumeRenderObject extends RenderBox {
   /// draws a single candle
   void paintBar(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
-    Color color = candle.isBull ? ColorPalette.darkGreen : ColorPalette.darkRed;
+    Color color = candle.isBull ? _bullColor : _bearColor;
 
     Paint paint = Paint()
       ..color = color

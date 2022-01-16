@@ -1,5 +1,6 @@
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/theme/color_palette.dart';
+import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:flutter/material.dart';
 
 class CandleInfoText extends StatelessWidget {
@@ -23,32 +24,36 @@ class CandleInfoText extends StatelessWidget {
     return RichText(
       text: TextSpan(
         text: dateFormatter(candle.date),
-        style: TextStyle(color: ColorPalette.grayColor, fontSize: 10),
+        style: TextStyle(color: Theme.of(context).grayColor, fontSize: 10),
         children: <TextSpan>[
           TextSpan(text: " O:"),
           TextSpan(
               text: candle.open.toStringAsFixed(2),
               style: TextStyle(
-                  color:
-                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
+                  color: candle.isBull
+                      ? Theme.of(context).primaryGreen
+                      : Theme.of(context).primaryRed)),
           TextSpan(text: " H:"),
           TextSpan(
               text: candle.high.toStringAsFixed(2),
               style: TextStyle(
-                  color:
-                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
+                  color: candle.isBull
+                      ? Theme.of(context).primaryGreen
+                      : Theme.of(context).primaryRed)),
           TextSpan(text: " L:"),
           TextSpan(
               text: candle.low.toStringAsFixed(2),
               style: TextStyle(
-                  color:
-                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
+                  color: candle.isBull
+                      ? Theme.of(context).primaryGreen
+                      : Theme.of(context).primaryRed)),
           TextSpan(text: " C:"),
           TextSpan(
               text: candle.close.toStringAsFixed(2),
               style: TextStyle(
-                  color:
-                      candle.isBull ? ColorPalette.green : ColorPalette.red)),
+                  color: candle.isBull
+                      ? Theme.of(context).primaryGreen
+                      : Theme.of(context).primaryRed)),
         ],
       ),
     );

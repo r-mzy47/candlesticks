@@ -9,28 +9,15 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class MyApp extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'candleSticks',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(),
-    );
-  }
+  _MyAppState createState() => _MyAppState();
 }
 
-class MyHomePage extends StatefulWidget {
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
+class _MyAppState extends State<MyApp> {
   List<Candle> candles = [];
   WebSocketChannel? _channel;
+  bool isDark = false;
 
   String interval = "1m";
 
@@ -101,13 +88,26 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("candleSticks"),
-      ),
-      body: Center(
-        child: AspectRatio(
-          aspectRatio: 1.2,
+    return MaterialApp(
+      theme: isDark ? ThemeData.dark() : ThemeData.light(),
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("candleSticks"),
+          actions: [
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  isDark = !isDark;
+                });
+              },
+              icon: Icon(
+                isDark ? Icons.wb_sunny_sharp : Icons.nightlight_round_outlined,
+              ),
+            )
+          ],
+        ),
+        body: Center(
           child: StreamBuilder(
             stream: _channel == null ? null : _channel!.stream,
             builder: (context, snapshot) {

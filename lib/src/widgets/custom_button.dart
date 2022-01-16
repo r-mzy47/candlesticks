@@ -1,4 +1,5 @@
 import 'package:candlesticks/src/theme/color_palette.dart';
+import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
@@ -21,7 +22,8 @@ class CustomButton extends StatelessWidget {
       width: width ?? 30,
       height: 30,
       child: RawMaterialButton(
-        fillColor: color ?? ColorPalette.barColor,
+        elevation: 0,
+        fillColor: color ?? Theme.of(context).background,
         onPressed: onPressed,
         child: child,
       ),

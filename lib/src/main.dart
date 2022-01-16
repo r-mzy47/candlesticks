@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'package:candlesticks/src/constant/intervals.dart';
 import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/color_palette.dart';
+import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/widgets/chart.dart';
-import 'package:candlesticks/src/widgets/custom_button.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'models/candle.dart';
 
 /// StatefulWidget that holds Chart's State (index of
@@ -64,6 +64,12 @@ class _CandlesticksState extends State<Candlesticks> {
     });
   }
 
+  @override
+  void didUpdateWidget(Candlesticks oldWidget) {
+    if (oldWidget.interval != widget.interval) index = -10;
+    super.didUpdateWidget(oldWidget);
+  }
+
   /// candleWidth controls the width of the single candles.
   ///  range: [2...10]
   double candleWidth = 6;
@@ -73,10 +79,8 @@ class _CandlesticksState extends State<Candlesticks> {
   @override
   Widget build(BuildContext context) {
     if (widget.candles.length == 0)
-      return Container(
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
+      return Center(
+        child: CircularProgressIndicator(),
       );
     return Column(
       children: [

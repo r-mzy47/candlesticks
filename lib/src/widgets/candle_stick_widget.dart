@@ -11,6 +11,8 @@ class CandleStickWidget extends LeafRenderObjectWidget {
   final double candleWidth;
   final double high;
   final double low;
+  final Color bullColor;
+  final Color bearColor;
 
   CandleStickWidget({
     required this.candles,
@@ -18,6 +20,8 @@ class CandleStickWidget extends LeafRenderObjectWidget {
     required this.candleWidth,
     required this.low,
     required this.high,
+    required this.bearColor,
+    required this.bullColor,
   });
 
   @override
@@ -28,6 +32,8 @@ class CandleStickWidget extends LeafRenderObjectWidget {
       candleWidth,
       low,
       high,
+      bullColor,
+      bearColor,
     );
   }
 
@@ -36,12 +42,29 @@ class CandleStickWidget extends LeafRenderObjectWidget {
       BuildContext context, covariant RenderObject renderObject) {
     CandleStickRenderObject candlestickRenderObject =
         renderObject as CandleStickRenderObject;
-    candlestickRenderObject._candles = candles;
-    candlestickRenderObject.index = index;
-    candlestickRenderObject._candleWidth = candleWidth;
-    candlestickRenderObject._high = high;
-    candlestickRenderObject._low = low;
-    candlestickRenderObject.markNeedsPaint();
+
+    if (index <= 0 && candlestickRenderObject._close != candles[0].close) {
+      candlestickRenderObject._candles = candles;
+      candlestickRenderObject._index = index;
+      candlestickRenderObject._candleWidth = candleWidth;
+      candlestickRenderObject._high = high;
+      candlestickRenderObject._low = low;
+      candlestickRenderObject._bullColor = bullColor;
+      candlestickRenderObject._bearColor = bearColor;
+      candlestickRenderObject.markNeedsPaint();
+    } else if (candlestickRenderObject._index != index ||
+        candlestickRenderObject._candleWidth != candleWidth ||
+        candlestickRenderObject._high != high ||
+        candlestickRenderObject._low != low) {
+      candlestickRenderObject._candles = candles;
+      candlestickRenderObject._index = index;
+      candlestickRenderObject._candleWidth = candleWidth;
+      candlestickRenderObject._high = high;
+      candlestickRenderObject._low = low;
+      candlestickRenderObject._bullColor = bullColor;
+      candlestickRenderObject._bearColor = bearColor;
+      candlestickRenderObject.markNeedsPaint();
+    }
     super.updateRenderObject(context, renderObject);
   }
 }
@@ -54,6 +77,9 @@ class CandleStickRenderObject extends RenderBox {
   late double _candleWidth;
   late double _low;
   late double _high;
+  late double _close;
+  late Color _bullColor;
+  late Color _bearColor;
 
   CandleStickRenderObject(
     List<Candle> candles,
@@ -61,30 +87,16 @@ class CandleStickRenderObject extends RenderBox {
     double candleWidth,
     double low,
     double high,
+    Color bullColor,
+    Color bearColor,
   ) {
     _candles = candles;
     _index = index;
     _candleWidth = candleWidth;
     _low = low;
     _high = high;
-  }
-
-  set index(int index) {
-    if (_index == index) return;
-    _index = index;
-  }
-
-  set candleWidth(double candleWidth) {
-    if (_candleWidth == candleWidth) return;
-    _candleWidth = candleWidth;
-  }
-
-  set high(double high) {
-    _high = high;
-  }
-
-  set low(double low) {
-    _low = low;
+    _bearColor = bearColor;
+    _bullColor = bullColor;
   }
 
   /// set size as large as possible
@@ -96,7 +108,7 @@ class CandleStickRenderObject extends RenderBox {
   /// draws a single candle
   void paintCandle(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
-    Color color = candle.isBull ? ColorPalette.green : ColorPalette.red;
+    Color color = candle.isBull ? _bullColor : _bearColor;
     Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
@@ -127,6 +139,7 @@ class CandleStickRenderObject extends RenderBox {
       var candle = _candles[i + _index];
       paintCandle(context, offset, i, candle, range);
     }
+    _close = _candles[0].close;
     context.canvas.save();
     context.canvas.restore();
   }

@@ -1,5 +1,6 @@
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/theme/color_palette.dart';
+import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -55,22 +56,22 @@ class TimeRow extends StatelessWidget {
   }
 
   /// Day/month text widget
-  Text _monthDayText(DateTime _time) {
+  Text _monthDayText(DateTime _time, Color color) {
     return Text(
       numberFormat(_time.month) + "/" + numberFormat(_time.day),
       style: TextStyle(
-        color: ColorPalette.grayColor,
+        color: color,
         fontSize: 12,
       ),
     );
   }
 
   /// Hour/minute text widget
-  Text _hourMinuteText(DateTime _time) {
+  Text _hourMinuteText(DateTime _time, Color color) {
     return Text(
       numberFormat(_time.hour) + ":" + numberFormat(_time.minute),
       style: TextStyle(
-        color: ColorPalette.grayColor,
+        color: color,
         fontSize: 12,
       ),
     );
@@ -102,12 +103,14 @@ class TimeRow extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: 0.05,
-                      color: ColorPalette.grayColor,
+                      color: Theme.of(context).grayColor,
                     ),
                   ),
                   dif.compareTo(Duration(days: 1)) > 0
-                      ? _monthDayText(_time)
-                      : _hourMinuteText(_time),
+                      ? _monthDayText(
+                          _time, Theme.of(context).scaleNumbersColor)
+                      : _hourMinuteText(
+                          _time, Theme.of(context).scaleNumbersColor),
                 ],
               );
             },
@@ -116,12 +119,12 @@ class TimeRow extends StatelessWidget {
             bottom: 0,
             left: math.max(indicatorX - 50, 0),
             child: Container(
-              color: ColorPalette.digalogColor,
+              color: Theme.of(context).hoverIndicatorBackgroundColor,
               child: Center(
                 child: Text(
                   dateFormatter(indicatorTime),
                   style: TextStyle(
-                    color: ColorPalette.grayColor,
+                    color: Theme.of(context).hoverIndicatorTextColor,
                     fontSize: 12,
                   ),
                 ),

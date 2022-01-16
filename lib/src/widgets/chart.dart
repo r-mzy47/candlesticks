@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:candlesticks/src/constant/view_constants.dart';
-import 'package:candlesticks/src/theme/color_palette.dart';
+import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_info_text.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
@@ -137,7 +137,7 @@ class Chart extends StatelessWidget {
                     max((maxWidth - hoverX) ~/ candleWidth + index, 0),
                     candles.length - 1)];
                 return Container(
-                  color: ColorPalette.darkBlue,
+                  color: Theme.of(context).background,
                   child: Stack(
                     children: [
                       TimeRow(
@@ -175,14 +175,14 @@ class Chart extends StatelessWidget {
                                         height: 0.3,
                                         color: candles[index >= 0 ? index : 0]
                                                 .isBull
-                                            ? ColorPalette.green
-                                            : ColorPalette.red,
+                                            ? Theme.of(context).primaryGreen
+                                            : Theme.of(context).primaryRed,
                                       ),
                                       Container(
                                         color: candles[index >= 0 ? index : 0]
                                                 .isBull
-                                            ? ColorPalette.darkGreen
-                                            : ColorPalette.darkRed,
+                                            ? Theme.of(context).primaryGreen
+                                            : Theme.of(context).primaryRed,
                                         child: Center(
                                           child: Text(
                                             candles[index >= 0 ? index : 0]
@@ -190,7 +190,8 @@ class Chart extends StatelessWidget {
                                                 .round()
                                                 .toString(),
                                             style: TextStyle(
-                                              color: ColorPalette.grayColor,
+                                              color: Theme.of(context)
+                                                  .currentPriceColor,
                                               fontSize: 12,
                                             ),
                                           ),
@@ -206,9 +207,10 @@ class Chart extends StatelessWidget {
                                     Expanded(
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          border: Border.symmetric(
-                                            vertical: BorderSide(
-                                              color: ColorPalette.grayColor,
+                                          border: Border(
+                                            right: BorderSide(
+                                              color:
+                                                  Theme.of(context).grayColor,
                                               width: 1,
                                             ),
                                           ),
@@ -216,12 +218,22 @@ class Chart extends StatelessWidget {
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
                                               vertical: 20),
-                                          child: CandleStickWidget(
-                                            candles: candles,
-                                            candleWidth: candleWidth,
-                                            index: index,
-                                            high: high,
-                                            low: low,
+                                          child: Stack(
+                                            children: [
+                                              RepaintBoundary(
+                                                child: CandleStickWidget(
+                                                  candles: candles,
+                                                  candleWidth: candleWidth,
+                                                  index: index,
+                                                  high: high,
+                                                  low: low,
+                                                  bearColor: Theme.of(context)
+                                                      .primaryRed,
+                                                  bullColor: Theme.of(context)
+                                                      .primaryGreen,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
@@ -241,9 +253,9 @@ class Chart extends StatelessWidget {
                                 Expanded(
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      border: Border.symmetric(
-                                        vertical: BorderSide(
-                                          color: ColorPalette.grayColor,
+                                      border: Border(
+                                        right: BorderSide(
+                                          color: Theme.of(context).grayColor,
                                           width: 1,
                                         ),
                                       ),
@@ -256,6 +268,10 @@ class Chart extends StatelessWidget {
                                         index: index,
                                         high:
                                             HelperFunctions.getRoof(volumeHigh),
+                                        bearColor:
+                                            Theme.of(context).secondaryRed,
+                                        bullColor:
+                                            Theme.of(context).secondaryGreen,
                                       ),
                                     ),
                                   ),
@@ -273,7 +289,8 @@ class Chart extends StatelessWidget {
                                               Text(
                                                 "-${HelperFunctions.priceToString(HelperFunctions.getRoof(volumeHigh))}",
                                                 style: TextStyle(
-                                                  color: ColorPalette.grayColor,
+                                                  color: Theme.of(context)
+                                                      .grayColor,
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -300,12 +317,13 @@ class Chart extends StatelessWidget {
                                 children: [
                                   DashLine(
                                     length: maxWidth,
-                                    color: ColorPalette.grayColor,
+                                    color: Theme.of(context).grayColor,
                                     direction: Axis.horizontal,
                                     thickness: 0.5,
                                   ),
                                   Container(
-                                    color: ColorPalette.digalogColor,
+                                    color: Theme.of(context)
+                                        .hoverIndicatorBackgroundColor,
                                     child: Center(
                                       child: Text(
                                         hoverY < maxHeight * 0.75
@@ -326,7 +344,8 @@ class Chart extends StatelessWidget {
                                                             (maxHeight * 0.25 -
                                                                 10))),
                                         style: TextStyle(
-                                          color: ColorPalette.grayColor,
+                                          color: Theme.of(context)
+                                              .hoverIndicatorTextColor,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -344,7 +363,7 @@ class Chart extends StatelessWidget {
                                 children: [
                                   DashLine(
                                     length: constraints.maxHeight - 20,
-                                    color: ColorPalette.grayColor,
+                                    color: Theme.of(context).grayColor,
                                     direction: Axis.vertical,
                                     thickness: 0.5,
                                   ),
