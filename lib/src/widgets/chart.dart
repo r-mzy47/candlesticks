@@ -22,9 +22,6 @@ class Chart extends StatelessWidget {
   /// called when user scales chart using buttons or scale gesture
   final Function onScaleUpdate;
 
-  /// scrollController controlls the horizontal time row
-  final ScrollController scrollController;
-
   /// onHorizontalDragUpdate
   /// callback calls when user scrolls horizontally along the chart
   final Function onHorizontalDragUpdate;
@@ -58,7 +55,6 @@ class Chart extends StatelessWidget {
     required this.candleWidth,
     required this.candles,
     required this.index,
-    required this.scrollController,
     required this.onEnter,
     required this.onExit,
     required this.onHover,
@@ -143,9 +139,9 @@ class Chart extends StatelessWidget {
                       TimeRow(
                         indicatorX: hoverX,
                         candles: candles,
-                        scrollController: scrollController,
                         candleWidth: candleWidth,
                         indicatorTime: currentCandle.date,
+                        index: index,
                       ),
                       Column(
                         children: [

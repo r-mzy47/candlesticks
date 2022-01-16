@@ -36,7 +36,6 @@ class _CandlesticksState extends State<Candlesticks> {
   /// index of the newest candle to be displayed
   /// changes when user scrolls along the chart
   int index = -10;
-  ScrollController scrollController = new ScrollController();
 
   double hoverX = 0.0;
   double hoverY = 0.0;
@@ -66,7 +65,11 @@ class _CandlesticksState extends State<Candlesticks> {
 
   @override
   void didUpdateWidget(Candlesticks oldWidget) {
-    if (oldWidget.interval != widget.interval) index = -10;
+    if (oldWidget.interval != widget.interval) {
+      index = -10;
+      lastX = 0;
+      lastIndex = -10;
+    }
     super.didUpdateWidget(oldWidget);
   }
 
@@ -123,7 +126,6 @@ class _CandlesticksState extends State<Candlesticks> {
                 onEnter: _incrementEnter,
                 onHover: _updateLocation,
                 onExit: _incrementExit,
-                scrollController: scrollController,
                 onHorizontalDragUpdate: (double x) {
                   setState(() {
                     x = x - lastX;
@@ -131,8 +133,6 @@ class _CandlesticksState extends State<Candlesticks> {
                     index = max(index, -10);
                     index = min(index, widget.candles.length - 1);
                   });
-                  if (index == lastIndex) return;
-                  scrollController.jumpTo((index + 10) * candleWidth);
                 },
                 onPanDown: (double value) {
                   lastX = value;

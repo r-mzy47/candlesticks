@@ -6,29 +6,36 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:math' as math;
 
-class TimeRow extends StatelessWidget {
+class TimeRow extends StatefulWidget {
   final List<Candle> candles;
   final double candleWidth;
-  final ScrollController scrollController;
   final double indicatorX;
   final DateTime indicatorTime;
+  final int index;
 
   const TimeRow({
     Key? key,
     required this.candles,
     required this.candleWidth,
-    required this.scrollController,
     required this.indicatorX,
     required this.indicatorTime,
+    required this.index,
   }) : super(key: key);
+
+  @override
+  State<TimeRow> createState() => _TimeRowState();
+}
+
+class _TimeRowState extends State<TimeRow> {
+  final ScrollController _scrollController = new ScrollController();
 
   /// Calculates number of candles between two time indicator
   int _stepCalculator() {
-    if (candleWidth < 3)
+    if (widget.candleWidth < 3)
       return 31;
-    else if (candleWidth < 5)
+    else if (widget.candleWidth < 5)
       return 19;
-    else if (candleWidth < 7)
+    else if (widget.candleWidth < 7)
       return 13;
     else
       return 9;
@@ -39,13 +46,13 @@ class TimeRow extends StatelessWidget {
     int candleNumber = (step + 1) ~/ 2 - 10 + index * step + -1;
     DateTime? _time;
     if (candleNumber < 0)
-      _time = candles[step + candleNumber].date.add(dif);
-    else if (candleNumber < candles.length)
-      _time = candles[candleNumber].date;
+      _time = widget.candles[step + candleNumber].date.add(dif);
+    else if (candleNumber < widget.candles.length)
+      _time = widget.candles[candleNumber].date;
     else {
-      final stepsBack = (candleNumber - candles.length) ~/ step + 1;
+      final stepsBack = (candleNumber - widget.candles.length) ~/ step + 1;
       final newIndex = candleNumber - stepsBack * step;
-      _time = candles[newIndex].date.subtract(dif * stepsBack);
+      _time = widget.candles[newIndex].date.subtract(dif * stepsBack);
     }
     return _time;
   }
@@ -82,18 +89,25 @@ class TimeRow extends StatelessWidget {
   }
 
   @override
+  void didUpdateWidget(TimeRow oldWidget) {
+    if (oldWidget.index != widget.index)
+      _scrollController.jumpTo((widget.index - 10) * widget.candleWidth);
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     int step = _stepCalculator();
-    final dif = candles[0].date.difference(candles[step].date);
+    final dif = widget.candles[0].date.difference(widget.candles[step].date);
     return Padding(
       padding: const EdgeInsets.only(right: 51.0),
       child: Stack(
         children: [
           ListView.builder(
-            itemCount: candles.length,
+            itemCount: widget.candles.length,
             scrollDirection: Axis.horizontal,
-            controller: scrollController,
-            itemExtent: step * candleWidth,
+            itemExtent: step * widget.candleWidth,
+            controller: _scrollController,
             reverse: true,
             itemBuilder: (context, index) {
               DateTime _time = _timeCalculator(step, index, dif);
@@ -117,12 +131,12 @@ class TimeRow extends StatelessWidget {
           ),
           Positioned(
             bottom: 0,
-            left: math.max(indicatorX - 50, 0),
+            left: math.max(widget.indicatorX - 50, 0),
             child: Container(
               color: Theme.of(context).hoverIndicatorBackgroundColor,
               child: Center(
                 child: Text(
-                  dateFormatter(indicatorTime),
+                  dateFormatter(widget.indicatorTime),
                   style: TextStyle(
                     color: Theme.of(context).hoverIndicatorTextColor,
                     fontSize: 12,
