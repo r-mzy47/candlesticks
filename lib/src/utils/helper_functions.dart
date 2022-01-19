@@ -9,6 +9,7 @@ class HelperFunctions {
   }
 
   static String priceToString(double price) {
+    if (price < 1) price = 1;
     int log = log10(price).floor();
     if (log > 9)
       return "${price ~/ 1000000000}B";

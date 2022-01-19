@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'package:candlesticks/src/constant/intervals.dart';
 import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/theme_data.dart';
-import 'package:candlesticks/src/widgets/chart.dart';
+import 'package:candlesticks/src/widgets/mobile_chart.dart';
+import 'package:candlesticks/src/widgets/web_chart.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'models/candle.dart';
 
 /// StatefulWidget that holds Chart's State (index of
@@ -37,31 +37,8 @@ class _CandlesticksState extends State<Candlesticks> {
   /// changes when user scrolls along the chart
   int index = -10;
 
-  double hoverX = 0.0;
-  double hoverY = 0.0;
-  bool showInfo = false;
-
   double lastX = 0;
   int lastIndex = -10;
-
-  void _incrementEnter(PointerEvent details) {
-    setState(() {
-      showInfo = true;
-    });
-  }
-
-  void _incrementExit(PointerEvent details) {
-    setState(() {
-      showInfo = false;
-    });
-  }
-
-  void _updateLocation(PointerEvent details) {
-    setState(() {
-      hoverX = details.localPosition.dx;
-      hoverY = details.localPosition.dy;
-    });
-  }
 
   @override
   void didUpdateWidget(Candlesticks oldWidget) {
@@ -109,39 +86,63 @@ class _CandlesticksState extends State<Candlesticks> {
             duration: Duration(milliseconds: 300),
             curve: Curves.easeInOutCirc,
             builder: (_, width, __) {
-              return Chart(
-                onScaleUpdate: (double scale) {
-                  setState(() {
-                    candleWidth *= scale;
-                    candleWidth = min(candleWidth, 10);
-                    candleWidth = max(candleWidth, 2);
-                    candleWidth.toInt();
-                  });
-                },
-                onPanEnd: () {
-                  lastIndex = index;
-                },
-                hoverX: hoverX + (index - lastIndex) * candleWidth,
-                hoverY: hoverY,
-                onEnter: _incrementEnter,
-                onHover: _updateLocation,
-                onExit: _incrementExit,
-                onHorizontalDragUpdate: (double x) {
-                  setState(() {
-                    x = x - lastX;
-                    index = lastIndex + x ~/ candleWidth;
-                    index = max(index, -10);
-                    index = min(index, widget.candles.length - 1);
-                  });
-                },
-                onPanDown: (double value) {
-                  lastX = value;
-                  lastIndex = index;
-                },
-                candleWidth: width as double,
-                candles: widget.candles,
-                index: index,
-              );
+              return kIsWeb
+                  ? WebChart(
+                      onScaleUpdate: (double scale) {
+                        setState(() {
+                          candleWidth *= scale;
+                          candleWidth = min(candleWidth, 10);
+                          candleWidth = max(candleWidth, 2);
+                          candleWidth.toInt();
+                        });
+                      },
+                      onPanEnd: () {
+                        lastIndex = index;
+                      },
+                      onHorizontalDragUpdate: (double x) {
+                        setState(() {
+                          x = x - lastX;
+                          index = lastIndex + x ~/ candleWidth;
+                          index = max(index, -10);
+                          index = min(index, widget.candles.length - 1);
+                        });
+                      },
+                      onPanDown: (double value) {
+                        lastX = value;
+                        lastIndex = index;
+                      },
+                      candleWidth: width as double,
+                      candles: widget.candles,
+                      index: index,
+                    )
+                  : MobileChart(
+                      onScaleUpdate: (double scale) {
+                        setState(() {
+                          candleWidth *= scale;
+                          candleWidth = min(candleWidth, 10);
+                          candleWidth = max(candleWidth, 2);
+                          candleWidth.toInt();
+                        });
+                      },
+                      onPanEnd: () {
+                        lastIndex = index;
+                      },
+                      onHorizontalDragUpdate: (double x) {
+                        setState(() {
+                          x = x - lastX;
+                          index = lastIndex + x ~/ candleWidth;
+                          index = max(index, -10);
+                          index = min(index, widget.candles.length - 1);
+                        });
+                      },
+                      onPanDown: (double value) {
+                        lastX = value;
+                        lastIndex = index;
+                      },
+                      candleWidth: width as double,
+                      candles: widget.candles,
+                      index: index,
+                    );
             },
           ),
         ),

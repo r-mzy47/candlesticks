@@ -1,23 +1,20 @@
 import 'package:candlesticks/candlesticks.dart';
-import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'dart:math' as math;
 
 class TimeRow extends StatefulWidget {
   final List<Candle> candles;
   final double candleWidth;
-  final double indicatorX;
-  final DateTime indicatorTime;
+  final double? indicatorX;
+  final DateTime? indicatorTime;
   final int index;
 
   const TimeRow({
     Key? key,
     required this.candles,
     required this.candleWidth,
-    required this.indicatorX,
+    this.indicatorX,
     required this.indicatorTime,
     required this.index,
   }) : super(key: key);
@@ -91,7 +88,7 @@ class _TimeRowState extends State<TimeRow> {
   @override
   void didUpdateWidget(TimeRow oldWidget) {
     if (oldWidget.index != widget.index)
-      _scrollController.jumpTo((widget.index - 10) * widget.candleWidth);
+      _scrollController.jumpTo((widget.index + 10) * widget.candleWidth);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -104,6 +101,7 @@ class _TimeRowState extends State<TimeRow> {
       child: Stack(
         children: [
           ListView.builder(
+            physics: NeverScrollableScrollPhysics(),
             itemCount: widget.candles.length,
             scrollDirection: Axis.horizontal,
             itemExtent: step * widget.candleWidth,
@@ -129,24 +127,26 @@ class _TimeRowState extends State<TimeRow> {
               );
             },
           ),
-          Positioned(
-            bottom: 0,
-            left: math.max(widget.indicatorX - 50, 0),
-            child: Container(
-              color: Theme.of(context).hoverIndicatorBackgroundColor,
-              child: Center(
-                child: Text(
-                  dateFormatter(widget.indicatorTime),
-                  style: TextStyle(
-                    color: Theme.of(context).hoverIndicatorTextColor,
-                    fontSize: 12,
+          widget.indicatorX == null
+              ? Container()
+              : Positioned(
+                  bottom: 0,
+                  left: math.max(widget.indicatorX! - 50, 0),
+                  child: Container(
+                    color: Theme.of(context).hoverIndicatorBackgroundColor,
+                    child: Center(
+                      child: Text(
+                        dateFormatter(widget.indicatorTime!),
+                        style: TextStyle(
+                          color: Theme.of(context).hoverIndicatorTextColor,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    width: 100,
+                    height: 20,
                   ),
                 ),
-              ),
-              width: 100,
-              height: 20,
-            ),
-          ),
         ],
       ),
     );

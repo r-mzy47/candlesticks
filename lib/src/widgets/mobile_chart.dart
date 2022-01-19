@@ -10,14 +10,13 @@ import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 import 'package:candlesticks/src/constant/scales.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dash_line.dart';
 
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
 /// Updates right-hand side numbers.
 /// And pass values down to [CandleStickWidget].
-class Chart extends StatelessWidget {
+class MobileChart extends StatefulWidget {
   /// onScaleUpdate callback
   /// called when user scales chart using buttons or scale gesture
   final Function onScaleUpdate;
@@ -37,32 +36,26 @@ class Chart extends StatelessWidget {
   /// changes when user scrolls along the chart
   final int index;
 
-  final void Function(PointerEvent) onEnter;
-
-  final void Function(PointerEvent) onHover;
-
-  final void Function(PointerEvent) onExit;
-
-  final double hoverX;
-  final double hoverY;
-
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
 
-  Chart({
+  MobileChart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
     required this.candleWidth,
     required this.candles,
     required this.index,
-    required this.onEnter,
-    required this.onExit,
-    required this.onHover,
-    required this.hoverX,
     required this.onPanDown,
     required this.onPanEnd,
-    required this.hoverY,
   });
+
+  @override
+  State<MobileChart> createState() => _MobileChartState();
+}
+
+class _MobileChartState extends State<MobileChart> {
+  double? longPressX;
+  double? longPressY;
 
   double calcutePriceScale(double height, double high, double low) {
     for (int i = 0; i < scales.length; i++) {
@@ -76,15 +69,6 @@ class Chart extends StatelessWidget {
     return 0;
   }
 
-  double calcutePriceIndicatorTopPadding(
-      double chartHeight, double low, double high) {
-    return chartHeight +
-        10 -
-        (candles[index >= 0 ? index : 0].close - low) /
-            (high - low) *
-            chartHeight;
-  }
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -94,16 +78,17 @@ class Chart extends StatelessWidget {
         final double maxHeight = constraints.maxHeight - DATE_BAR_HEIGHT;
 
         // visible candles start and end indexes
-        final int candlesStartIndex = max(index, 0);
-        final int candlesEndIndex =
-            min(maxWidth ~/ candleWidth + index, candles.length - 1);
+        final int candlesStartIndex = max(widget.index, 0);
+        final int candlesEndIndex = min(
+            maxWidth ~/ widget.candleWidth + widget.index,
+            widget.candles.length - 1);
 
         // visible candles highest and lowest price
         double candlesHighPrice = 0;
         double candlesLowPrice = double.infinity;
         for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
-          candlesLowPrice = min(candles[i].low, candlesLowPrice);
-          candlesHighPrice = max(candles[i].high, candlesHighPrice);
+          candlesLowPrice = min(widget.candles[i].low, candlesLowPrice);
+          candlesHighPrice = max(widget.candles[i].high, candlesHighPrice);
         }
 
         // calcute priceScale
@@ -118,7 +103,14 @@ class Chart extends StatelessWidget {
         // calcute highest volume
         double volumeHigh = 0;
         for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
-          volumeHigh = max(candles[i].volume, volumeHigh);
+          volumeHigh = max(widget.candles[i].volume, volumeHigh);
+        }
+
+        if (longPressX != null && longPressY != null) {
+          longPressX = max(longPressX!, 0);
+          longPressX = min(longPressX!, maxWidth);
+          longPressY = max(longPressY!, 0);
+          longPressX = min(longPressX!, maxHeight);
         }
 
         return TweenAnimationBuilder(
@@ -129,19 +121,24 @@ class Chart extends StatelessWidget {
               tween: Tween(begin: candlesHighPrice, end: candlesLowPrice),
               duration: Duration(milliseconds: 200),
               builder: (context, double low, _) {
-                final currentCandle = candles[min(
-                    max((maxWidth - hoverX) ~/ candleWidth + index, 0),
-                    candles.length - 1)];
+                final currentCandle = longPressX == null
+                    ? null
+                    : widget.candles[min(
+                        max(
+                            (maxWidth - longPressX!) ~/ widget.candleWidth +
+                                widget.index,
+                            0),
+                        widget.candles.length - 1)];
                 return Container(
                   color: Theme.of(context).background,
                   child: Stack(
                     children: [
                       TimeRow(
-                        indicatorX: hoverX,
-                        candles: candles,
-                        candleWidth: candleWidth,
-                        indicatorTime: currentCandle.date,
-                        index: index,
+                        indicatorX: longPressX,
+                        candles: widget.candles,
+                        candleWidth: widget.candleWidth,
+                        indicatorTime: currentCandle?.date,
+                        index: widget.index,
                       ),
                       Column(
                         children: [
@@ -155,48 +152,8 @@ class Chart extends StatelessWidget {
                                   priceScale: priceScale,
                                   width: constraints.maxWidth,
                                   chartHeight: chartHeight,
-                                ),
-                                AnimatedPositioned(
-                                  duration: Duration(microseconds: 300),
-                                  right: 0,
-                                  top: calcutePriceIndicatorTopPadding(
-                                    chartHeight,
-                                    low,
-                                    high,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: maxWidth,
-                                        height: 0.3,
-                                        color: candles[index >= 0 ? index : 0]
-                                                .isBull
-                                            ? Theme.of(context).primaryGreen
-                                            : Theme.of(context).primaryRed,
-                                      ),
-                                      Container(
-                                        color: candles[index >= 0 ? index : 0]
-                                                .isBull
-                                            ? Theme.of(context).primaryGreen
-                                            : Theme.of(context).primaryRed,
-                                        child: Center(
-                                          child: Text(
-                                            candles[index >= 0 ? index : 0]
-                                                .close
-                                                .round()
-                                                .toString(),
-                                            style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .currentPriceColor,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ),
-                                        width: PRICE_BAR_WIDTH,
-                                        height: PRICE_INDICATOR_HEIGHT,
-                                      ),
-                                    ],
-                                  ),
+                                  lastCandle: widget.candles[
+                                      widget.index < 0 ? 0 : widget.index],
                                 ),
                                 Row(
                                   children: [
@@ -213,23 +170,20 @@ class Chart extends StatelessWidget {
                                         ),
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
-                                              vertical: 20),
-                                          child: Stack(
-                                            children: [
-                                              RepaintBoundary(
-                                                child: CandleStickWidget(
-                                                  candles: candles,
-                                                  candleWidth: candleWidth,
-                                                  index: index,
-                                                  high: high,
-                                                  low: low,
-                                                  bearColor: Theme.of(context)
-                                                      .primaryRed,
-                                                  bullColor: Theme.of(context)
-                                                      .primaryGreen,
-                                                ),
-                                              ),
-                                            ],
+                                              vertical:
+                                                  MAIN_CHART_VERTICAL_PADDING),
+                                          child: RepaintBoundary(
+                                            child: CandleStickWidget(
+                                              candles: widget.candles,
+                                              candleWidth: widget.candleWidth,
+                                              index: widget.index,
+                                              high: high,
+                                              low: low,
+                                              bearColor:
+                                                  Theme.of(context).primaryRed,
+                                              bullColor: Theme.of(context)
+                                                  .primaryGreen,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -259,9 +213,9 @@ class Chart extends StatelessWidget {
                                     child: Padding(
                                       padding: const EdgeInsets.only(top: 10.0),
                                       child: VolumeWidget(
-                                        candles: candles,
-                                        barWidth: candleWidth,
-                                        index: index,
+                                        candles: widget.candles,
+                                        barWidth: widget.candleWidth,
+                                        index: widget.index,
                                         high:
                                             HelperFunctions.getRoof(volumeHigh),
                                         bearColor:
@@ -306,9 +260,9 @@ class Chart extends StatelessWidget {
                           ),
                         ],
                       ),
-                      kIsWeb
+                      longPressY != null
                           ? Positioned(
-                              top: hoverY - 10,
+                              top: longPressY! - 10,
                               child: Row(
                                 children: [
                                   DashLine(
@@ -322,9 +276,9 @@ class Chart extends StatelessWidget {
                                         .hoverIndicatorBackgroundColor,
                                     child: Center(
                                       child: Text(
-                                        hoverY < maxHeight * 0.75
+                                        longPressY! < maxHeight * 0.75
                                             ? (high -
-                                                    (hoverY - 20) /
+                                                    (longPressY! - 20) /
                                                         (maxHeight * 0.75 -
                                                             40) *
                                                         (high - low))
@@ -333,7 +287,7 @@ class Chart extends StatelessWidget {
                                                 HelperFunctions.getRoof(
                                                         volumeHigh) *
                                                     (1 -
-                                                        (hoverY -
+                                                        (longPressY! -
                                                                 maxHeight *
                                                                     0.75 -
                                                                 10) /
@@ -353,46 +307,59 @@ class Chart extends StatelessWidget {
                               ),
                             )
                           : Container(),
-                      kIsWeb
+                      longPressX != null
                           ? Positioned(
-                              child: Column(
-                                children: [
-                                  DashLine(
-                                    length: constraints.maxHeight - 20,
-                                    color: Theme.of(context).grayColor,
-                                    direction: Axis.vertical,
-                                    thickness: 0.5,
-                                  ),
-                                ],
+                              child: Container(
+                                width: widget.candleWidth,
+                                height: maxHeight,
+                                color: Theme.of(context).gold.withOpacity(0.2),
                               ),
-                              left: hoverX,
+                              right: (maxWidth - longPressX!) ~/
+                                      widget.candleWidth *
+                                      widget.candleWidth +
+                                  PRICE_BAR_WIDTH,
                             )
                           : Container(),
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
-                        child: CandleInfoText(candle: currentCandle),
+                        child: currentCandle != null
+                            ? CandleInfoText(candle: currentCandle)
+                            : null,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
-                        child: MouseRegion(
-                          onEnter: onEnter,
-                          onHover: onHover,
-                          onExit: onExit,
-                          child: GestureDetector(
-                            onPanUpdate: (update) {
-                              onHorizontalDragUpdate(update.localPosition.dx);
-                            },
-                            onPanEnd: (update) {
-                              onPanEnd();
-                            },
-                            onPanDown: (update) {
-                              onPanDown(update.localPosition.dx);
-                            },
-                            child: Container(
-                              color: Color.fromARGB(1, 255, 255, 255),
-                            ),
-                          ),
+                        child: GestureDetector(
+                          onPanUpdate: (update) {
+                            widget.onHorizontalDragUpdate(
+                                update.localPosition.dx);
+                          },
+                          onPanEnd: (update) {
+                            widget.onPanEnd();
+                          },
+                          onLongPressEnd: (_) {
+                            setState(() {
+                              longPressX = null;
+                              longPressY = null;
+                            });
+                          },
+                          onLongPressStart: (LongPressStartDetails details) {
+                            setState(() {
+                              longPressX = details.localPosition.dx;
+                              longPressY = details.localPosition.dy;
+                            });
+                          },
+                          behavior: HitTestBehavior.translucent,
+                          onLongPressMoveUpdate:
+                              (LongPressMoveUpdateDetails details) {
+                            setState(() {
+                              longPressX = details.localPosition.dx;
+                              longPressY = details.localPosition.dy;
+                            });
+                          },
+                          onPanDown: (update) {
+                            widget.onPanDown(update.localPosition.dx);
+                          },
                         ),
                       )
                     ],
