@@ -8,7 +8,7 @@ class HelperFunctions {
     return (number ~/ pow(10, log) + 1) * pow(10, log).toDouble();
   }
 
-  static String priceToString(double price) {
+  static String addMetricPrefix(double price) {
     if (price < 1) price = 1;
     int log = log10(price).floor();
     if (log > 9)
@@ -19,5 +19,15 @@ class HelperFunctions {
       return "${price ~/ 1000}K";
     else
       return "${price.toStringAsFixed(0)}";
+  }
+
+  static String priceToString(double price) {
+    return price > 1000
+        ? price.toInt().toString()
+        : price > 100
+            ? price.toStringAsFixed(1)
+            : price > 10
+                ? price.toStringAsFixed(2)
+                : price.toStringAsFixed(4);
   }
 }

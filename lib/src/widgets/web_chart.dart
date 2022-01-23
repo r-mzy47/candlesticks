@@ -265,7 +265,7 @@ class _WebChartState extends State<WebChart> {
                                           child: Row(
                                             children: [
                                               Text(
-                                                "-${HelperFunctions.priceToString(HelperFunctions.getRoof(volumeHigh))}",
+                                                "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh))}",
                                                 style: TextStyle(
                                                   color: Theme.of(context)
                                                       .grayColor,
@@ -305,13 +305,13 @@ class _WebChartState extends State<WebChart> {
                                     child: Center(
                                       child: Text(
                                         mouseHoverY! < maxHeight * 0.75
-                                            ? (high -
+                                            ? HelperFunctions.priceToString(
+                                                high -
                                                     (mouseHoverY! - 20) /
                                                         (maxHeight * 0.75 -
                                                             40) *
                                                         (high - low))
-                                                .toStringAsFixed(0)
-                                            : HelperFunctions.priceToString(
+                                            : HelperFunctions.addMetricPrefix(
                                                 HelperFunctions.getRoof(
                                                         volumeHigh) *
                                                     (1 -
@@ -335,7 +335,7 @@ class _WebChartState extends State<WebChart> {
                               ),
                             )
                           : Container(),
-                      mouseHoverY != null
+                      mouseHoverX != null
                           ? Positioned(
                               child: DashLine(
                                 length: constraints.maxHeight - 20,

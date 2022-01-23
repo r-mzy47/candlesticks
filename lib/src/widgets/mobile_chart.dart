@@ -252,7 +252,7 @@ class _MobileChartState extends State<MobileChart> {
                                           child: Row(
                                             children: [
                                               Text(
-                                                "-${HelperFunctions.priceToString(HelperFunctions.getRoof(volumeHigh))}",
+                                                "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh))}",
                                                 style: TextStyle(
                                                   color: Theme.of(context)
                                                       .grayColor,
@@ -292,13 +292,13 @@ class _MobileChartState extends State<MobileChart> {
                                     child: Center(
                                       child: Text(
                                         longPressY! < maxHeight * 0.75
-                                            ? (high -
+                                            ? HelperFunctions.priceToString(
+                                                high -
                                                     (longPressY! - 20) /
                                                         (maxHeight * 0.75 -
                                                             40) *
                                                         (high - low))
-                                                .toStringAsFixed(0)
-                                            : HelperFunctions.priceToString(
+                                            : HelperFunctions.addMetricPrefix(
                                                 HelperFunctions.getRoof(
                                                         volumeHigh) *
                                                     (1 -

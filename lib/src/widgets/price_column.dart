@@ -1,6 +1,7 @@
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
+import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 
 class PriceColumn extends StatelessWidget {
@@ -51,6 +52,7 @@ class PriceColumn extends StatelessWidget {
                   priceTileHeight / 2,
               width: width,
               child: ListView.builder(
+                key: Key("priceColumnListBuilder"),
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: 100,
                 itemBuilder: (context, index) {
@@ -67,7 +69,7 @@ class PriceColumn extends StatelessWidget {
                             color: Theme.of(context).grayColor,
                           ),
                           Text(
-                            "-${(high - priceScale * index).toInt()}",
+                            "-${HelperFunctions.priceToString(high - priceScale * index)}",
                             style: TextStyle(
                               color: Theme.of(context).scaleNumbersColor,
                               fontSize: 12,
@@ -95,7 +97,7 @@ class PriceColumn extends StatelessWidget {
                         : Theme.of(context).primaryRed,
                     child: Center(
                       child: Text(
-                        lastCandle.close.round().toString(),
+                        HelperFunctions.priceToString(lastCandle.close),
                         style: TextStyle(
                           color: Theme.of(context).currentPriceColor,
                           fontSize: 12,

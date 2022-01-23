@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
   String interval = "1m";
 
   void binanceFetch(String interval) {
-    fetchCandles(symbol: "BTCUSDT", interval: interval).then(
+    fetchCandles(symbol: "XRPUSDT", interval: interval).then(
       (value) => setState(
         () {
           this.interval = interval;
@@ -38,7 +38,7 @@ class _MyAppState extends State<MyApp> {
       jsonEncode(
         {
           "method": "SUBSCRIBE",
-          "params": ["btcusdt@kline_" + interval],
+          "params": ["xrpusdt@kline_" + interval],
           "id": 1
         },
       ),
