@@ -56,6 +56,7 @@ class MobileChart extends StatefulWidget {
 class _MobileChartState extends State<MobileChart> {
   double? longPressX;
   double? longPressY;
+  double additionalVerticalPadding = 0;
 
   double calcutePriceScale(double height, double high, double low) {
     for (int i = 0; i < scales.length; i++) {
@@ -91,8 +92,13 @@ class _MobileChartState extends State<MobileChart> {
           candlesHighPrice = max(widget.candles[i].high, candlesHighPrice);
         }
 
+        additionalVerticalPadding =
+            min(maxHeight / 4, additionalVerticalPadding);
+        additionalVerticalPadding = max(0, additionalVerticalPadding);
+
         // calcute priceScale
-        double chartHeight = maxHeight * 0.75 - 2 * MAIN_CHART_VERTICAL_PADDING;
+        double chartHeight = maxHeight * 0.75 -
+            2 * (MAIN_CHART_VERTICAL_PADDING + additionalVerticalPadding);
         double priceScale =
             calcutePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
 
@@ -154,6 +160,13 @@ class _MobileChartState extends State<MobileChart> {
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[
                                       widget.index < 0 ? 0 : widget.index],
+                                  onScale: (delta) {
+                                    setState(() {
+                                      additionalVerticalPadding += delta;
+                                    });
+                                  },
+                                  additionalVerticalPadding:
+                                      additionalVerticalPadding,
                                 ),
                                 Row(
                                   children: [
@@ -168,10 +181,12 @@ class _MobileChartState extends State<MobileChart> {
                                             ),
                                           ),
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
+                                        child: AnimatedPadding(
+                                          duration: Duration(milliseconds: 200),
+                                          padding: EdgeInsets.symmetric(
                                               vertical:
-                                                  MAIN_CHART_VERTICAL_PADDING),
+                                                  MAIN_CHART_VERTICAL_PADDING +
+                                                      additionalVerticalPadding),
                                           child: RepaintBoundary(
                                             child: CandleStickWidget(
                                               candles: widget.candles,

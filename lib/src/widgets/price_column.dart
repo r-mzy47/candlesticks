@@ -12,6 +12,8 @@ class PriceColumn extends StatelessWidget {
     required this.width,
     required this.chartHeight,
     required this.lastCandle,
+    required this.onScale,
+    required this.additionalVerticalPadding,
   }) : super(key: key);
 
   final double low;
@@ -20,6 +22,8 @@ class PriceColumn extends StatelessWidget {
   final double width;
   final double chartHeight;
   final Candle lastCandle;
+  final double additionalVerticalPadding;
+  final void Function(double) onScale;
 
   double calcutePriceIndicatorTopPadding(
       double chartHeight, double low, double high) {
@@ -31,75 +35,82 @@ class PriceColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double priceTileHeight = chartHeight / ((high - low) / priceScale);
-    return Stack(
-      children: [
-        AnimatedPositioned(
-          duration: Duration(milliseconds: 400),
-          top: MAIN_CHART_VERTICAL_PADDING - priceTileHeight / 2,
-          height: chartHeight +
-              2 * MAIN_CHART_VERTICAL_PADDING +
-              -MAIN_CHART_VERTICAL_PADDING +
-              priceTileHeight / 2,
-          width: width,
-          child: ListView.builder(
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: 100,
-            itemBuilder: (context, index) {
-              return AnimatedContainer(
-                duration: Duration(milliseconds: 400),
-                height: priceTileHeight,
-                width: double.infinity,
-                child: Center(
-                  child: Row(
-                    children: [
-                      Container(
-                        width: width - PRICE_BAR_WIDTH,
-                        height: 0.05,
-                        color: Theme.of(context).grayColor,
+    return GestureDetector(
+      onVerticalDragUpdate: (details) {
+        onScale(details.delta.dy);
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: additionalVerticalPadding),
+        child: Stack(
+          children: [
+            AnimatedPositioned(
+              duration: Duration(milliseconds: 400),
+              top: MAIN_CHART_VERTICAL_PADDING - priceTileHeight / 2,
+              height: chartHeight +
+                  MAIN_CHART_VERTICAL_PADDING +
+                  priceTileHeight / 2,
+              width: width,
+              child: ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: 100,
+                itemBuilder: (context, index) {
+                  return AnimatedContainer(
+                    duration: Duration(milliseconds: 400),
+                    height: priceTileHeight,
+                    width: double.infinity,
+                    child: Center(
+                      child: Row(
+                        children: [
+                          Container(
+                            width: width - PRICE_BAR_WIDTH,
+                            height: 0.05,
+                            color: Theme.of(context).grayColor,
+                          ),
+                          Text(
+                            "-${(high - priceScale * index).toInt()}",
+                            style: TextStyle(
+                              color: Theme.of(context).scaleNumbersColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        "-${(high - priceScale * index).toInt()}",
+                    ),
+                  );
+                },
+              ),
+            ),
+            Positioned(
+              right: 0,
+              top: calcutePriceIndicatorTopPadding(
+                chartHeight,
+                low,
+                high,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    color: lastCandle.isBull
+                        ? Theme.of(context).primaryGreen
+                        : Theme.of(context).primaryRed,
+                    child: Center(
+                      child: Text(
+                        lastCandle.close.round().toString(),
                         style: TextStyle(
-                          color: Theme.of(context).scaleNumbersColor,
+                          color: Theme.of(context).currentPriceColor,
                           fontSize: 12,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        Positioned(
-          right: 0,
-          top: calcutePriceIndicatorTopPadding(
-            chartHeight,
-            low,
-            high,
-          ),
-          child: Row(
-            children: [
-              Container(
-                color: lastCandle.isBull
-                    ? Theme.of(context).primaryGreen
-                    : Theme.of(context).primaryRed,
-                child: Center(
-                  child: Text(
-                    lastCandle.close.round().toString(),
-                    style: TextStyle(
-                      color: Theme.of(context).currentPriceColor,
-                      fontSize: 12,
                     ),
+                    width: PRICE_BAR_WIDTH,
+                    height: PRICE_INDICATOR_HEIGHT,
                   ),
-                ),
-                width: PRICE_BAR_WIDTH,
-                height: PRICE_INDICATOR_HEIGHT,
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

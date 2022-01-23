@@ -10,7 +10,6 @@ import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 import 'package:candlesticks/src/constant/scales.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dash_line.dart';
 
 /// This widget manages gestures
@@ -58,6 +57,7 @@ class _WebChartState extends State<WebChart> {
   double? mouseHoverX;
   double? mouseHoverY;
   bool isDragging = false;
+  double additionalVerticalPadding = 0;
 
   void _onMouseExit(PointerEvent details) {
     setState(() {
@@ -107,8 +107,13 @@ class _WebChartState extends State<WebChart> {
           candlesHighPrice = max(widget.candles[i].high, candlesHighPrice);
         }
 
+        additionalVerticalPadding =
+            min(maxHeight / 4, additionalVerticalPadding);
+        additionalVerticalPadding = max(0, additionalVerticalPadding);
+
         // calcute priceScale
-        double chartHeight = maxHeight * 0.75 - 2 * MAIN_CHART_VERTICAL_PADDING;
+        double chartHeight = maxHeight * 0.75 -
+            2 * (MAIN_CHART_VERTICAL_PADDING + additionalVerticalPadding);
         double priceScale =
             calcutePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
 
@@ -168,6 +173,13 @@ class _WebChartState extends State<WebChart> {
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[
                                       widget.index < 0 ? 0 : widget.index],
+                                  onScale: (delta) {
+                                    setState(() {
+                                      additionalVerticalPadding += delta;
+                                    });
+                                  },
+                                  additionalVerticalPadding:
+                                      additionalVerticalPadding,
                                 ),
                                 Row(
                                   children: [
@@ -182,10 +194,12 @@ class _WebChartState extends State<WebChart> {
                                             ),
                                           ),
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
+                                        child: AnimatedPadding(
+                                          duration: Duration(milliseconds: 200),
+                                          padding: EdgeInsets.symmetric(
                                               vertical:
-                                                  MAIN_CHART_VERTICAL_PADDING),
+                                                  MAIN_CHART_VERTICAL_PADDING +
+                                                      additionalVerticalPadding),
                                           child: RepaintBoundary(
                                             child: CandleStickWidget(
                                               candles: widget.candles,
