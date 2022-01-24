@@ -89,6 +89,8 @@ class _CandlesticksState extends State<Candlesticks> {
               return kIsWeb
                   ? WebChart(
                       onScaleUpdate: (double scale) {
+                        scale = max(0.95, scale);
+                        scale = min(1.05, scale);
                         setState(() {
                           candleWidth *= scale;
                           candleWidth = min(candleWidth, 10);
@@ -117,6 +119,8 @@ class _CandlesticksState extends State<Candlesticks> {
                     )
                   : MobileChart(
                       onScaleUpdate: (double scale) {
+                        scale = max(0.95, scale);
+                        scale = min(1.05, scale);
                         setState(() {
                           candleWidth *= scale;
                           candleWidth = min(candleWidth, 10);

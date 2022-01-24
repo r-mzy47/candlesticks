@@ -52,7 +52,6 @@ class PriceColumn extends StatelessWidget {
                   priceTileHeight / 2,
               width: width,
               child: ListView.builder(
-                key: Key("priceColumnListBuilder"),
                 physics: NeverScrollableScrollPhysics(),
                 itemCount: 100,
                 itemBuilder: (context, index) {

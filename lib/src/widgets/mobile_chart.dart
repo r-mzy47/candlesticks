@@ -345,18 +345,24 @@ class _MobileChartState extends State<MobileChart> {
                       Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
                         child: GestureDetector(
-                          onPanUpdate: (update) {
-                            widget.onHorizontalDragUpdate(
-                                update.localPosition.dx);
-                          },
-                          onPanEnd: (update) {
-                            widget.onPanEnd();
-                          },
                           onLongPressEnd: (_) {
                             setState(() {
                               longPressX = null;
                               longPressY = null;
                             });
+                          },
+                          onScaleEnd: (_) {
+                            widget.onPanEnd();
+                          },
+                          onScaleUpdate: (details) {
+                            if (details.scale == 1) {
+                              widget.onHorizontalDragUpdate(
+                                  details.focalPoint.dx);
+                            }
+                            widget.onScaleUpdate(details.scale);
+                          },
+                          onScaleStart: (details) {
+                            widget.onPanDown(details.localFocalPoint.dx);
                           },
                           onLongPressStart: (LongPressStartDetails details) {
                             setState(() {
@@ -371,9 +377,6 @@ class _MobileChartState extends State<MobileChart> {
                               longPressX = details.localPosition.dx;
                               longPressY = details.localPosition.dy;
                             });
-                          },
-                          onPanDown: (update) {
-                            widget.onPanDown(update.localPosition.dx);
                           },
                         ),
                       )

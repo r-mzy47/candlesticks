@@ -7,6 +7,7 @@ import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 import 'package:candlesticks/src/constant/scales.dart';
@@ -355,27 +356,38 @@ class _WebChartState extends State<WebChart> {
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
-                        child: MouseRegion(
-                          onHover: _onMouseHover,
-                          onExit: _onMouseExit,
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onPanUpdate: (update) {
-                              widget.onHorizontalDragUpdate(
-                                  update.localPosition.dx);
-                            },
-                            onPanEnd: (update) {
-                              widget.onPanEnd();
-                              setState(() {
-                                isDragging = false;
-                              });
-                            },
-                            onPanDown: (update) {
-                              widget.onPanDown(update.localPosition.dx);
-                              setState(() {
-                                isDragging = true;
-                              });
-                            },
+                        child: Listener(
+                          onPointerSignal: (pointerSignal) {
+                            if (pointerSignal is PointerScrollEvent) {
+                              widget.onScaleUpdate(
+                                  pointerSignal.scrollDelta.direction);
+                            }
+                          },
+                          child: MouseRegion(
+                            cursor: isDragging
+                                ? SystemMouseCursors.grabbing
+                                : SystemMouseCursors.precise,
+                            onHover: _onMouseHover,
+                            onExit: _onMouseExit,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onPanUpdate: (update) {
+                                widget.onHorizontalDragUpdate(
+                                    update.localPosition.dx);
+                              },
+                              onPanEnd: (update) {
+                                widget.onPanEnd();
+                                setState(() {
+                                  isDragging = false;
+                                });
+                              },
+                              onPanDown: (update) {
+                                widget.onPanDown(update.localPosition.dx);
+                                setState(() {
+                                  isDragging = true;
+                                });
+                              },
+                            ),
                           ),
                         ),
                       )
