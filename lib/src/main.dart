@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:candlesticks/src/constant/intervals.dart';
 import 'package:candlesticks/src/models/candle.dart';
+import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/widgets/mobile_chart.dart';
 import 'package:candlesticks/src/widgets/web_chart.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
@@ -20,10 +21,13 @@ class Candlesticks extends StatefulWidget {
 
   final List<String>? intervals;
 
+  final Future<void> Function()? onLoadMoreCandles;
+
   Candlesticks({
     required this.candles,
     required this.onIntervalChange,
     required this.interval,
+    this.onLoadMoreCandles,
     this.intervals,
   });
 
@@ -56,100 +60,124 @@ class _CandlesticksState extends State<Candlesticks> {
 
   bool showIntervals = false;
 
+  bool isCallingLoadMore = false;
+
   @override
   Widget build(BuildContext context) {
-    if (widget.candles.length == 0)
-      return Center(
-        child: CircularProgressIndicator(),
-      );
     return Column(
       children: [
         ToolBar(
-            onZoomInPressed: () {
-              setState(() {
-                candleWidth += 2;
-                candleWidth = min(candleWidth, 10);
-              });
-            },
-            onZoomOutPressed: () {
-              setState(() {
-                candleWidth -= 2;
-                candleWidth = max(candleWidth, 2);
-              });
-            },
-            interval: widget.interval,
-            intervals: widget.intervals ?? intervals,
-            onIntervalChange: widget.onIntervalChange),
-        Expanded(
-          child: TweenAnimationBuilder(
-            tween: Tween(begin: 6.toDouble(), end: candleWidth),
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOutCirc,
-            builder: (_, width, __) {
-              return kIsWeb
-                  ? WebChart(
-                      onScaleUpdate: (double scale) {
-                        scale = max(0.95, scale);
-                        scale = min(1.05, scale);
-                        setState(() {
-                          candleWidth *= scale;
-                          candleWidth = min(candleWidth, 10);
-                          candleWidth = max(candleWidth, 2);
-                          candleWidth.toInt();
-                        });
-                      },
-                      onPanEnd: () {
-                        lastIndex = index;
-                      },
-                      onHorizontalDragUpdate: (double x) {
-                        setState(() {
-                          x = x - lastX;
-                          index = lastIndex + x ~/ candleWidth;
-                          index = max(index, -10);
-                          index = min(index, widget.candles.length - 1);
-                        });
-                      },
-                      onPanDown: (double value) {
-                        lastX = value;
-                        lastIndex = index;
-                      },
-                      candleWidth: width as double,
-                      candles: widget.candles,
-                      index: index,
-                    )
-                  : MobileChart(
-                      onScaleUpdate: (double scale) {
-                        scale = max(0.95, scale);
-                        scale = min(1.05, scale);
-                        setState(() {
-                          candleWidth *= scale;
-                          candleWidth = min(candleWidth, 10);
-                          candleWidth = max(candleWidth, 2);
-                          candleWidth.toInt();
-                        });
-                      },
-                      onPanEnd: () {
-                        lastIndex = index;
-                      },
-                      onHorizontalDragUpdate: (double x) {
-                        setState(() {
-                          x = x - lastX;
-                          index = lastIndex + x ~/ candleWidth;
-                          index = max(index, -10);
-                          index = min(index, widget.candles.length - 1);
-                        });
-                      },
-                      onPanDown: (double value) {
-                        lastX = value;
-                        lastIndex = index;
-                      },
-                      candleWidth: width as double,
-                      candles: widget.candles,
-                      index: index,
-                    );
-            },
-          ),
+          onZoomInPressed: () {
+            setState(() {
+              candleWidth += 2;
+              candleWidth = min(candleWidth, 10);
+            });
+          },
+          onZoomOutPressed: () {
+            setState(() {
+              candleWidth -= 2;
+              candleWidth = max(candleWidth, 2);
+            });
+          },
+          interval: widget.interval,
+          intervals: widget.intervals ?? intervals,
+          onIntervalChange: widget.onIntervalChange,
         ),
+        if (widget.candles.length == 0)
+          Expanded(
+            child: Center(
+              child: CircularProgressIndicator(
+                color: Theme.of(context).gold,
+              ),
+            ),
+          )
+        else
+          Expanded(
+            child: TweenAnimationBuilder(
+              tween: Tween(begin: 6.toDouble(), end: candleWidth),
+              duration: Duration(milliseconds: 300),
+              curve: Curves.easeInOutCirc,
+              builder: (_, width, __) {
+                return kIsWeb
+                    ? WebChart(
+                        onScaleUpdate: (double scale) {
+                          scale = max(0.95, scale);
+                          scale = min(1.05, scale);
+                          setState(() {
+                            candleWidth *= scale;
+                            candleWidth = min(candleWidth, 10);
+                            candleWidth = max(candleWidth, 2);
+                            candleWidth.toInt();
+                          });
+                        },
+                        onPanEnd: () {
+                          lastIndex = index;
+                        },
+                        onHorizontalDragUpdate: (double x) {
+                          setState(() {
+                            x = x - lastX;
+                            index = lastIndex + x ~/ candleWidth;
+                            index = max(index, -10);
+                            index = min(index, widget.candles.length - 1);
+                          });
+                        },
+                        onPanDown: (double value) {
+                          lastX = value;
+                          lastIndex = index;
+                        },
+                        onReachEnd: () {
+                          if (isCallingLoadMore == false) {
+                            isCallingLoadMore = true;
+                            widget.onLoadMoreCandles!().then((_) {
+                              isCallingLoadMore = false;
+                            });
+                          }
+                        },
+                        candleWidth: width as double,
+                        candles: widget.candles,
+                        index: index,
+                      )
+                    : MobileChart(
+                        onScaleUpdate: (double scale) {
+                          scale = max(0.95, scale);
+                          scale = min(1.05, scale);
+                          setState(() {
+                            candleWidth *= scale;
+                            candleWidth = min(candleWidth, 10);
+                            candleWidth = max(candleWidth, 2);
+                            candleWidth.toInt();
+                          });
+                        },
+                        onPanEnd: () {
+                          lastIndex = index;
+                        },
+                        onHorizontalDragUpdate: (double x) {
+                          setState(() {
+                            x = x - lastX;
+                            index = lastIndex + x ~/ candleWidth;
+                            index = max(index, -10);
+                            index = min(index, widget.candles.length - 1);
+                          });
+                        },
+                        onPanDown: (double value) {
+                          lastX = value;
+                          lastIndex = index;
+                        },
+                        onReachEnd: () {
+                          if (isCallingLoadMore == false) {
+                            isCallingLoadMore = true;
+                            widget.onLoadMoreCandles!().then((_) {
+                              isCallingLoadMore = false;
+                            });
+                          }
+                        },
+                        candleWidth: width as double,
+                        candles: widget.candles,
+                        index: index,
+                      );
+              },
+            ),
+          ),
       ],
     );
   }

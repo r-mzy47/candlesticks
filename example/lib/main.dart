@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:example/candle_ticker_model.dart';
 import 'package:example/repository.dart';
 import 'package:flutter/material.dart';
 import 'package:candlesticks/candlesticks.dart';
@@ -17,37 +18,12 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   List<Candle> candles = [];
   WebSocketChannel? _channel;
-  bool isDark = false;
-
-  String interval = "1m";
-
-  void binanceFetch(String interval) {
-    fetchCandles(symbol: "XRPUSDT", interval: interval).then(
-      (value) => setState(
-        () {
-          this.interval = interval;
-          candles = value;
-        },
-      ),
-    );
-    if (_channel != null) _channel!.sink.close();
-    _channel = WebSocketChannel.connect(
-      Uri.parse('wss://stream.binance.com:9443/ws'),
-    );
-    _channel!.sink.add(
-      jsonEncode(
-        {
-          "method": "SUBSCRIBE",
-          "params": ["xrpusdt@kline_" + interval],
-          "id": 1
-        },
-      ),
-    );
-  }
+  bool themeIsDark = false;
+  String currentInterval = "1m";
 
   @override
   void initState() {
-    binanceFetch("1m");
+    binanceFetch(currentInterval);
     super.initState();
   }
 
@@ -57,39 +33,75 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
+  Future<void> binanceFetch(String interval) async {
+    // close current channel if exists
+    if (_channel != null) _channel!.sink.close();
+    // clear last candle list
+    setState(() {
+      candles = [];
+      currentInterval = interval;
+    });
+
+    try {
+      // load candles info
+      final data = await fetchCandles(symbol: "XRPUSDT", interval: interval);
+      // connect to binance stream
+      _channel = establishConnection(currentInterval);
+      // update candles
+      setState(() {
+        candles = data;
+        currentInterval = interval;
+      });
+    } catch (e) {
+      // handle error
+      return;
+    }
+  }
+
   void updateCandlesFromSnapshot(AsyncSnapshot<Object?> snapshot) {
+    if (candles.length == 0) return;
     if (snapshot.data != null) {
-      final data = jsonDecode(snapshot.data as String) as Map<String, dynamic>;
-      if (data.containsKey("k") == true &&
-          candles[0].date.millisecondsSinceEpoch == data["k"]["t"]) {
-        candles[0] = Candle(
-            date: candles[0].date,
-            high: double.parse(data["k"]["h"]),
-            low: double.parse(data["k"]["l"]),
-            open: double.parse(data["k"]["o"]),
-            close: double.parse(data["k"]["c"]),
-            volume: double.parse(data["k"]["v"]));
-      } else if (data.containsKey("k") == true &&
-          data["k"]["t"] - candles[0].date.millisecondsSinceEpoch ==
-              candles[0].date.millisecondsSinceEpoch -
-                  candles[1].date.millisecondsSinceEpoch) {
-        candles.insert(
-            0,
-            Candle(
-                date: DateTime.fromMillisecondsSinceEpoch(data["k"]["t"]),
-                high: double.parse(data["k"]["h"]),
-                low: double.parse(data["k"]["l"]),
-                open: double.parse(data["k"]["o"]),
-                close: double.parse(data["k"]["c"]),
-                volume: double.parse(data["k"]["v"])));
+      final map = jsonDecode(snapshot.data as String) as Map<String, dynamic>;
+      if (map.containsKey("k") == true) {
+        final candleTicker = CandleTickerModel.fromJson(map);
+
+        // cehck if incoming candle is an update on current last candle, or a new one
+        if (candles[0].date == candleTicker.candle.date) {
+          // update last candle
+          candles[0] = candleTicker.candle;
+        }
+        // check if incoming new candle is next candle so the difrence
+        // between times must be the same as last existing 2 candles
+        else if (candleTicker.candle.date.difference(candles[0].date) ==
+            candles[0].date.difference(candles[1].date)) {
+          // add new candle to list
+          candles.insert(0, candleTicker.candle);
+        }
       }
+    }
+  }
+
+  Future<void> loadMoreCandles() async {
+    try {
+      // load candles info
+      final data = await fetchCandles(
+          symbol: "XRPUSDT",
+          interval: currentInterval,
+          endTime: candles.last.date.millisecondsSinceEpoch);
+      candles.removeLast();
+      setState(() {
+        candles.addAll(data);
+      });
+    } catch (e) {
+      // handle error
+      return;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: isDark ? ThemeData.dark() : ThemeData.light(),
+      theme: themeIsDark ? ThemeData.dark() : ThemeData.light(),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
@@ -98,11 +110,13 @@ class _MyAppState extends State<MyApp> {
             IconButton(
               onPressed: () {
                 setState(() {
-                  isDark = !isDark;
+                  themeIsDark = !themeIsDark;
                 });
               },
               icon: Icon(
-                isDark ? Icons.wb_sunny_sharp : Icons.nightlight_round_outlined,
+                themeIsDark
+                    ? Icons.wb_sunny_sharp
+                    : Icons.nightlight_round_outlined,
               ),
             )
           ],
@@ -117,7 +131,8 @@ class _MyAppState extends State<MyApp> {
                   binanceFetch(value);
                 },
                 candles: candles,
-                interval: interval,
+                interval: currentInterval,
+                onLoadMoreCandles: loadMoreCandles,
               );
             },
           ),

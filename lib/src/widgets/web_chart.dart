@@ -40,6 +40,8 @@ class WebChart extends StatefulWidget {
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
 
+  final Function() onReachEnd;
+
   WebChart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -48,6 +50,7 @@ class WebChart extends StatefulWidget {
     required this.index,
     required this.onPanDown,
     required this.onPanEnd,
+    required this.onReachEnd,
   });
 
   @override
@@ -100,6 +103,12 @@ class _WebChartState extends State<WebChart> {
             maxWidth ~/ widget.candleWidth + widget.index,
             widget.candles.length - 1);
 
+        if (candlesEndIndex == widget.candles.length - 1) {
+          Future(() {
+            widget.onReachEnd();
+          });
+        }
+
         // visible candles highest and lowest price
         double candlesHighPrice = 0;
         double candlesLowPrice = double.infinity;
@@ -134,11 +143,11 @@ class _WebChartState extends State<WebChart> {
         }
 
         return TweenAnimationBuilder(
-          tween: Tween(begin: candlesLowPrice, end: candlesHighPrice),
+          tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
           duration: Duration(milliseconds: 200),
           builder: (context, double high, _) {
             return TweenAnimationBuilder(
-              tween: Tween(begin: candlesHighPrice, end: candlesLowPrice),
+              tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
               duration: Duration(milliseconds: 200),
               builder: (context, double low, _) {
                 final currentCandle = mouseHoverX == null
