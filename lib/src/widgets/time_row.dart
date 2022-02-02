@@ -1,4 +1,5 @@
-import 'package:candlesticks/candlesticks.dart';
+import 'package:candlesticks/src/constant/view_constants.dart';
+import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -87,7 +88,8 @@ class _TimeRowState extends State<TimeRow> {
 
   @override
   void didUpdateWidget(TimeRow oldWidget) {
-    if (oldWidget.index != widget.index)
+    if (oldWidget.index != widget.index ||
+        oldWidget.candleWidth != widget.candleWidth)
       _scrollController.jumpTo((widget.index + 10) * widget.candleWidth);
     super.didUpdateWidget(oldWidget);
   }
@@ -97,7 +99,7 @@ class _TimeRowState extends State<TimeRow> {
     int step = _stepCalculator();
     final dif = widget.candles[0].date.difference(widget.candles[step].date);
     return Padding(
-      padding: const EdgeInsets.only(right: 51.0),
+      padding: const EdgeInsets.only(right: PRICE_BAR_WIDTH + 1.0),
       child: Stack(
         children: [
           ListView.builder(

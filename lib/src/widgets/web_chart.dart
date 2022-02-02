@@ -10,7 +10,6 @@ import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
-import 'package:candlesticks/src/constant/scales.dart';
 import 'dash_line.dart';
 
 /// This widget manages gestures
@@ -78,15 +77,15 @@ class _WebChartState extends State<WebChart> {
   }
 
   double calcutePriceScale(double height, double high, double low) {
-    for (int i = 0; i < scales.length; i++) {
-      double newHigh = (high ~/ scales[i] + 1) * scales[i];
-      double newLow = (low ~/ scales[i]) * scales[i];
-      double range = newHigh - newLow;
-      if (height / (range / scales[i]) > MIN_PRICETILE_HEIGHT) {
-        return scales[i];
-      }
-    }
-    return 0;
+    int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
+    double sizeRange = high - low;
+    double minStepSize = sizeRange / minTiles;
+    double base =
+        pow(10, HelperFunctions.log10(minStepSize).floor()).toDouble();
+
+    if (2 * base > minStepSize) return 2 * base;
+    if (5 * base > minStepSize) return 5 * base;
+    return 10 * base;
   }
 
   @override
@@ -144,11 +143,11 @@ class _WebChartState extends State<WebChart> {
 
         return TweenAnimationBuilder(
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
-          duration: Duration(milliseconds: 200),
+          duration: Duration(milliseconds: 300),
           builder: (context, double high, _) {
             return TweenAnimationBuilder(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
-              duration: Duration(milliseconds: 200),
+              duration: Duration(milliseconds: 300),
               builder: (context, double low, _) {
                 final currentCandle = mouseHoverX == null
                     ? null
@@ -205,7 +204,7 @@ class _WebChartState extends State<WebChart> {
                                           ),
                                         ),
                                         child: AnimatedPadding(
-                                          duration: Duration(milliseconds: 200),
+                                          duration: Duration(milliseconds: 300),
                                           padding: EdgeInsets.symmetric(
                                               vertical:
                                                   MAIN_CHART_VERTICAL_PADDING +
@@ -288,7 +287,7 @@ class _WebChartState extends State<WebChart> {
                                       ),
                                     ],
                                   ),
-                                  width: 50,
+                                  width: PRICE_BAR_WIDTH,
                                 ),
                               ],
                             ),
@@ -338,7 +337,7 @@ class _WebChartState extends State<WebChart> {
                                         ),
                                       ),
                                     ),
-                                    width: 50,
+                                    width: PRICE_BAR_WIDTH,
                                     height: 20,
                                   ),
                                 ],

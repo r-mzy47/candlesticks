@@ -1,5 +1,4 @@
 import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 

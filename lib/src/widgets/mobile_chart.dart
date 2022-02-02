@@ -9,7 +9,6 @@ import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
-import 'package:candlesticks/src/constant/scales.dart';
 import 'dash_line.dart';
 
 /// This widget manages gestures
@@ -62,15 +61,15 @@ class _MobileChartState extends State<MobileChart> {
   double additionalVerticalPadding = 0;
 
   double calcutePriceScale(double height, double high, double low) {
-    for (int i = 0; i < scales.length; i++) {
-      double newHigh = (high ~/ scales[i] + 1) * scales[i];
-      double newLow = (low ~/ scales[i]) * scales[i];
-      double range = newHigh - newLow;
-      if (height / (range / scales[i]) > MIN_PRICETILE_HEIGHT) {
-        return scales[i];
-      }
-    }
-    return 0;
+    int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
+    double sizeRange = high - low;
+    double minStepSize = sizeRange / minTiles;
+    double base =
+        pow(10, HelperFunctions.log10(minStepSize).floor()).toDouble();
+
+    if (2 * base > minStepSize) return 2 * base;
+    if (5 * base > minStepSize) return 5 * base;
+    return 10 * base;
   }
 
   @override
@@ -93,13 +92,13 @@ class _MobileChartState extends State<MobileChart> {
           });
         }
 
+        List<Candle> inRangeCandles = widget.candles
+            .getRange(candlesStartIndex, candlesEndIndex)
+            .toList();
+
         // visible candles highest and lowest price
-        double candlesHighPrice = 0;
-        double candlesLowPrice = double.infinity;
-        for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
-          candlesLowPrice = min(widget.candles[i].low, candlesLowPrice);
-          candlesHighPrice = max(widget.candles[i].high, candlesHighPrice);
-        }
+        double candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
+        double candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
 
         additionalVerticalPadding =
             min(maxHeight / 4, additionalVerticalPadding);
@@ -130,11 +129,11 @@ class _MobileChartState extends State<MobileChart> {
 
         return TweenAnimationBuilder(
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
-          duration: Duration(milliseconds: 200),
+          duration: Duration(milliseconds: 300),
           builder: (context, double high, _) {
             return TweenAnimationBuilder(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
-              duration: Duration(milliseconds: 200),
+              duration: Duration(milliseconds: 300),
               builder: (context, double low, _) {
                 final currentCandle = longPressX == null
                     ? null
@@ -191,7 +190,7 @@ class _MobileChartState extends State<MobileChart> {
                                           ),
                                         ),
                                         child: AnimatedPadding(
-                                          duration: Duration(milliseconds: 200),
+                                          duration: Duration(milliseconds: 300),
                                           padding: EdgeInsets.symmetric(
                                               vertical:
                                                   MAIN_CHART_VERTICAL_PADDING +
@@ -274,7 +273,7 @@ class _MobileChartState extends State<MobileChart> {
                                       ),
                                     ],
                                   ),
-                                  width: 50,
+                                  width: PRICE_BAR_WIDTH,
                                 ),
                               ],
                             ),

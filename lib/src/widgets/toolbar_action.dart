@@ -1,31 +1,28 @@
-import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:flutter/material.dart';
 
-class CustomButton extends StatelessWidget {
+class ToolBarAction extends StatelessWidget {
   final void Function() onPressed;
   final Widget child;
-  final double? width;
-  final Color? color;
+  final double width;
 
-  const CustomButton({
+  const ToolBarAction({
     Key? key,
     required this.child,
     required this.onPressed,
-    this.width,
-    this.color,
+    this.width = 30,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width ?? 30,
+      width: width,
       height: 30,
       child: RawMaterialButton(
         elevation: 0,
-        fillColor: color ?? Theme.of(context).background,
+        fillColor: Theme.of(context).background,
         onPressed: onPressed,
-        child: child,
+        child: Center(child: child),
       ),
     );
   }
