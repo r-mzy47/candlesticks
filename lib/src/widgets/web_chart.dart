@@ -108,17 +108,13 @@ class _WebChartState extends State<WebChart> {
           });
         }
 
-        // visible candles highest and lowest price
-        double candlesHighPrice = 0;
-        double candlesLowPrice = double.infinity;
-        for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
-          candlesLowPrice = min(widget.candles[i].low, candlesLowPrice);
-          candlesHighPrice = max(widget.candles[i].high, candlesHighPrice);
-        }
+        List<Candle> inRangeCandles = widget.candles
+            .getRange(candlesStartIndex, candlesEndIndex + 1)
+            .toList();
 
-        additionalVerticalPadding =
-            min(maxHeight / 4, additionalVerticalPadding);
-        additionalVerticalPadding = max(0, additionalVerticalPadding);
+        // visible candles highest and lowest price
+        double candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
+        double candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
 
         // calcute priceScale
         double chartHeight = maxHeight * 0.75 -

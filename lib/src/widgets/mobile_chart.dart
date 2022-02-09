@@ -93,7 +93,7 @@ class _MobileChartState extends State<MobileChart> {
         }
 
         List<Candle> inRangeCandles = widget.candles
-            .getRange(candlesStartIndex, candlesEndIndex)
+            .getRange(candlesStartIndex, candlesEndIndex + 1)
             .toList();
 
         // visible candles highest and lowest price
