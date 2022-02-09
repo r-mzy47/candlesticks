@@ -105,7 +105,8 @@ class _CandlesticksState extends State<Candlesticks> {
                           lastIndex = index;
                         },
                         onReachEnd: () {
-                          if (isCallingLoadMore == false) {
+                          if (isCallingLoadMore == false &&
+                              widget.onLoadMoreCandles != null) {
                             isCallingLoadMore = true;
                             widget.onLoadMoreCandles!().then((_) {
                               isCallingLoadMore = false;
@@ -142,7 +143,8 @@ class _CandlesticksState extends State<Candlesticks> {
                           lastIndex = index;
                         },
                         onReachEnd: () {
-                          if (isCallingLoadMore == false) {
+                          if (isCallingLoadMore == false &&
+                              widget.onLoadMoreCandles != null) {
                             isCallingLoadMore = true;
                             widget.onLoadMoreCandles!().then((_) {
                               isCallingLoadMore = false;
