@@ -2,8 +2,6 @@ import 'package:candlesticks/src/models/candle.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 
-/// This widget extends [LeafRenderObjectWidget]
-/// And uses CandleStickRenderObject for painting the chart.
 class VolumeWidget extends LeafRenderObjectWidget {
   final List<Candle> candles;
   final int index;
@@ -49,8 +47,6 @@ class VolumeWidget extends LeafRenderObjectWidget {
   }
 }
 
-/// This render object is responsible for
-/// drawing the configured chart on the canvas.
 class VolumeRenderObject extends RenderBox {
   late List<Candle> _candles;
   late int _index;

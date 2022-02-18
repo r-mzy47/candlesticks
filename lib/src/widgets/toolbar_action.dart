@@ -1,6 +1,8 @@
 import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:flutter/material.dart';
 
+
+/// Top toolbar button widget.
 class ToolBarAction extends StatelessWidget {
   final void Function() onPressed;
   final Widget child;

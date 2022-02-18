@@ -13,10 +13,15 @@ import 'dart:io' show Platform;
 /// StatefulWidget that holds Chart's State (index of
 /// current position and candles width).
 class Candlesticks extends StatefulWidget {
+
+  /// The list items are arranged in such a way that 
+  /// the newest candle should be in position 0 and
   final List<Candle> candles;
 
+  /// this callback calls when the last candle gets visible
   final Future<void> Function()? onLoadMoreCandles;
 
+  /// list of buttons you what to add on top tool bar
   final List<ToolBarAction> actions;
 
   Candlesticks({
@@ -30,7 +35,6 @@ class Candlesticks extends StatefulWidget {
   _CandlesticksState createState() => _CandlesticksState();
 }
 
-/// [Candlesticks] state
 class _CandlesticksState extends State<Candlesticks> {
   /// index of the newest candle to be displayed
   /// changes when user scrolls along the chart
@@ -42,8 +46,7 @@ class _CandlesticksState extends State<Candlesticks> {
   ///  range: [2...10]
   double candleWidth = 6;
 
-  bool showIntervals = false;
-
+  /// true when widget.onLoadMoreCandles is fetching new candles.
   bool isCallingLoadMore = false;
 
   @override

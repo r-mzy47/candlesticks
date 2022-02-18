@@ -133,11 +133,6 @@ class _DesktopChartState extends State<DesktopChart> {
           volumeHigh = max(widget.candles[i].volume, volumeHigh);
         }
 
-        if (isDragging) {
-          mouseHoverX = null;
-          mouseHoverY = null;
-        }
-
         return TweenAnimationBuilder(
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
           duration: Duration(milliseconds: 300),
@@ -299,7 +294,7 @@ class _DesktopChartState extends State<DesktopChart> {
                           ),
                         ],
                       ),
-                      mouseHoverY != null
+                      mouseHoverY != null && !isDragging
                           ? Positioned(
                               top: mouseHoverY! - 10,
                               child: Row(
@@ -346,7 +341,7 @@ class _DesktopChartState extends State<DesktopChart> {
                               ),
                             )
                           : Container(),
-                      mouseHoverX != null
+                      mouseHoverX != null && !isDragging
                           ? Positioned(
                               child: DashLine(
                                 length: constraints.maxHeight - 20,
@@ -382,6 +377,8 @@ class _DesktopChartState extends State<DesktopChart> {
                             child: GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onPanUpdate: (update) {
+                                mouseHoverX = update.localPosition.dx;
+                                mouseHoverY = update.localPosition.dy;
                                 widget.onHorizontalDragUpdate(
                                     update.localPosition.dx);
                               },
