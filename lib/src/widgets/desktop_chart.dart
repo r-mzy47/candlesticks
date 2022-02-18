@@ -16,7 +16,7 @@ import 'dash_line.dart';
 /// Calculates the highest and lowest price of visible candles.
 /// Updates right-hand side numbers.
 /// And pass values down to [CandleStickWidget].
-class WebChart extends StatefulWidget {
+class DesktopChart extends StatefulWidget {
   /// onScaleUpdate callback
   /// called when user scales chart using buttons or scale gesture
   final Function onScaleUpdate;
@@ -41,7 +41,7 @@ class WebChart extends StatefulWidget {
 
   final Function() onReachEnd;
 
-  WebChart({
+  DesktopChart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
     required this.candleWidth,
@@ -53,10 +53,10 @@ class WebChart extends StatefulWidget {
   });
 
   @override
-  State<WebChart> createState() => _WebChartState();
+  State<DesktopChart> createState() => _DesktopChartState();
 }
 
-class _WebChartState extends State<WebChart> {
+class _DesktopChartState extends State<DesktopChart> {
   double? mouseHoverX;
   double? mouseHoverY;
   bool isDragging = false;

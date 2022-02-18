@@ -3,11 +3,12 @@ import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/widgets/toolbar_action.dart';
 import 'package:candlesticks/src/widgets/mobile_chart.dart';
-import 'package:candlesticks/src/widgets/web_chart.dart';
+import 'package:candlesticks/src/widgets/desktop_chart.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'models/candle.dart';
+import 'dart:io' show Platform;
 
 /// StatefulWidget that holds Chart's State (index of
 /// current position and candles width).
@@ -78,8 +79,8 @@ class _CandlesticksState extends State<Candlesticks> {
               tween: Tween(begin: 6.toDouble(), end: candleWidth),
               duration: Duration(milliseconds: 120),
               builder: (_, double width, __) {
-                return kIsWeb
-                    ? WebChart(
+                return (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux)
+                    ? DesktopChart(
                         onScaleUpdate: (double scale) {
                           scale = max(0.90, scale);
                           scale = min(1.1, scale);
