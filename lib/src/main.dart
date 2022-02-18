@@ -79,83 +79,88 @@ class _CandlesticksState extends State<Candlesticks> {
               tween: Tween(begin: 6.toDouble(), end: candleWidth),
               duration: Duration(milliseconds: 120),
               builder: (_, double width, __) {
-                return (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux)
-                    ? DesktopChart(
-                        onScaleUpdate: (double scale) {
-                          scale = max(0.90, scale);
-                          scale = min(1.1, scale);
-                          setState(() {
-                            candleWidth *= scale;
-                            candleWidth = min(candleWidth, 16);
-                            candleWidth = max(candleWidth, 4);
-                          });
-                        },
-                        onPanEnd: () {
-                          lastIndex = index;
-                        },
-                        onHorizontalDragUpdate: (double x) {
-                          setState(() {
-                            x = x - lastX;
-                            index = lastIndex + x ~/ candleWidth;
-                            index = max(index, -10);
-                            index = min(index, widget.candles.length - 1);
-                          });
-                        },
-                        onPanDown: (double value) {
-                          lastX = value;
-                          lastIndex = index;
-                        },
-                        onReachEnd: () {
-                          if (isCallingLoadMore == false &&
-                              widget.onLoadMoreCandles != null) {
-                            isCallingLoadMore = true;
-                            widget.onLoadMoreCandles!().then((_) {
-                              isCallingLoadMore = false;
-                            });
-                          }
-                        },
-                        candleWidth: width,
-                        candles: widget.candles,
-                        index: index,
-                      )
-                    : MobileChart(
-                        onScaleUpdate: (double scale) {
-                          scale = max(0.90, scale);
-                          scale = min(1.1, scale);
-                          setState(() {
-                            candleWidth *= scale;
-                            candleWidth = min(candleWidth, 16);
-                            candleWidth = max(candleWidth, 4);
-                          });
-                        },
-                        onPanEnd: () {
-                          lastIndex = index;
-                        },
-                        onHorizontalDragUpdate: (double x) {
-                          setState(() {
-                            x = x - lastX;
-                            index = lastIndex + x ~/ candleWidth;
-                            index = max(index, -10);
-                            index = min(index, widget.candles.length - 1);
-                          });
-                        },
-                        onPanDown: (double value) {
-                          lastX = value;
-                          lastIndex = index;
-                        },
-                        onReachEnd: () {
-                          if (isCallingLoadMore == false &&
-                              widget.onLoadMoreCandles != null) {
-                            isCallingLoadMore = true;
-                            widget.onLoadMoreCandles!().then((_) {
-                              isCallingLoadMore = false;
-                            });
-                          }
-                        },
-                        candleWidth: width,
-                        candles: widget.candles,
-                        index: index,
-                      );
+                if (kIsWeb ||
+                    Platform.isMacOS ||
+                    Platform.isWindows ||
+                    Platform.isLinux) {
+                  return DesktopChart(
+                    onScaleUpdate: (double scale) {
+                      scale = max(0.90, scale);
+                      scale = min(1.1, scale);
+                      setState(() {
+                        candleWidth *= scale;
+                        candleWidth = min(candleWidth, 16);
+                        candleWidth = max(candleWidth, 4);
+                      });
+                    },
+                    onPanEnd: () {
+                      lastIndex = index;
+                    },
+                    onHorizontalDragUpdate: (double x) {
+                      setState(() {
+                        x = x - lastX;
+                        index = lastIndex + x ~/ candleWidth;
+                        index = max(index, -10);
+                        index = min(index, widget.candles.length - 1);
+                      });
+                    },
+                    onPanDown: (double value) {
+                      lastX = value;
+                      lastIndex = index;
+                    },
+                    onReachEnd: () {
+                      if (isCallingLoadMore == false &&
+                          widget.onLoadMoreCandles != null) {
+                        isCallingLoadMore = true;
+                        widget.onLoadMoreCandles!().then((_) {
+                          isCallingLoadMore = false;
+                        });
+                      }
+                    },
+                    candleWidth: width,
+                    candles: widget.candles,
+                    index: index,
+                  );
+                } else {
+                  return MobileChart(
+                    onScaleUpdate: (double scale) {
+                      scale = max(0.90, scale);
+                      scale = min(1.1, scale);
+                      setState(() {
+                        candleWidth *= scale;
+                        candleWidth = min(candleWidth, 16);
+                        candleWidth = max(candleWidth, 4);
+                      });
+                    },
+                    onPanEnd: () {
+                      lastIndex = index;
+                    },
+                    onHorizontalDragUpdate: (double x) {
+                      setState(() {
+                        x = x - lastX;
+                        index = lastIndex + x ~/ candleWidth;
+                        index = max(index, -10);
+                        index = min(index, widget.candles.length - 1);
+                      });
+                    },
+                    onPanDown: (double value) {
+                      lastX = value;
+                      lastIndex = index;
+                    },
+                    onReachEnd: () {
+                      if (isCallingLoadMore == false &&
+                          widget.onLoadMoreCandles != null) {
+                        isCallingLoadMore = true;
+                        widget.onLoadMoreCandles!().then((_) {
+                          isCallingLoadMore = false;
+                        });
+                      }
+                    },
+                    candleWidth: width,
+                    candles: widget.candles,
+                    index: index,
+                  );
+                }
               },
             ),
           ),

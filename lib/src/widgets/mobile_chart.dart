@@ -62,6 +62,7 @@ class _MobileChartState extends State<MobileChart> {
 
   double calcutePriceScale(double height, double high, double low) {
     int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
+    minTiles = max(2, minTiles);
     double sizeRange = high - low;
     double minStepSize = sizeRange / minTiles;
     double base =
@@ -99,10 +100,6 @@ class _MobileChartState extends State<MobileChart> {
         // visible candles highest and lowest price
         double candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
         double candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
-
-        additionalVerticalPadding =
-            min(maxHeight / 4, additionalVerticalPadding);
-        additionalVerticalPadding = max(0, additionalVerticalPadding);
 
         // calcute priceScale
         double chartHeight = maxHeight * 0.75 -
@@ -171,6 +168,11 @@ class _MobileChartState extends State<MobileChart> {
                                   onScale: (delta) {
                                     setState(() {
                                       additionalVerticalPadding += delta;
+                                      additionalVerticalPadding = min(
+                                          maxHeight / 4,
+                                          additionalVerticalPadding);
+                                      additionalVerticalPadding =
+                                          max(0, additionalVerticalPadding);
                                     });
                                   },
                                   additionalVerticalPadding:
