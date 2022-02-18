@@ -133,7 +133,7 @@ class _TimeRowState extends State<TimeRow> {
               ? Container()
               : Positioned(
                   bottom: 0,
-                  left: math.max(widget.indicatorX! - 50, 0),
+                  left: math.max(widget.indicatorX! - 55, 0),
                   child: Container(
                     color: Theme.of(context).hoverIndicatorBackgroundColor,
                     child: Center(
@@ -145,7 +145,7 @@ class _TimeRowState extends State<TimeRow> {
                         ),
                       ),
                     ),
-                    width: 100,
+                    width: 110,
                     height: 20,
                   ),
                 ),
