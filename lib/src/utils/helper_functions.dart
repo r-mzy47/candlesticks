@@ -23,7 +23,7 @@ class HelperFunctions {
 
   static String priceToString(double price) {
     return price > 1000
-        ? price.toInt().toStringAsFixed(2)
+        ? price.toStringAsFixed(2)
         : price > 100
             ? price.toStringAsFixed(3)
             : price > 10
