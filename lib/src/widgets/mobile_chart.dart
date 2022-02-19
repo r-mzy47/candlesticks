@@ -325,7 +325,7 @@ class _MobileChartState extends State<MobileChart> {
                                         ),
                                       ),
                                     ),
-                                    width: 50,
+                                    width: PRICE_BAR_WIDTH,
                                     height: 20,
                                   ),
                                 ],
