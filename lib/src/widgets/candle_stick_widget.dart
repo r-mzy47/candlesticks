@@ -104,26 +104,25 @@ class CandleStickRenderObject extends RenderBox {
   void paintCandle(PaintingContext context, Offset offset, int index,
       Candle candle, double range) {
     Color color = candle.isBull ? _bullColor : _bearColor;
+
     Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    var path = Path()
-      ..moveTo(size.width + offset.dx - (index + 0.5) * _candleWidth,
-          offset.dy + (_high - candle.high) / range)
-      ..relativeLineTo(0, (candle.high - candle.low) / range);
 
-    context.canvas.drawPath(path, paint);
-    paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    path = Path()
-      ..addRect(Rect.fromPoints(
-          Offset(size.width + offset.dx - (index * _candleWidth + 0.5),
-              offset.dy + (_high - candle.close) / range),
-          Offset(size.width + offset.dx - ((index + 1) * _candleWidth - 0.5),
-              offset.dy + (_high - candle.open) / range)));
-    context.canvas.drawPath(path, paint);
+    double x = size.width + offset.dx - (index + 0.5) * _candleWidth;
+
+    context.canvas.drawLine(
+      Offset(x, offset.dy + (_high - candle.high) / range),
+      Offset(x, offset.dy + (_high - candle.low) / range),
+      paint,
+    );
+
+    context.canvas.drawLine(
+      Offset(x, offset.dy + (_high - candle.open) / range),
+      Offset(x, offset.dy + (_high - candle.close) / range),
+      paint..strokeWidth = _candleWidth - 1,
+    );
   }
 
   @override

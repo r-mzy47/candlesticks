@@ -82,16 +82,14 @@ class VolumeRenderObject extends RenderBox {
       Candle candle, double range) {
     Color color = candle.isBull ? _bullColor : _bearColor;
 
-    Paint paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    var path = Path()
-      ..addRect(Rect.fromPoints(
-          Offset(size.width + offset.dx - (index * _barWidth + 0.5),
-              offset.dy + (_high - candle.volume) / range),
-          Offset(size.width + offset.dx - ((index + 1) * _barWidth - 0.5),
-              offset.dy + size.height)));
-    context.canvas.drawPath(path, paint);
+    double x = size.width + offset.dx - (index + 0.5) * _barWidth;
+
+    context.canvas.drawLine(
+        Offset(x, offset.dy + (_high - candle.volume) / range),
+        Offset(x, offset.dy + size.height),
+        Paint()
+          ..color = color
+          ..strokeWidth = _barWidth - 1);
   }
 
   @override
