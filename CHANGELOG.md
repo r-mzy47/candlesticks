@@ -1,3 +1,7 @@
+## [2.0.1] - Feb 21, 2022
+
+- document correction
+
 ## [2.0.0] - Feb 21, 2022
 
 - [Improvement] performance improvement

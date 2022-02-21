@@ -1,6 +1,6 @@
 # candlesticks
 
-[![pub package](https://img.shields.io/badge/pub-v2.0.0-orange.svg)](https://pub.dev/packages/candlesticks)
+[![pub package](https://img.shields.io/badge/pub-v2.0.1-orange.svg)](https://pub.dev/packages/candlesticks)
 
 A high-performance full featured candlesticks chart for all platforms!
 
@@ -21,7 +21,7 @@ web demo:
 
 ```yaml
 dependencies:
-  candlesticks: ^2.0.0
+  candlesticks: ^2.0.1
 ```
 
 2. Get the package using your IDE's GUI or via command line with
