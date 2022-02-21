@@ -2,7 +2,7 @@
 
 [![pub package](https://img.shields.io/badge/pub-v2.0.0-orange.svg)](https://pub.dev/packages/candlesticks)
 
-A high-performance full featured candlesticks chart for all platforms!</br>
+A high-performance full featured candlesticks chart for all platforms</br>
 web demo:</br>
 [Binance Candles](https://rmzy.dev/candlesticks/)</br>
 [Binance Candles Github Repository](https://github.com/r-mzy47/binance_candles)

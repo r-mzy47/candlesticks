@@ -1,6 +1,10 @@
-## [1.2.0] - Nov 8, 2021
+## [2.0.0] - Feb 2, 2022
 
-- [Feature] show selected candle info
+- [Improvement] performance improvement
+- [Feature] desktop support
+- [Feature] price scaling
+- [Feature] add light theme
+- [Breaking] `interval` and `onIntervalChange` parameters are deleted from [Candlesticks] widget
 
 ## [1.1.1] - Sep 10, 2021
 
