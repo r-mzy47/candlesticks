@@ -47,3 +47,5 @@ final candle =  Candle(date: DateTime.now(), open: 1780.36, high: 1873.93, low: 
 ### Candlesticks
 
 [Candlesticks] widget requires a list of candles, the arrangement of the `candles` array should be such that the newest item is in position 0, `onLoadMoreCandles` is a nullable callback which calls whenever the last candle gets visible. and in case you whant to add more actions in top toolbar like [Binance Candles](https://rmzy.dev/candlesticks/), you can make your custom [ToolBarAction] and add it to `actions` parameter.
+
+🍺 pull requests are welcome!
