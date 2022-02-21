@@ -1,10 +1,7 @@
 import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/color_palette.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 
-/// This widget extends [LeafRenderObjectWidget]
-/// And uses CandleStickRenderObject for painting the chart.
 class VolumeWidget extends LeafRenderObjectWidget {
   final List<Candle> candles;
   final int index;
@@ -50,8 +47,6 @@ class VolumeWidget extends LeafRenderObjectWidget {
   }
 }
 
-/// This render object is responsible for
-/// drawing the configured chart on the canvas.
 class VolumeRenderObject extends RenderBox {
   late List<Candle> _candles;
   late int _index;
@@ -87,16 +82,14 @@ class VolumeRenderObject extends RenderBox {
       Candle candle, double range) {
     Color color = candle.isBull ? _bullColor : _bearColor;
 
-    Paint paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    var path = Path()
-      ..addRect(Rect.fromPoints(
-          Offset(size.width + offset.dx - (index * _barWidth + 0.5),
-              offset.dy + (_high - candle.volume) / range),
-          Offset(size.width + offset.dx - ((index + 1) * _barWidth - 0.5),
-              offset.dy + size.height)));
-    context.canvas.drawPath(path, paint);
+    double x = size.width + offset.dx - (index + 0.5) * _barWidth;
+
+    context.canvas.drawLine(
+        Offset(x, offset.dy + (_high - candle.volume) / range),
+        Offset(x, offset.dy + size.height),
+        Paint()
+          ..color = color
+          ..strokeWidth = _barWidth - 1);
   }
 
   @override

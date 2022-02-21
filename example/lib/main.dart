@@ -1,9 +1,7 @@
 import 'dart:convert';
-
-import 'package:example/repository.dart';
 import 'package:flutter/material.dart';
 import 'package:candlesticks/candlesticks.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
@@ -16,110 +14,55 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   List<Candle> candles = [];
-  WebSocketChannel? _channel;
-  bool isDark = false;
-
-  String interval = "1m";
-
-  void binanceFetch(String interval) {
-    fetchCandles(symbol: "XRPUSDT", interval: interval).then(
-      (value) => setState(
-        () {
-          this.interval = interval;
-          candles = value;
-        },
-      ),
-    );
-    if (_channel != null) _channel!.sink.close();
-    _channel = WebSocketChannel.connect(
-      Uri.parse('wss://stream.binance.com:9443/ws'),
-    );
-    _channel!.sink.add(
-      jsonEncode(
-        {
-          "method": "SUBSCRIBE",
-          "params": ["xrpusdt@kline_" + interval],
-          "id": 1
-        },
-      ),
-    );
-  }
+  bool themeIsDark = false;
 
   @override
   void initState() {
-    binanceFetch("1m");
+    fetchCandles().then((value) {
+      setState(() {
+        candles = value;
+      });
+    });
     super.initState();
   }
 
-  @override
-  void dispose() {
-    if (_channel != null) _channel!.sink.close();
-    super.dispose();
-  }
-
-  void updateCandlesFromSnapshot(AsyncSnapshot<Object?> snapshot) {
-    if (snapshot.data != null) {
-      final data = jsonDecode(snapshot.data as String) as Map<String, dynamic>;
-      if (data.containsKey("k") == true &&
-          candles[0].date.millisecondsSinceEpoch == data["k"]["t"]) {
-        candles[0] = Candle(
-            date: candles[0].date,
-            high: double.parse(data["k"]["h"]),
-            low: double.parse(data["k"]["l"]),
-            open: double.parse(data["k"]["o"]),
-            close: double.parse(data["k"]["c"]),
-            volume: double.parse(data["k"]["v"]));
-      } else if (data.containsKey("k") == true &&
-          data["k"]["t"] - candles[0].date.millisecondsSinceEpoch ==
-              candles[0].date.millisecondsSinceEpoch -
-                  candles[1].date.millisecondsSinceEpoch) {
-        candles.insert(
-            0,
-            Candle(
-                date: DateTime.fromMillisecondsSinceEpoch(data["k"]["t"]),
-                high: double.parse(data["k"]["h"]),
-                low: double.parse(data["k"]["l"]),
-                open: double.parse(data["k"]["o"]),
-                close: double.parse(data["k"]["c"]),
-                volume: double.parse(data["k"]["v"])));
-      }
-    }
+  Future<List<Candle>> fetchCandles() async {
+    final uri = Uri.parse(
+        "https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h");
+    final res = await http.get(uri);
+    return (jsonDecode(res.body) as List<dynamic>)
+        .map((e) => Candle.fromJson(e))
+        .toList()
+        .reversed
+        .toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: isDark ? ThemeData.dark() : ThemeData.light(),
+      theme: themeIsDark ? ThemeData.dark() : ThemeData.light(),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: Text("candleSticks"),
+          title: Text("BTCUSDT 1H Chart"),
           actions: [
             IconButton(
               onPressed: () {
                 setState(() {
-                  isDark = !isDark;
+                  themeIsDark = !themeIsDark;
                 });
               },
               icon: Icon(
-                isDark ? Icons.wb_sunny_sharp : Icons.nightlight_round_outlined,
+                themeIsDark
+                    ? Icons.wb_sunny_sharp
+                    : Icons.nightlight_round_outlined,
               ),
             )
           ],
         ),
         body: Center(
-          child: StreamBuilder(
-            stream: _channel == null ? null : _channel!.stream,
-            builder: (context, snapshot) {
-              updateCandlesFromSnapshot(snapshot);
-              return Candlesticks(
-                onIntervalChange: (String value) async {
-                  binanceFetch(value);
-                },
-                candles: candles,
-                interval: interval,
-              );
-            },
+          child: Candlesticks(
+            candles: candles,
           ),
         ),
       ),

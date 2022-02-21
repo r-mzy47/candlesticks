@@ -1,11 +1,18 @@
 # candlesticks
 
-[![pub package](https://img.shields.io/badge/pub-v1.1.1-orange.svg)](https://pub.dev/packages/candlesticks)
+[![pub package](https://img.shields.io/badge/pub-v2.0.0-orange.svg)](https://pub.dev/packages/candlesticks)
 
-A flutter candlesticks chart for android, ios and the web; It contains optimized animations, indicators (soon) and socket connection ability.
+A high-performance full featured candlesticks chart for all platforms!</br>
+web demo:</br>
+[Binance Candles](https://rmzy.dev/candlesticks/)</br>
+[Binance Candles Github Repository](https://github.com/r-mzy47/binance_candles)
 
-![Gif](https://github.com/r-mzy47/candlesticks/blob/master/example.gif "Bitcoin chart")
+## Preview
 
+<p float="center">
+  <img src="https://github.com/r-mzy47/candlesticks/blob/develop/example_ios.gif" height="400">
+<img src="https://github.com/r-mzy47/candlesticks/blob/develop/example_macOS.gif" height="400">
+</p>
 
 ## Installation
 
@@ -13,7 +20,7 @@ A flutter candlesticks chart for android, ios and the web; It contains optimized
 
 ```yaml
 dependencies:
-  candlesticks: ^1.1.0
+  candlesticks: ^2.0.0
 ```
 
 2. Get the package using your IDE's GUI or via command line with
@@ -31,7 +38,6 @@ import 'package:candlesticks/candlesticks.dart';
 ### Candle
 
 [Candle] class contains six required variables that hold a single candle data: date, high, low, open, close and volume.
-It can be instantiated using its default constructor or fromJson named custructor.
 
 ```dart
 final candle =  Candle(date: DateTime.now(), open: 1780.36, high: 1873.93, low: 1755.34, close: 1848.56, volume: 0);
@@ -39,8 +45,6 @@ final candle =  Candle(date: DateTime.now(), open: 1780.36, high: 1873.93, low: 
 
 ### Candlesticks
 
-[Candlesticks] widget requires a list of candles, current interval as String and onIntervalChange callback. And that's it. It is recommended to wrap [Candlesticks] with the [AspectRatio] widget.
+[Candlesticks] widget requires a list of candles, the arrangement of the `candles` array should be such that the newest item is in position 0, `onLoadMoreCandles` is a nullable callback which calls whenever the last candle gets visible. and in case you whant to add more actions in top toolbar like [Binance Candles](https://rmzy.dev/candlesticks/), you can make your custom [ToolBarAction] and add it to `actions` parameter.
 
-## Note
-
-If you want your chart to updates with every price tick, you can use the Binance socket API as provided in the example.
+🍺 pull requests are welcome!

@@ -9,7 +9,6 @@ import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
-import 'package:candlesticks/src/constant/scales.dart';
 import 'dash_line.dart';
 
 /// This widget manages gestures
@@ -39,6 +38,8 @@ class MobileChart extends StatefulWidget {
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
 
+  final Function() onReachEnd;
+
   MobileChart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -47,6 +48,7 @@ class MobileChart extends StatefulWidget {
     required this.index,
     required this.onPanDown,
     required this.onPanEnd,
+    required this.onReachEnd,
   });
 
   @override
@@ -59,15 +61,16 @@ class _MobileChartState extends State<MobileChart> {
   double additionalVerticalPadding = 0;
 
   double calcutePriceScale(double height, double high, double low) {
-    for (int i = 0; i < scales.length; i++) {
-      double newHigh = (high ~/ scales[i] + 1) * scales[i];
-      double newLow = (low ~/ scales[i]) * scales[i];
-      double range = newHigh - newLow;
-      if (height / (range / scales[i]) > MIN_PRICETILE_HEIGHT) {
-        return scales[i];
-      }
-    }
-    return 0;
+    int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
+    minTiles = max(2, minTiles);
+    double sizeRange = high - low;
+    double minStepSize = sizeRange / minTiles;
+    double base =
+        pow(10, HelperFunctions.log10(minStepSize).floor()).toDouble();
+
+    if (2 * base > minStepSize) return 2 * base;
+    if (5 * base > minStepSize) return 5 * base;
+    return 10 * base;
   }
 
   @override
@@ -84,17 +87,19 @@ class _MobileChartState extends State<MobileChart> {
             maxWidth ~/ widget.candleWidth + widget.index,
             widget.candles.length - 1);
 
-        // visible candles highest and lowest price
-        double candlesHighPrice = 0;
-        double candlesLowPrice = double.infinity;
-        for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
-          candlesLowPrice = min(widget.candles[i].low, candlesLowPrice);
-          candlesHighPrice = max(widget.candles[i].high, candlesHighPrice);
+        if (candlesEndIndex == widget.candles.length - 1) {
+          Future(() {
+            widget.onReachEnd();
+          });
         }
 
-        additionalVerticalPadding =
-            min(maxHeight / 4, additionalVerticalPadding);
-        additionalVerticalPadding = max(0, additionalVerticalPadding);
+        List<Candle> inRangeCandles = widget.candles
+            .getRange(candlesStartIndex, candlesEndIndex + 1)
+            .toList();
+
+        // visible candles highest and lowest price
+        double candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
+        double candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
 
         // calcute priceScale
         double chartHeight = maxHeight * 0.75 -
@@ -120,12 +125,12 @@ class _MobileChartState extends State<MobileChart> {
         }
 
         return TweenAnimationBuilder(
-          tween: Tween(begin: candlesLowPrice, end: candlesHighPrice),
-          duration: Duration(milliseconds: 200),
+          tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
+          duration: Duration(milliseconds: 300),
           builder: (context, double high, _) {
             return TweenAnimationBuilder(
-              tween: Tween(begin: candlesHighPrice, end: candlesLowPrice),
-              duration: Duration(milliseconds: 200),
+              tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
+              duration: Duration(milliseconds: 300),
               builder: (context, double low, _) {
                 final currentCandle = longPressX == null
                     ? null
@@ -163,6 +168,11 @@ class _MobileChartState extends State<MobileChart> {
                                   onScale: (delta) {
                                     setState(() {
                                       additionalVerticalPadding += delta;
+                                      additionalVerticalPadding = min(
+                                          maxHeight / 4,
+                                          additionalVerticalPadding);
+                                      additionalVerticalPadding =
+                                          max(0, additionalVerticalPadding);
                                     });
                                   },
                                   additionalVerticalPadding:
@@ -182,7 +192,7 @@ class _MobileChartState extends State<MobileChart> {
                                           ),
                                         ),
                                         child: AnimatedPadding(
-                                          duration: Duration(milliseconds: 200),
+                                          duration: Duration(milliseconds: 300),
                                           padding: EdgeInsets.symmetric(
                                               vertical:
                                                   MAIN_CHART_VERTICAL_PADDING +
@@ -265,7 +275,7 @@ class _MobileChartState extends State<MobileChart> {
                                       ),
                                     ],
                                   ),
-                                  width: 50,
+                                  width: PRICE_BAR_WIDTH,
                                 ),
                               ],
                             ),
@@ -315,7 +325,7 @@ class _MobileChartState extends State<MobileChart> {
                                         ),
                                       ),
                                     ),
-                                    width: 50,
+                                    width: PRICE_BAR_WIDTH,
                                     height: 20,
                                   ),
                                 ],
@@ -345,18 +355,24 @@ class _MobileChartState extends State<MobileChart> {
                       Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
                         child: GestureDetector(
-                          onPanUpdate: (update) {
-                            widget.onHorizontalDragUpdate(
-                                update.localPosition.dx);
-                          },
-                          onPanEnd: (update) {
-                            widget.onPanEnd();
-                          },
                           onLongPressEnd: (_) {
                             setState(() {
                               longPressX = null;
                               longPressY = null;
                             });
+                          },
+                          onScaleEnd: (_) {
+                            widget.onPanEnd();
+                          },
+                          onScaleUpdate: (details) {
+                            if (details.scale == 1) {
+                              widget.onHorizontalDragUpdate(
+                                  details.focalPoint.dx);
+                            }
+                            widget.onScaleUpdate(details.scale);
+                          },
+                          onScaleStart: (details) {
+                            widget.onPanDown(details.localFocalPoint.dx);
                           },
                           onLongPressStart: (LongPressStartDetails details) {
                             setState(() {
@@ -371,9 +387,6 @@ class _MobileChartState extends State<MobileChart> {
                               longPressX = details.localPosition.dx;
                               longPressY = details.localPosition.dy;
                             });
-                          },
-                          onPanDown: (update) {
-                            widget.onPanDown(update.localPosition.dx);
                           },
                         ),
                       )

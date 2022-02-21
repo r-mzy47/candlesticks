@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class DarkColorPalette {
   static const grayColor = Color(0xFF848E9C);
   static const background = Color(0xFF191B20);
-  static const primaryGreen = Color(0xFF02C077);
+  static const primaryGreen = Color(0xFF26A69A);
   static const secondaryGreen = Color(0xFF005940);
-  static const primaryRed = Color(0xFFCF304A);
+  static const primaryRed = Color(0xFFEF5350);
   static const secondaryRed = Color(0xFF82122B);
   static const hoverIndicatorBackgroundColor = Color(0xFF4C525E);
   static const digalogColor = Color(0xFF23282D);
