@@ -118,11 +118,24 @@ class CandleStickRenderObject extends RenderBox {
       paint,
     );
 
-    context.canvas.drawLine(
-      Offset(x, offset.dy + (_high - candle.open) / range),
-      Offset(x, offset.dy + (_high - candle.close) / range),
-      paint..strokeWidth = _candleWidth - 1,
-    );
+    final double openCandleY = offset.dy + (_high - candle.open) / range;
+    final double closeCandleY = offset.dy + (_high - candle.close) / range;
+
+    if ((openCandleY - closeCandleY).abs() > 1) {
+      context.canvas.drawLine(
+        Offset(x, openCandleY),
+        Offset(x, closeCandleY),
+        paint..strokeWidth = _candleWidth - 1,
+      );
+    } else {
+      // if the candle body is too small
+      final double mid = (closeCandleY + openCandleY) / 2;
+      context.canvas.drawLine(
+        Offset(x, mid - 0.5),
+        Offset(x, mid + 0.5),
+        paint..strokeWidth = _candleWidth - 1,
+      );
+    }
   }
 
   @override
