@@ -38,7 +38,6 @@ import 'package:candlesticks/candlesticks.dart';
 ### Candle
 
 [Candle] class contains six required variables that hold a single candle data: date, high, low, open, close and volume.
-It can be instantiated using its default constructor or fromJson named custructor.
 
 ```dart
 final candle =  Candle(date: DateTime.now(), open: 1780.36, high: 1873.93, low: 1755.34, close: 1848.56, volume: 0);
