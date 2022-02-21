@@ -16,8 +16,6 @@ dependencies:
     path:
       "../"
   http: ^0.13.3
-  web_socket_channel: ^2.1.0
-
 
   cupertino_icons: ^1.0.2
 
