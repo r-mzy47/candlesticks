@@ -2,17 +2,18 @@
 
 [![pub package](https://img.shields.io/badge/pub-v2.0.0-orange.svg)](https://pub.dev/packages/candlesticks)
 
-A high-performance full featured candlesticks chart for all platforms!</br>
-web demo:</br>
-[Binance Candles](https://rmzy.dev/candlesticks/)</br>
+A high-performance full featured candlesticks chart for all platforms!
+
+web demo:
+
+[Binance Candles](https://rmzy.dev/candlesticks/)
+
 [Binance Candles Github Repository](https://github.com/r-mzy47/binance_candles)
 
 ## Preview
-
-<p float="center">
-  <img src="https://github.com/r-mzy47/candlesticks/blob/develop/example_ios.gif" height="400">
-<img src="https://github.com/r-mzy47/candlesticks/blob/develop/example_macOS.gif" height="400">
-</p>
+|IOS	|macOS		|
+|:------------:|:------------:|
+|	[![](https://github.com/r-mzy47/candlesticks/blob/develop/example_ios.gif)](https://github.com/imaNNeoFighT/fl_chart/blob/master/repo_files/documentations/line_chart.md#sample-1-source-code)   |	[![](https://github.com/r-mzy47/candlesticks/blob/develop/example_macOS.gif)](https://github.com/imaNNeoFighT/fl_chart/blob/master/repo_files/documentations/line_chart.md#sample-2-source-code) | 
 
 ## Installation
 
