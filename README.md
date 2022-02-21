@@ -5,7 +5,7 @@
 A high-performance full featured candlesticks chart for all platforms!</br>
 web demo:</br>
 [Binance Candles](https://rmzy.dev/candlesticks/)</br>
-[Binance Candles Github Repository](https://rmzy.dev/candlesticks/)
+[Binance Candles Github Repository](https://github.com/r-mzy47/binance_candles)
 
 ## Preview
 
