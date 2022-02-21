@@ -13,9 +13,8 @@ import 'dart:io' show Platform;
 /// StatefulWidget that holds Chart's State (index of
 /// current position and candles width).
 class Candlesticks extends StatefulWidget {
- 
   /// The arrangement of the array should be such that
-  ///  the newest item is in position 0 
+  ///  the newest item is in position 0
   final List<Candle> candles;
 
   /// this callback calls when the last candle gets visible
