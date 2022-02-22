@@ -1,4 +1,4 @@
-## [2.0.1] - Feb 21, 2022
+## [2.1.0] - Feb 22, 2022
 
 - document correction
 

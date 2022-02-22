@@ -19,7 +19,7 @@ web demo:</br>
 
 ```yaml
 dependencies:
-  candlesticks: ^2.0.1
+  candlesticks: ^2.1.0
 ```
 
 2. Get the package using your IDE's GUI or via command line with
