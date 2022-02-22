@@ -4,16 +4,14 @@
 
 A high-performance full featured candlesticks chart for all platforms!
 
-web demo:
-
-[Binance Candles](https://rmzy.dev/candlesticks/)
-
+web demo:</br>
+[Binance Candles](https://rmzy.dev/candlesticks/)</br>
 [Binance Candles Github Repository](https://github.com/r-mzy47/binance_candles)
 
 ## Preview
 |IOS	|macOS		|
 |:------------:|:------------:|
-|	[![](https://github.com/r-mzy47/candlesticks/blob/develop/example_ios.gif)](https://github.com/imaNNeoFighT/fl_chart/blob/master/repo_files/documentations/line_chart.md#sample-1-source-code)   |	[![](https://github.com/r-mzy47/candlesticks/blob/develop/example_macOS.gif)](https://github.com/imaNNeoFighT/fl_chart/blob/master/repo_files/documentations/line_chart.md#sample-2-source-code) | 
+|	[![](https://github.com/r-mzy47/candlesticks/blob/develop/example_ios.gif)](https://github.com/r-mzy47/candlesticks/blob/master/example/lib/main.dart)   |	[![](https://github.com/r-mzy47/candlesticks/blob/develop/example_macOS.gif)](https://github.com/r-mzy47/candlesticks/blob/master/example/lib/main.dart) | 
 
 ## Installation
 
