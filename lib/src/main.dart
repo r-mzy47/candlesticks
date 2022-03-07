@@ -1,13 +1,11 @@
 import 'dart:math';
-import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/theme_data.dart';
-import 'package:candlesticks/src/widgets/toolbar_action.dart';
+import 'package:candlesticks/candlesticks.dart';
+import 'package:candlesticks/src/models/main_window_indicator.dart';
 import 'package:candlesticks/src/widgets/mobile_chart.dart';
 import 'package:candlesticks/src/widgets/desktop_chart.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'models/candle.dart';
 import 'dart:io' show Platform;
 
 /// StatefulWidget that holds Chart's State (index of
@@ -23,11 +21,14 @@ class Candlesticks extends StatefulWidget {
   /// list of buttons you what to add on top tool bar
   final List<ToolBarAction> actions;
 
+  final List<Indicator>? indicators;
+
   Candlesticks({
     Key? key,
     required this.candles,
     this.onLoadMoreCandles,
     this.actions = const [],
+    this.indicators,
   }) : super(key: key);
 
   @override
@@ -48,6 +49,19 @@ class _CandlesticksState extends State<Candlesticks> {
   /// true when widget.onLoadMoreCandles is fetching new candles.
   bool isCallingLoadMore = false;
 
+  late MainWidnowDataContainer? mainWidnowDataContainer;
+
+  @override
+  void didUpdateWidget(covariant Candlesticks oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.candles.length != 0) {
+      mainWidnowDataContainer =
+          MainWidnowDataContainer(widget.indicators ?? [], widget.candles);
+    } else {
+      mainWidnowDataContainer!.tickUpdate(widget.candles);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -67,7 +81,7 @@ class _CandlesticksState extends State<Candlesticks> {
           },
           children: widget.actions,
         ),
-        if (widget.candles.length == 0)
+        if (widget.candles.length == 0 || mainWidnowDataContainer == null)
           Expanded(
             child: Center(
               child: CircularProgressIndicator(
@@ -125,6 +139,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   );
                 } else {
                   return MobileChart(
+                    mainWidnowDataContainer: mainWidnowDataContainer!,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);
                       scale = min(1.1, scale);

@@ -1,11 +1,15 @@
 import 'dart:math';
+import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
+import 'package:candlesticks/src/models/main_window_indicator.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_info_text.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
+import 'package:candlesticks/src/widgets/mainwindow_indicator_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
+import 'package:candlesticks/src/widgets/top_panel.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
@@ -35,6 +39,8 @@ class MobileChart extends StatefulWidget {
   /// changes when user scrolls along the chart
   final int index;
 
+  final MainWidnowDataContainer mainWidnowDataContainer;
+
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
 
@@ -49,6 +55,7 @@ class MobileChart extends StatefulWidget {
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
+    required this.mainWidnowDataContainer,
   });
 
   @override
@@ -59,6 +66,7 @@ class _MobileChartState extends State<MobileChart> {
   double? longPressX;
   double? longPressY;
   double additionalVerticalPadding = 0;
+  bool showIndicatorNames = false;
 
   double calcutePriceScale(double height, double high, double low) {
     int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
@@ -98,8 +106,12 @@ class _MobileChartState extends State<MobileChart> {
             .toList();
 
         // visible candles highest and lowest price
-        double candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
-        double candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
+        double candlesHighPrice = widget.mainWidnowDataContainer.highs
+            .getRange(candlesStartIndex, candlesEndIndex + 1)
+            .reduce(max);
+        double candlesLowPrice = widget.mainWidnowDataContainer.lows
+            .getRange(candlesStartIndex, candlesEndIndex + 1)
+            .reduce(min);
 
         // calcute priceScale
         double chartHeight = maxHeight * 0.75 -
@@ -112,10 +124,7 @@ class _MobileChartState extends State<MobileChart> {
         candlesLowPrice = (candlesLowPrice ~/ priceScale) * priceScale;
 
         // calcute highest volume
-        double volumeHigh = 0;
-        for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
-          volumeHigh = max(widget.candles[i].volume, volumeHigh);
-        }
+        double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
 
         if (longPressX != null && longPressY != null) {
           longPressX = max(longPressX!, 0);
@@ -198,16 +207,31 @@ class _MobileChartState extends State<MobileChart> {
                                                   MAIN_CHART_VERTICAL_PADDING +
                                                       additionalVerticalPadding),
                                           child: RepaintBoundary(
-                                            child: CandleStickWidget(
-                                              candles: widget.candles,
-                                              candleWidth: widget.candleWidth,
-                                              index: widget.index,
-                                              high: high,
-                                              low: low,
-                                              bearColor:
-                                                  Theme.of(context).primaryRed,
-                                              bullColor: Theme.of(context)
-                                                  .primaryGreen,
+                                            child: Stack(
+                                              children: [
+                                                MainWindowIndicatorWidget(
+                                                  indicatorDatas: widget
+                                                      .mainWidnowDataContainer
+                                                      .indicatorComponentData,
+                                                  index: widget.index,
+                                                  candleWidth:
+                                                      widget.candleWidth,
+                                                  low: low,
+                                                  high: high,
+                                                ),
+                                                CandleStickWidget(
+                                                  candles: widget.candles,
+                                                  candleWidth:
+                                                      widget.candleWidth,
+                                                  index: widget.index,
+                                                  high: high,
+                                                  low: low,
+                                                  bearColor: Theme.of(context)
+                                                      .primaryRed,
+                                                  bullColor: Theme.of(context)
+                                                      .primaryGreen,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ),
@@ -348,9 +372,18 @@ class _MobileChartState extends State<MobileChart> {
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
-                        child: currentCandle != null
-                            ? CandleInfoText(candle: currentCandle)
-                            : null,
+                        child: TopPanel(
+                          currentCandle: currentCandle,
+                          indicators: widget.mainWidnowDataContainer.indicators,
+                          toggleIndicatorVisibility: (indicatorName) {
+                            setState(() {
+                              widget.mainWidnowDataContainer
+                                  .toggleIndicatorVisibility(indicatorName);
+                            });
+                          },
+                          unvisibleIndicators: widget
+                              .mainWidnowDataContainer.unvisibleIndicators,
+                        ),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
