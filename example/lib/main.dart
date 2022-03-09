@@ -15,6 +15,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   List<Candle> candles = [];
+  List<Indicator> indicators = [];
   bool themeIsDark = false;
 
   @override
@@ -24,6 +25,64 @@ class _MyAppState extends State<MyApp> {
         candles = value;
       });
     });
+    indicators = [
+      Indicator(
+          name: "BB 20",
+          dependsOnNPrevCandles: 20,
+          calculator: (index, candles) {
+            double sum = 0;
+            for (int i = index; i < index + 20; i++) {
+              sum += candles[i].close;
+            }
+            final average = sum / 20;
+
+            num sumOfSquaredDiffFromMean = 0;
+            for (int i = 0; i < 20; i++) {
+              final squareDiffFromMean =
+                  math.pow(candles[i].close - average, 2);
+              sumOfSquaredDiffFromMean += squareDiffFromMean;
+            }
+
+            final variance = sumOfSquaredDiffFromMean / 20;
+
+            final standardDeviation = math.sqrt(variance);
+
+            return [
+              average + standardDeviation * 2,
+              average,
+              average - standardDeviation * 2
+            ];
+          },
+          indicatorComponentsStyle: [
+            IndicatorStyle(name: "high", color: Colors.blue.shade900),
+            IndicatorStyle(name: "mid", color: Colors.yellow.shade800),
+            IndicatorStyle(name: "low", color: Colors.pink.shade800)
+          ],
+          onRemove: () {
+            setState(() {
+              indicators.removeWhere((element) => element.name == "BB 20");
+            });
+          }),
+      Indicator(
+        name: "MA 100",
+        dependsOnNPrevCandles: 100,
+        calculator: (index, candles) {
+          double sum = 0;
+          for (int i = index; i < index + 100; i++) {
+            sum += candles[i].close;
+          }
+          return [sum / 100];
+        },
+        indicatorComponentsStyle: [
+          IndicatorStyle(name: "mv", color: Colors.green.shade600),
+        ],
+        onRemove: () {
+          setState(() {
+            indicators.removeWhere((element) => element.name == "MA 100");
+          });
+        },
+      ),
+    ];
     super.initState();
   }
 
@@ -64,55 +123,7 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: Candlesticks(
             candles: candles,
-            indicators: [
-              Indicator(
-                name: "BB 20",
-                dependsOnNPrevCandles: 20,
-                calculator: (index, candles) {
-                  double sum = 0;
-                  for (int i = index; i < index + 20; i++) {
-                    sum += candles[i].close;
-                  }
-                  final average = sum / 20;
-
-                  num sumOfSquaredDiffFromMean = 0;
-                  for (int i = 0; i < 20; i++) {
-                    final squareDiffFromMean =
-                        math.pow(candles[i].close - average, 2);
-                    sumOfSquaredDiffFromMean += squareDiffFromMean;
-                  }
-
-                  final variance = sumOfSquaredDiffFromMean / 20;
-
-                  final standardDeviation = math.sqrt(variance);
-
-                  return [
-                    average + standardDeviation * 2,
-                    average,
-                    average - standardDeviation * 2
-                  ];
-                },
-                indicatorComponentsStyle: [
-                  IndicatorStyle(name: "high", color: Colors.blue.shade900),
-                  IndicatorStyle(name: "mid", color: Colors.yellow.shade800),
-                  IndicatorStyle(name: "low", color: Colors.pink.shade800)
-                ],
-              ),
-              Indicator(
-                name: "MA 100",
-                dependsOnNPrevCandles: 100,
-                calculator: (index, candles) {
-                  double sum = 0;
-                  for (int i = index; i < index + 100; i++) {
-                    sum += candles[i].close;
-                  }
-                  return [sum / 100];
-                },
-                indicatorComponentsStyle: [
-                  IndicatorStyle(name: "mv", color: Colors.green.shade600),
-                ],
-              )
-            ],
+            indicators: indicators,
           ),
         ),
       ),

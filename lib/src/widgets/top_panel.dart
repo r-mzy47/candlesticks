@@ -28,10 +28,13 @@ class _TopPanelState extends State<TopPanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        widget.currentCandle != null
-            ? CandleInfoText(candle: widget.currentCandle!)
-            : Container(),
-        showIndicatorNames
+        SizedBox(
+          height: 20,
+          child: widget.currentCandle != null
+              ? CandleInfoText(candle: widget.currentCandle!)
+              : Container(),
+        ),
+        showIndicatorNames || widget.indicators.length == 1
             ? Column(
                 children: widget.indicators
                     .map(
@@ -40,7 +43,7 @@ class _TopPanelState extends State<TopPanel> {
                           children: [
                             Text(e.name),
                             SizedBox(
-                              width: 5,
+                              width: 10,
                             ),
                             GestureDetector(
                               onTap: () {
@@ -50,6 +53,13 @@ class _TopPanelState extends State<TopPanel> {
                                   ? Icon(Icons.visibility_outlined)
                                   : Icon(Icons.visibility_off_outlined),
                             ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            GestureDetector(
+                              onTap: e.onRemove,
+                              child: Icon(Icons.close),
+                            ),
                           ],
                         ),
                       ),
@@ -57,23 +67,25 @@ class _TopPanelState extends State<TopPanel> {
                     .toList(),
               )
             : Container(),
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              showIndicatorNames = !showIndicatorNames;
-            });
-          },
-          child: _PanelButton(
-            child: Row(
-              children: [
-                Icon(showIndicatorNames
-                    ? Icons.keyboard_arrow_up_rounded
-                    : Icons.keyboard_arrow_down_rounded),
-                Text(widget.indicators.length.toString()),
-              ],
-            ),
-          ),
-        ),
+        widget.indicators.length > 1
+            ? GestureDetector(
+                onTap: () {
+                  setState(() {
+                    showIndicatorNames = !showIndicatorNames;
+                  });
+                },
+                child: _PanelButton(
+                  child: Row(
+                    children: [
+                      Icon(showIndicatorNames
+                          ? Icons.keyboard_arrow_up_rounded
+                          : Icons.keyboard_arrow_down_rounded),
+                      Text(widget.indicators.length.toString()),
+                    ],
+                  ),
+                ),
+              )
+            : Container(),
       ],
     );
   }

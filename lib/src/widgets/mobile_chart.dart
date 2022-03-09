@@ -39,6 +39,7 @@ class MobileChart extends StatefulWidget {
   /// changes when user scrolls along the chart
   final int index;
 
+  /// holds main window indicators data and high and low prices.
   final MainWidnowDataContainer mainWidnowDataContainer;
 
   final void Function(double) onPanDown;
@@ -370,22 +371,6 @@ class _MobileChartState extends State<MobileChart> {
                             )
                           : Container(),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 12),
-                        child: TopPanel(
-                          currentCandle: currentCandle,
-                          indicators: widget.mainWidnowDataContainer.indicators,
-                          toggleIndicatorVisibility: (indicatorName) {
-                            setState(() {
-                              widget.mainWidnowDataContainer
-                                  .toggleIndicatorVisibility(indicatorName);
-                            });
-                          },
-                          unvisibleIndicators: widget
-                              .mainWidnowDataContainer.unvisibleIndicators,
-                        ),
-                      ),
-                      Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
                         child: GestureDetector(
                           onLongPressEnd: (_) {
@@ -422,7 +407,23 @@ class _MobileChartState extends State<MobileChart> {
                             });
                           },
                         ),
-                      )
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 12),
+                        child: TopPanel(
+                          currentCandle: currentCandle,
+                          indicators: widget.mainWidnowDataContainer.indicators,
+                          toggleIndicatorVisibility: (indicatorName) {
+                            setState(() {
+                              widget.mainWidnowDataContainer
+                                  .toggleIndicatorVisibility(indicatorName);
+                            });
+                          },
+                          unvisibleIndicators: widget
+                              .mainWidnowDataContainer.unvisibleIndicators,
+                        ),
+                      ),
                     ],
                   ),
                 );
