@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:candlesticks/src/constant/view_constants.dart';
+import 'package:candlesticks/src/models/candle_style.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_info_text.dart';
@@ -40,6 +41,10 @@ class MobileChart extends StatefulWidget {
 
   final Function() onReachEnd;
 
+  final CandleStyle? candleStyle;
+
+  final bool ma7, ma25, ma99;
+
   MobileChart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -49,6 +54,10 @@ class MobileChart extends StatefulWidget {
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
+    this.candleStyle,
+    this.ma7 = true,
+    this.ma25 = true,
+    this.ma99 = true,
   });
 
   @override
@@ -60,7 +69,7 @@ class _MobileChartState extends State<MobileChart> {
   double? longPressY;
   double additionalVerticalPadding = 0;
 
-  double calcutePriceScale(double height, double high, double low) {
+  double calculatePriceScale(double height, double high, double low) {
     int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
     minTiles = max(2, minTiles);
     double sizeRange = high - low;
@@ -105,7 +114,7 @@ class _MobileChartState extends State<MobileChart> {
         double chartHeight = maxHeight * 0.75 -
             2 * (MAIN_CHART_VERTICAL_PADDING + additionalVerticalPadding);
         double priceScale =
-            calcutePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
+            calculatePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
 
         // high and low calibrations revision
         candlesHighPrice = (candlesHighPrice ~/ priceScale + 1) * priceScale;
@@ -204,10 +213,14 @@ class _MobileChartState extends State<MobileChart> {
                                               index: widget.index,
                                               high: high,
                                               low: low,
-                                              bearColor:
-                                                  Theme.of(context).primaryRed,
-                                              bullColor: Theme.of(context)
-                                                  .primaryGreen,
+                                              candleStyle: widget.candleStyle,
+                                              ma7: widget.ma7,
+                                              ma25: widget.ma25,
+                                              ma99: widget.ma99,
+                                              // bearColor:
+                                              //     Theme.of(context).primaryRed,
+                                              // bullColor: Theme.of(context)
+                                              //     .primaryGreen,
                                             ),
                                           ),
                                         ),

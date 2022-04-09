@@ -1,11 +1,11 @@
-/// Candle model wich holds a single candle data.
+/// Candle model which holds a single candle data.
 /// It contains five required double variables that hold a single candle data: high, low, open, close and volume.
-/// It can be instantiated using its default constructor or fromJson named custructor.
+/// It can be instantiated using its default constructor or fromJson named constructor.
 class Candle {
   /// DateTime for the candle
   final DateTime date;
 
-  /// The highet price during this candle lifetime
+  /// The height price during this candle lifetime
   /// It if always more than low, open and close
   final double high;
 
@@ -13,7 +13,7 @@ class Candle {
   /// It if always less than high, open and close
   final double low;
 
-  /// Price at the beginnig of the period
+  /// Price at the beginning of the period
   final double open;
 
   /// Price at the end of the period
