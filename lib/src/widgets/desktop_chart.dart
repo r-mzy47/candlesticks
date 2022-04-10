@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
@@ -36,6 +37,10 @@ class DesktopChart extends StatefulWidget {
   /// changes when user scrolls along the chart
   final int index;
 
+  /// will chart resize vertically by visible range
+  /// or by the whole dataset
+  final ChartAdjust chartAdjust;
+
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
 
@@ -47,6 +52,7 @@ class DesktopChart extends StatefulWidget {
     required this.candleWidth,
     required this.candles,
     required this.index,
+    required this.chartAdjust,
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
@@ -109,13 +115,19 @@ class _DesktopChartState extends State<DesktopChart> {
           });
         }
 
-        List<Candle> inRangeCandles = widget.candles
-            .getRange(candlesStartIndex, candlesEndIndex + 1)
-            .toList();
-
         // visible candles highest and lowest price
-        double candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
-        double candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
+        double candlesHighPrice = 0;
+        double candlesLowPrice = 0;
+        if (widget.chartAdjust == ChartAdjust.visibleRange) {
+          List<Candle> inRangeCandles = widget.candles
+              .getRange(candlesStartIndex, candlesEndIndex + 1)
+              .toList();
+          candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
+          candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
+        } else if (widget.chartAdjust == ChartAdjust.fullRange) {
+          candlesHighPrice = widget.candles.map((e) => e.high).reduce(max);
+          candlesLowPrice = widget.candles.map((e) => e.low).reduce(min);
+        }
 
         // calcute priceScale
         double chartHeight = maxHeight * 0.75 -

@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'models/candle.dart';
 import 'dart:io' show Platform;
 
+enum ChartAdjust { visibleRange, fullRange }
+
 /// StatefulWidget that holds Chart's State (index of
 /// current position and candles width).
 class Candlesticks extends StatefulWidget {
@@ -23,12 +25,18 @@ class Candlesticks extends StatefulWidget {
   /// list of buttons you what to add on top tool bar
   final List<ToolBarAction> actions;
 
-  Candlesticks({
-    Key? key,
-    required this.candles,
-    this.onLoadMoreCandles,
-    this.actions = const [],
-  }) : super(key: key);
+  final ChartAdjust chartAdjust;
+
+  final bool displayZoomActions;
+
+  Candlesticks(
+      {Key? key,
+      required this.candles,
+      this.onLoadMoreCandles,
+      this.actions = const [],
+      this.chartAdjust = ChartAdjust.visibleRange,
+      this.displayZoomActions = true})
+      : super(key: key);
 
   @override
   _CandlesticksState createState() => _CandlesticksState();
@@ -53,6 +61,7 @@ class _CandlesticksState extends State<Candlesticks> {
     return Column(
       children: [
         ToolBar(
+          displayZoomActions: widget.displayZoomActions,
           onZoomInPressed: () {
             setState(() {
               candleWidth += 2;
@@ -86,6 +95,7 @@ class _CandlesticksState extends State<Candlesticks> {
                     Platform.isWindows ||
                     Platform.isLinux) {
                   return DesktopChart(
+                    chartAdjust: widget.chartAdjust,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);
                       scale = min(1.1, scale);
@@ -125,6 +135,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   );
                 } else {
                   return MobileChart(
+                    chartAdjust: widget.chartAdjust,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);
                       scale = min(1.1, scale);

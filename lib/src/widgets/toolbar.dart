@@ -3,15 +3,17 @@ import 'package:candlesticks/src/widgets/toolbar_action.dart';
 import 'package:flutter/material.dart';
 
 class ToolBar extends StatelessWidget {
-  const ToolBar({
-    Key? key,
-    required this.onZoomInPressed,
-    required this.onZoomOutPressed,
-    required this.children,
-  }) : super(key: key);
+  const ToolBar(
+      {Key? key,
+      required this.onZoomInPressed,
+      required this.onZoomOutPressed,
+      required this.children,
+      required this.displayZoomActions})
+      : super(key: key);
 
   final void Function() onZoomInPressed;
   final void Function() onZoomOutPressed;
+  final bool displayZoomActions;
   final List<Widget> children;
 
   @override
@@ -22,20 +24,22 @@ class ToolBar extends StatelessWidget {
         padding: const EdgeInsets.all(2.0),
         child: Row(
           children: [
-            ToolBarAction(
-              onPressed: onZoomOutPressed,
-              child: Icon(
-                Icons.remove,
-                color: Theme.of(context).grayColor,
+            if (displayZoomActions) ...[
+              ToolBarAction(
+                onPressed: onZoomOutPressed,
+                child: Icon(
+                  Icons.remove,
+                  color: Theme.of(context).grayColor,
+                ),
               ),
-            ),
-            ToolBarAction(
-              onPressed: onZoomInPressed,
-              child: Icon(
-                Icons.add,
-                color: Theme.of(context).grayColor,
+              ToolBarAction(
+                onPressed: onZoomInPressed,
+                child: Icon(
+                  Icons.add,
+                  color: Theme.of(context).grayColor,
+                ),
               ),
-            ),
+            ],
             ...children
           ],
         ),
