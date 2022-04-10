@@ -10,7 +10,13 @@ import 'package:flutter/material.dart';
 import 'models/candle.dart';
 import 'dart:io' show Platform;
 
-enum ChartAdjust { visibleRange, fullRange }
+enum ChartAdjust {
+  /// Will adjust chart size by max and min value from visible area
+  visibleRange,
+
+  /// Will adjust chart size by max and min value from the whole data
+  fullRange
+}
 
 /// StatefulWidget that holds Chart's State (index of
 /// current position and candles width).
