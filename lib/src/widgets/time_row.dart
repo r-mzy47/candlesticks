@@ -1,6 +1,6 @@
-import 'package:candlesticks/src/constant/view_constants.dart';
-import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/theme_data.dart';
+import 'package:candlesticks_plus/src/constant/view_constants.dart';
+import 'package:candlesticks_plus/src/models/candle.dart';
+import 'package:candlesticks_plus/src/theme/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 

@@ -1,4 +1,4 @@
-import 'package:candlesticks/src/models/candle.dart';
+import 'package:candlesticks_plus/src/models/candle.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 

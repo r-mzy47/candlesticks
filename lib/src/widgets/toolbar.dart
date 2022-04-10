@@ -1,5 +1,5 @@
-import 'package:candlesticks/src/theme/theme_data.dart';
-import 'package:candlesticks/src/widgets/toolbar_action.dart';
+import 'package:candlesticks_plus/src/theme/theme_data.dart';
+import 'package:candlesticks_plus/src/widgets/toolbar_action.dart';
 import 'package:flutter/material.dart';
 
 class ToolBar extends StatelessWidget {
