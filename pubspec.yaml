@@ -1,6 +1,6 @@
 name: candlesticks_plus
 description: A high-performance full featured candlesticks chart for all platforms.
-version: 1.0.0
+version: 1.0.1
 homepage: https://github.com/mhbdev/candlesticks
 
 environment:

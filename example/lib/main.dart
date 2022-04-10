@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:candlesticks_plus/candlesticks_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:candlesticks/candlesticks.dart';
 import 'package:http/http.dart' as http;
 
 void main() {

@@ -1,4 +1,4 @@
-library candlesticks;
+library candlesticks_plus;
 
 export 'src/main.dart';
 export 'src/models/candle.dart';

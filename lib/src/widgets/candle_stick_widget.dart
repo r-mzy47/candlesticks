@@ -1,5 +1,5 @@
-import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/models/candle_style.dart';
+import 'package:candlesticks_plus/src/models/candle.dart';
+import 'package:candlesticks_plus/src/models/candle_style.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
 
@@ -195,6 +195,7 @@ class CandleStickRenderObject extends RenderBox {
       dy1 = dy2;
       preP = curP;
     }
+
     canvas.drawPath(
         path,
         Paint()
@@ -216,21 +217,23 @@ class CandleStickRenderObject extends RenderBox {
       if (_ma7) {
         final maOffset7 = paintMA7(context, offset, i, candle);
         if (maOffset7 != null) maPoints7.add(maOffset7);
-        paintMA(context.canvas, maPoints7, Colors.orangeAccent);
       }
 
       if (_ma25) {
         final maOffset25 = paintMA25(context, offset, i, candle);
         if (maOffset25 != null) maPoints25.add(maOffset25);
-        paintMA(context.canvas, maPoints25, Colors.purpleAccent);
       }
 
       if (_ma99) {
         final maOffset99 = paintMA99(context, offset, i, candle);
         if (maOffset99 != null) maPoints99.add(maOffset99);
-        paintMA(context.canvas, maPoints99, Colors.blueAccent);
       }
     }
+
+    if (_ma7) paintMA(context.canvas, maPoints7, Colors.orangeAccent);
+    if (_ma25) paintMA(context.canvas, maPoints25, Colors.purpleAccent);
+    if (_ma99) paintMA(context.canvas, maPoints99, Colors.blueAccent);
+
     _close = _candles[0].close;
     context.canvas.save();
     context.canvas.restore();
