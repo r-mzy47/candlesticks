@@ -25,9 +25,14 @@ class Candlesticks extends StatefulWidget {
   /// list of buttons you what to add on top tool bar
   final List<ToolBarAction> actions;
 
+  /// How chart price range will be adjusted when moving chart
   final ChartAdjust chartAdjust;
 
+  /// Will zoom buttons be displayed in toolbar
   final bool displayZoomActions;
+
+  /// Custom loader widget
+  final Widget? loadingWidget;
 
   Candlesticks(
       {Key? key,
@@ -35,7 +40,8 @@ class Candlesticks extends StatefulWidget {
       this.onLoadMoreCandles,
       this.actions = const [],
       this.chartAdjust = ChartAdjust.visibleRange,
-      this.displayZoomActions = true})
+      this.displayZoomActions = true,
+      this.loadingWidget})
       : super(key: key);
 
   @override
@@ -79,9 +85,10 @@ class _CandlesticksState extends State<Candlesticks> {
         if (widget.candles.length == 0)
           Expanded(
             child: Center(
-              child: CircularProgressIndicator(
-                color: Theme.of(context).gold,
-              ),
+              child: widget.loadingWidget ??
+                  CircularProgressIndicator(
+                    color: Theme.of(context).gold,
+                  ),
             ),
           )
         else

@@ -61,11 +61,7 @@ class _MyAppState extends State<MyApp> {
           ],
         ),
         body: Center(
-          child: Candlesticks(
-            candles: candles,
-            chartAdjust: ChartAdjust.fullRange,
-            displayZoomActions: false,
-          ),
+          child: Candlesticks(candles: candles),
         ),
       ),
     );

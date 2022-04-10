@@ -37,7 +37,7 @@ class DesktopChart extends StatefulWidget {
   /// changes when user scrolls along the chart
   final int index;
 
-  /// will chart resize vertically by visible range
+  /// Will chart resize vertically by visible range
   /// or by the whole dataset
   final ChartAdjust chartAdjust;
 

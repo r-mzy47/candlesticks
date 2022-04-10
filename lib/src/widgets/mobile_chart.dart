@@ -36,7 +36,7 @@ class MobileChart extends StatefulWidget {
   /// changes when user scrolls along the chart
   final int index;
 
-  /// how chart price range will be adjusted when moving chart
+  /// How chart price range will be adjusted when moving chart
   final ChartAdjust chartAdjust;
 
   final void Function(double) onPanDown;
