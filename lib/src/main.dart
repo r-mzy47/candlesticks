@@ -31,6 +31,8 @@ class Candlesticks extends StatefulWidget {
 
   final bool ma7, ma25, ma99;
 
+  final String? watermark;
+
   Candlesticks({
     Key? key,
     required this.candles,
@@ -41,6 +43,7 @@ class Candlesticks extends StatefulWidget {
     this.ma7 = true,
     this.ma25 = true,
     this.ma99 = true,
+    this.watermark
   }) : super(key: key);
 
   @override
@@ -97,6 +100,7 @@ class _CandlesticksState extends State<Candlesticks> {
               builder: (_, double width, __) {
                 if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
                   return DesktopChart(
+                    watermark: widget.watermark,
                     ma7: widget.ma7,
                     ma25: widget.ma25,
                     ma99: widget.ma99,

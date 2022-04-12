@@ -29,9 +29,9 @@ extension MultiThemeColorExtension on ThemeData {
       ? LightColorPalette.secondaryRed
       : DarkColorPalette.secondaryRed;
 
-  Color get digalogColor => brightness == Brightness.light
-      ? LightColorPalette.digalogColor
-      : DarkColorPalette.digalogColor;
+  Color get dialogColor => brightness == Brightness.light
+      ? LightColorPalette.dialogColor
+      : DarkColorPalette.dialogColor;
 
   Color get lightGold => brightness == Brightness.light
       ? LightColorPalette.lightGold

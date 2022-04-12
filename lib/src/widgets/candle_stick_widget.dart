@@ -1,7 +1,9 @@
 import 'package:candlesticks_plus/src/models/candle.dart';
 import 'package:candlesticks_plus/src/models/candle_style.dart';
+import 'package:candlesticks_plus/src/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
+import 'dart:math';
 
 class CandleStickWidget extends LeafRenderObjectWidget {
   final List<Candle> candles;
@@ -126,43 +128,45 @@ class CandleStickRenderObject extends RenderBox {
   }
 
   /// draw MA7
-  Offset? paintMA7(PaintingContext context, Offset offset, int index, Candle candle) {
-    if (_candles.length - 7 <= _index + index) return null;
-    double range = (_high - _low) / size.height;
-    double x = size.width + offset.dx - (index + 0.5) * _candleWidth;
-    final currentIndex = _index + index;
-    final list = _candles.sublist(currentIndex, currentIndex + 6).map((e) => e.close);
-    double y = (list.fold<double>(0, (double p, double c) => p + c)) / list.length;
-    return Offset(x, offset.dy + (_high - y) / range);
-  }
+  // Offset? paintMA7(Offset offset, int index, Candle candle) {
+  //   if (_candles.length - 7 <= _index + index) return null;
+  //   double range = (_high - _low) / size.height;
+  //   double x = size.width + offset.dx - (index + 0.5) * _candleWidth;
+  //   final currentIndex = _index + index;
+  //   final list = _candles.sublist(currentIndex, currentIndex + 6).map((e) => e.close);
+  //   double y = (list.fold<double>(0, (double p, double c) => p + c)) / list.length;
+  //   return Offset(x, offset.dy + (_high - y) / range);
+  // }
 
   /// draw MA25
-  Offset? paintMA25(PaintingContext context, Offset offset, int index, Candle candle) {
-    if (_candles.length - 25 <= _index + index) return null;
-
-    double range = (_high - _low) / size.height;
-    double x = size.width + offset.dx - (index + 0.5) * _candleWidth;
-    final currentIndex = _index + index;
-    final list = _candles.sublist(currentIndex, currentIndex + 24).map((e) => e.close);
-    double y = (list.fold<double>(0, (double p, double c) => p + c)) / list.length;
-
-    return Offset(x, offset.dy + (_high - y) / range);
-  }
+  // Offset? paintMA25(Offset offset, int index, Candle candle) {
+  //   if (_candles.length - 25 <= _index + index) return null;
+  //
+  //   double range = (_high - _low) / size.height;
+  //   double x = size.width + offset.dx - (index + 0.5) * _candleWidth;
+  //   final currentIndex = _index + index;
+  //   final list = _candles.sublist(currentIndex, currentIndex + 24).map((e) => e.close);
+  //   double y = (list.fold<double>(0, (double p, double c) => p + c)) / list.length;
+  //
+  //   return Offset(x, offset.dy + (_high - y) / range);
+  // }
 
   /// draw MA99
-  Offset? paintMA99(PaintingContext context, Offset offset, int index, Candle candle) {
-    if (_candles.length - 99 <= _index + index) return null;
-
-    double range = (_high - _low) / size.height;
-    double x = size.width + offset.dx - (index + 0.5) * _candleWidth;
-    final currentIndex = _index + index;
-    final list = _candles.sublist(currentIndex, currentIndex + 98).map((e) => e.close);
-    double y = (list.fold<double>(0, (double p, double c) => p + c)) / list.length;
-
-    return Offset(x, offset.dy + (_high - y) / range);
-  }
+  // Offset? paintMA99(Offset offset, int index, Candle candle) {
+  //   if (_candles.length - 99 <= _index + index) return null;
+  //
+  //   double range = (_high - _low) / size.height;
+  //   double x = size.width + offset.dx - (index + 0.5) * _candleWidth;
+  //   final currentIndex = _index + index;
+  //   final list = _candles.sublist(currentIndex, currentIndex + 98).map((e) => e.close);
+  //   double y = (list.fold<double>(0, (double p, double c) => p + c)) / list.length;
+  //
+  //   return Offset(x, offset.dy + (_high - y) / range);
+  // }
 
   void paintMA(Canvas canvas, List<Offset> points, Color color) {
+    if (points.isEmpty) return;
+
     gradient(Offset a, Offset b) {
       return (b.dy - a.dy) / (b.dx - a.dx);
     }
@@ -206,36 +210,126 @@ class CandleStickRenderObject extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     double range = (_high - _low) / size.height;
-    List<Offset> maPoints7 = [];
-    List<Offset> maPoints25 = [];
-    List<Offset> maPoints99 = [];
+    // List<Offset> maPoints7 = [];
+    // List<Offset> maPoints25 = [];
+    // List<Offset> maPoints99 = [];
+
+    List<Map<String, dynamic>> visibleCandles = [];
     for (int i = 0; (i + 1) * _candleWidth < size.width; i++) {
       if (i + _index >= _candles.length || i + _index < 0) continue;
       var candle = _candles[i + _index];
+      visibleCandles.add({'c': candle, 'i': i});
+
       paintCandle(context, offset, i, candle, range);
 
-      if (_ma7) {
-        final maOffset7 = paintMA7(context, offset, i, candle);
-        if (maOffset7 != null) maPoints7.add(maOffset7);
-      }
+      // if (_ma7) {
+      //   final maOffset7 = paintMA7(offset, i, candle);
+      //   if (maOffset7 != null) maPoints7.add(maOffset7);
+      // }
 
-      if (_ma25) {
-        final maOffset25 = paintMA25(context, offset, i, candle);
-        if (maOffset25 != null) maPoints25.add(maOffset25);
-      }
+      // if (_ma25) {
+      //   final maOffset25 = paintMA25(offset, i, candle);
+      //   if (maOffset25 != null) maPoints25.add(maOffset25);
+      // }
 
-      if (_ma99) {
-        final maOffset99 = paintMA99(context, offset, i, candle);
-        if (maOffset99 != null) maPoints99.add(maOffset99);
-      }
+      // if (_ma99) {
+      //   final maOffset99 = paintMA99(offset, i, candle);
+      //   if (maOffset99 != null) maPoints99.add(maOffset99);
+      // }
     }
 
-    if (_ma7) paintMA(context.canvas, maPoints7, Colors.orangeAccent);
-    if (_ma25) paintMA(context.canvas, maPoints25, Colors.purpleAccent);
-    if (_ma99) paintMA(context.canvas, maPoints99, Colors.blueAccent);
+    List<Candle> inArea = visibleCandles.map<Candle>((e) => e['c']).toList();
+
+    paintMinLowMaxHigh(context, inArea, offset, range);
+
+    if (_ma7)
+      paintMA(
+          context.canvas,
+          visibleCandles
+              .where((e) => (e['c'] as Candle).ma7 != null)
+              .map((e) =>
+              Offset(size.width + offset.dx - (e['i'] + 0.5) * _candleWidth, offset.dy + (_high - (e['c'] as Candle).ma7!) / range))
+              .toList(),
+          Colors.orangeAccent);
+
+    if (_ma25)
+      paintMA(
+          context.canvas,
+          visibleCandles
+              .where((e) => (e['c'] as Candle).ma25 != null)
+              .map((e) =>
+              Offset(size.width + offset.dx - (e['i'] + 0.5) * _candleWidth, offset.dy + (_high - (e['c'] as Candle).ma25!) / range))
+              .toList(),
+          Colors.purpleAccent);
+
+    if (_ma99)
+      paintMA(
+          context.canvas,
+          visibleCandles
+          .where((e) => (e['c'] as Candle).ma99 != null)
+              .map((e) =>
+              Offset(size.width + offset.dx - (e['i'] + 0.5) * _candleWidth, offset.dy + (_high - (e['c'] as Candle).ma99!) / range))
+              .toList(),
+          Colors.blueAccent);
+    // if (_ma25) paintMA(context.canvas, maPoints7, Colors.orangeAccent);
+    // if (_ma25) paintMA(context.canvas, maPoints25, Colors.purpleAccent);
+    // if (_ma99) paintMA(context.canvas, maPoints99, Colors.blueAccent);
 
     _close = _candles[0].close;
     context.canvas.save();
     context.canvas.restore();
+  }
+
+  void paintMinLowMaxHigh(PaintingContext context, List<Candle> inArea, Offset offset, double range) {
+    final minLow = inArea.map((e) => e.low).reduce(min);
+    final maxHigh = inArea.map((e) => e.high).reduce(max);
+
+    final minLowX =
+        size.width + offset.dx - (_candles.indexWhere((e) => e.low == minLow) - _index + 0.5) * _candleWidth;
+    final minLowY = offset.dy + (_high - minLow) / range;
+    context.canvas.drawLine(
+        Offset(
+          minLowX <= size.width / 2 ? minLowX + (20) : minLowX - (20),
+          minLowY,
+        ),
+        Offset(minLowX, minLowY),
+        Paint()
+          ..color = Colors.black
+          ..style = PaintingStyle.fill);
+
+    final maxHighX =
+        size.width + offset.dx - (_candles.indexWhere((e) => e.high == maxHigh) - _index + 0.5) * _candleWidth;
+    final maxHighY = offset.dy + ((_high - maxHigh) / range);
+    context.canvas.drawLine(
+        Offset(
+          maxHighX <= size.width / 2 ? maxHighX + (20) : maxHighX - (20),
+          maxHighY,
+        ),
+        Offset(maxHighX, maxHighY),
+        Paint()
+          ..color = Colors.black
+          ..style = PaintingStyle.fill);
+
+    TextPainter lowTp = TextPainter(
+        text: TextSpan(style: TextStyle(fontSize: 10), text: HelperFunctions.priceToString(minLow)),
+        textDirection: TextDirection.ltr);
+    lowTp.layout();
+    lowTp.paint(
+        context.canvas,
+        Offset(
+            (minLowX <= size.width / 2 ? minLowX + 20 : minLowX - 20) +
+                (minLowX <= size.width / 2 ? 4 : (-lowTp.width - 4)),
+            minLowY - lowTp.height / 2));
+
+    TextPainter highTp = TextPainter(
+        text: TextSpan(style: TextStyle(fontSize: 10), text: HelperFunctions.priceToString(maxHigh)),
+        textDirection: TextDirection.ltr);
+    highTp.layout();
+    highTp.paint(
+        context.canvas,
+        Offset(
+            (maxHighX <= size.width / 2 ? maxHighX + 20 : maxHighX - 20) +
+                (maxHighX <= size.width / 2 ? 4 : (-highTp.width - 4)),
+            maxHighY - highTp.height / 2));
   }
 }

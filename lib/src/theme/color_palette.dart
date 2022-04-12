@@ -8,7 +8,7 @@ class DarkColorPalette {
   static const primaryRed = Color(0xFFEF5350);
   static const secondaryRed = Color(0xFF82122B);
   static const hoverIndicatorBackgroundColor = Color(0xFF4C525E);
-  static const digalogColor = Color(0xFF23282D);
+  static const dialogColor = Color(0xFF23282D);
   static const lightGold = Color(0xFF494537);
   static const gold = Color(0xFFF0B90A);
   static const hoverIndicatorTextColor = Color(0xFFFFFFFF);
@@ -23,11 +23,11 @@ class LightColorPalette {
   static const secondaryGreen = Color(0xFF8CCCC6);
   static const primaryRed = Color(0xFFEF5350);
   static const secondaryRed = Color(0xFFF1A3A1);
-  static const digalogColor = Color(0xFFFFFFFF);
+  static const dialogColor = Color(0xFFFFFFFF);
   static const hoverIndicatorBackgroundColor = Color(0xFF131722);
   static const lightGold = Color(0xFF494537);
   static const gold = Color(0xFFF0B90A);
   static const hoverIndicatorTextColor = Color(0xFFFFFFFF);
-  static const scaleNumbersColor = Color(0XFF000000);
+  static const scaleNumbersColor = Color(0xFF757575);
   static const currentPriceColor = Color(0XFFFFFFFF);
 }

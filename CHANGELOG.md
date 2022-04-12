@@ -55,7 +55,7 @@
 - [Improvement] scaling animation
 - [Feature] add price indicators
 - [BugFix] the newest candles are shown first
-- [Breaking] candles list order is chanded: newest candle (at index 0) -> older candles
+- [Breaking] candles list order is changed: newest candle (at index 0) -> older candles
 
 ## [0.1.1] - Apr 10, 2021
 

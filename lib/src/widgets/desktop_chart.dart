@@ -46,6 +46,8 @@ class DesktopChart extends StatefulWidget {
 
   final bool ma7, ma25, ma99;
 
+  final String? watermark;
+
   DesktopChart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -55,6 +57,7 @@ class DesktopChart extends StatefulWidget {
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
+    this.watermark,
     this.candleStyle,
     this.ma7 = true,
     this.ma25 = true,
@@ -70,6 +73,13 @@ class _DesktopChartState extends State<DesktopChart> {
   double? mouseHoverY;
   bool isDragging = false;
   double additionalVerticalPadding = 0;
+  late List<Candle> candles;
+
+  @override
+  void initState() {
+    candles = widget.candles;
+    super.initState();
+  }
 
   void _onMouseExit(PointerEvent details) {
     setState(() {
@@ -86,7 +96,7 @@ class _DesktopChartState extends State<DesktopChart> {
   }
 
   double calculatePriceScale(double height, double high, double low) {
-    int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
+    int minTiles = (height / MIN_PRICE_TILE_HEIGHT).floor();
     minTiles = max(2, minTiles);
     double sizeRange = high - low;
     double minStepSize = sizeRange / minTiles;
@@ -98,9 +108,19 @@ class _DesktopChartState extends State<DesktopChart> {
   }
 
   @override
+  void didUpdateWidget(covariant DesktopChart oldWidget) {
+    if (oldWidget.candles != widget.candles) {
+      candles = updateCandlesMa(widget.candles);
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        candles = updateCandlesMa(widget.candles);
+
         // determine charts width and height
         final double maxWidth = constraints.maxWidth - PRICE_BAR_WIDTH;
         final double maxHeight = constraints.maxHeight - DATE_BAR_HEIGHT;
@@ -121,7 +141,7 @@ class _DesktopChartState extends State<DesktopChart> {
         double candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
         double candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
 
-        // calcute priceScale
+        // calculate priceScale
         double chartHeight = maxHeight * 0.75 - 2 * (MAIN_CHART_VERTICAL_PADDING + additionalVerticalPadding);
         double priceScale = calculatePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
 
@@ -129,7 +149,7 @@ class _DesktopChartState extends State<DesktopChart> {
         candlesHighPrice = (candlesHighPrice ~/ priceScale + 1) * priceScale;
         candlesLowPrice = (candlesLowPrice ~/ priceScale) * priceScale;
 
-        // calcute highest volume
+        // calculate highest volume
         double volumeHigh = 0;
         for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
           volumeHigh = max(widget.candles[i].volume, volumeHigh);
@@ -139,21 +159,34 @@ class _DesktopChartState extends State<DesktopChart> {
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
           duration: Duration(milliseconds: 300),
           builder: (context, double high, _) {
+            double maxMaHigh = candles.map((e) => e.maxMa ?? high).reduce(max);
+            if (maxMaHigh > high) high = maxMaHigh;
+
             return TweenAnimationBuilder(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
               duration: Duration(milliseconds: 300),
               builder: (context, double low, _) {
+                double minMaHigh = candles.map((e) => e.minMa ?? low).reduce(min);
+                if (minMaHigh < low) low = minMaHigh;
+
                 final currentCandle = mouseHoverX == null
-                    ? null
-                    : widget.candles[min(max((maxWidth - mouseHoverX!) ~/ widget.candleWidth + widget.index, 0),
-                        widget.candles.length - 1)];
+                    ? (candles.isNotEmpty ? candles.first : null)
+                    : candles[min(
+                        max((maxWidth - mouseHoverX!) ~/ widget.candleWidth + widget.index, 0), candles.length - 1)];
                 return Container(
-                  color: Theme.of(context).background,
                   child: Stack(
                     children: [
+                      if (widget.watermark != null)
+                        Center(
+                          child: Text(
+                            widget.watermark ?? '',
+                            style: TextStyle(
+                                color: Colors.grey.withOpacity(0.2), fontWeight: FontWeight.bold, fontSize: 100),
+                          ),
+                        ),
                       TimeRow(
                         indicatorX: mouseHoverX,
-                        candles: widget.candles,
+                        candles: candles,
                         candleWidth: widget.candleWidth,
                         indicatorTime: currentCandle?.date,
                         index: widget.index,
@@ -170,7 +203,7 @@ class _DesktopChartState extends State<DesktopChart> {
                                   priceScale: priceScale,
                                   width: constraints.maxWidth,
                                   chartHeight: chartHeight,
-                                  lastCandle: widget.candles[widget.index < 0 ? 0 : widget.index],
+                                  lastCandle: candles[widget.index < 0 ? 0 : widget.index],
                                   onScale: (delta) {
                                     setState(() {
                                       additionalVerticalPadding += delta;
@@ -198,7 +231,7 @@ class _DesktopChartState extends State<DesktopChart> {
                                               vertical: MAIN_CHART_VERTICAL_PADDING + additionalVerticalPadding),
                                           child: RepaintBoundary(
                                             child: CandleStickWidget(
-                                              candles: widget.candles,
+                                              candles: candles,
                                               candleWidth: widget.candleWidth,
                                               index: widget.index,
                                               high: high,
@@ -241,7 +274,7 @@ class _DesktopChartState extends State<DesktopChart> {
                                     child: Padding(
                                       padding: const EdgeInsets.only(top: 10.0),
                                       child: VolumeWidget(
-                                        candles: widget.candles,
+                                        candles: candles,
                                         barWidth: widget.candleWidth,
                                         index: widget.index,
                                         high: HelperFunctions.getRoof(volumeHigh),
@@ -329,7 +362,15 @@ class _DesktopChartState extends State<DesktopChart> {
                           : Container(),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
-                        child: currentCandle != null ? CandleInfoText(candle: currentCandle) : null,
+                        child: currentCandle != null
+                            ? CandleInfoText(
+                                showMa7: widget.ma7,
+                                showMa25: widget.ma25,
+                                showMa99: widget.ma99,
+                                data: candles,
+                                candle: currentCandle,
+                                candleStyle: widget.candleStyle)
+                            : null,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
@@ -375,5 +416,28 @@ class _DesktopChartState extends State<DesktopChart> {
         );
       },
     );
+  }
+
+  List<Candle> updateCandlesMa(List<Candle> candles) {
+    for (int index = candles.length; index >= 0; index--) {
+      if (widget.ma7) if (candles.length - 7 > index) {
+        final list = candles.sublist(index, index + 7).map((e) => e.close);
+        double y = (list.fold<double>(0, (double p, double c) => p + c)) / 7;
+        candles[index].ma7 = y;
+      }
+
+      if (widget.ma25)  if (candles.length - 25 > index) {
+        final list = candles.sublist(index, index + 25).map((e) => e.close);
+        double y = (list.fold<double>(0, (double p, double c) => p + c)) / 25;
+        candles[index].ma25 = y;
+      }
+
+      if (widget.ma99) if (candles.length - 99 > index) {
+        final list = candles.sublist(index, index + 99).map((e) => e.close);
+        double y = (list.fold<double>(0, (double p, double c) => p + c)) / 99;
+        candles[index].ma99 = y;
+      }
+    }
+    return candles;
   }
 }

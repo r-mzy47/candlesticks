@@ -63,8 +63,10 @@ class _MyAppState extends State<MyApp> {
         body: Center(
           child: Candlesticks(
             candles: candles,
-            ma7: false,
-            ma25: false,
+            watermark: 'Matinex',
+            onLoadMoreCandles: () async {
+              candles.addAll(candles.sublist(0, 100));
+            },
           ),
         ),
       ),
