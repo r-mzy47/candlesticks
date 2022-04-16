@@ -49,12 +49,15 @@ class _CandlesticksState extends State<Candlesticks> {
   /// true when widget.onLoadMoreCandles is fetching new candles.
   bool isCallingLoadMore = false;
 
-  late MainWidnowDataContainer? mainWidnowDataContainer;
+  MainWidnowDataContainer? mainWidnowDataContainer;
 
   @override
   void didUpdateWidget(covariant Candlesticks oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.candles.length != 0) {
+    if (widget.candles.length == 0) {
+      return;
+    }
+    if (mainWidnowDataContainer == null) {
       mainWidnowDataContainer =
           MainWidnowDataContainer(widget.indicators ?? [], widget.candles);
     } else {
