@@ -125,7 +125,7 @@ class MainWidnowDataContainer {
 
     // update prev candles
     int firstCandleIndex = 0;
-    for (int i = candles.length; i >= 0; i++) {
+    for (int i = candles.length - 1; i >= 0; i--) {
       if (candles[i].date == beginDate) {
         firstCandleIndex = i;
       }
@@ -144,7 +144,7 @@ class MainWidnowDataContainer {
             .toList();
 
         // TODO
-        for (int i = 0; candles[i].date.compareTo(endDate) >= 0; i++) {
+        for (int i = firstCandleIndex - indicator.dependsOnNPrevCandles + 1; i < candles.length; i++) {
           double low = lows[i];
           double high = highs[i];
 
