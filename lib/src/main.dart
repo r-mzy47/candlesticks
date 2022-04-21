@@ -48,7 +48,8 @@ class Candlesticks extends StatefulWidget {
       this.chartAdjust = ChartAdjust.visibleRange,
       this.displayZoomActions = true,
       this.loadingWidget})
-      : super(key: key);
+      : assert(candles.length == 0 || candles.length > 1, "Please provide at least 2 candles"),
+       super(key: key);
 
   @override
   _CandlesticksState createState() => _CandlesticksState();
