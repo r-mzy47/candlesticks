@@ -47,6 +47,8 @@ class DesktopChart extends StatefulWidget {
   /// holds main window indicators data and high and low prices.
   final MainWidnowDataContainer mainWidnowDataContainer;
 
+  final void Function(String)? onRemoveIndicator;
+
   DesktopChart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -57,6 +59,7 @@ class DesktopChart extends StatefulWidget {
     required this.onPanEnd,
     required this.onReachEnd,
     required this.mainWidnowDataContainer,
+    required this.onRemoveIndicator,
   });
 
   @override
@@ -418,6 +421,7 @@ class _DesktopChartState extends State<DesktopChart> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
                         child: TopPanel(
+                          onRemoveIndicator: widget.onRemoveIndicator,
                           currentCandle: currentCandle,
                           indicators: widget.mainWidnowDataContainer.indicators,
                           toggleIndicatorVisibility: (indicatorName) {

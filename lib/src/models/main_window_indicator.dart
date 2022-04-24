@@ -144,7 +144,9 @@ class MainWidnowDataContainer {
             .toList();
 
         // TODO
-        for (int i = firstCandleIndex - indicator.dependsOnNPrevCandles + 1; i < candles.length; i++) {
+        for (int i = firstCandleIndex - indicator.dependsOnNPrevCandles + 1;
+            i < candles.length;
+            i++) {
           double low = lows[i];
           double high = highs[i];
 

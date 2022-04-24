@@ -45,6 +45,8 @@ class MobileChart extends StatefulWidget {
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
 
+  final void Function(String)? onRemoveIndicator;
+
   final Function() onReachEnd;
 
   MobileChart({
@@ -57,6 +59,7 @@ class MobileChart extends StatefulWidget {
     required this.onPanEnd,
     required this.onReachEnd,
     required this.mainWidnowDataContainer,
+    required this.onRemoveIndicator,
   });
 
   @override
@@ -412,6 +415,7 @@ class _MobileChartState extends State<MobileChart> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
                         child: TopPanel(
+                          onRemoveIndicator: widget.onRemoveIndicator,
                           currentCandle: currentCandle,
                           indicators: widget.mainWidnowDataContainer.indicators,
                           toggleIndicatorVisibility: (indicatorName) {

@@ -11,11 +11,13 @@ class TopPanel extends StatefulWidget {
     required this.indicators,
     required this.toggleIndicatorVisibility,
     required this.unvisibleIndicators,
+    required this.onRemoveIndicator,
   }) : super(key: key);
   final Candle? currentCandle;
   final List<Indicator> indicators;
   final void Function(String indicatorName) toggleIndicatorVisibility;
   final List<String> unvisibleIndicators;
+  final void Function(String indicatorName)? onRemoveIndicator;
   @override
   State<TopPanel> createState() => _TopPanelState();
 }
@@ -56,10 +58,14 @@ class _TopPanelState extends State<TopPanel> {
                             SizedBox(
                               width: 10,
                             ),
-                            GestureDetector(
-                              onTap: e.onRemove,
-                              child: Icon(Icons.close),
-                            ),
+                            widget.onRemoveIndicator != null
+                                ? GestureDetector(
+                                    onTap: () {
+                                      widget.onRemoveIndicator!(e.name);
+                                    },
+                                    child: Icon(Icons.close),
+                                  )
+                                : Container(),
                           ],
                         ),
                       ),

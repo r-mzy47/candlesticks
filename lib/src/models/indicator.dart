@@ -6,14 +6,12 @@ class Indicator {
   final List<double?> Function(int index, List<Candle> candles) calculator;
   final int dependsOnNPrevCandles;
   final List<IndicatorStyle> indicatorComponentsStyles;
-  final void Function() onRemove;
 
   Indicator({
     required this.name,
     required this.dependsOnNPrevCandles,
     required this.calculator,
     required this.indicatorComponentsStyles,
-    required this.onRemove,
   });
 }
 

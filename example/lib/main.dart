@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:candlesticks/candlesticks.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:math' as math;
+
 void main() {
   runApp(MyApp());
 }
@@ -50,42 +51,37 @@ class _MyAppState extends State<MyApp> {
     });
     indicators = [
       Indicator(
-          name: "BB 3",
-          dependsOnNPrevCandles: 3,
-          calculator: (index, candles) {
-            double sum = 0;
-            for (int i = index; i < index + 3; i++) {
-              sum += candles[i].close;
-            }
-            final average = sum / 3;
+        name: "BB 3",
+        dependsOnNPrevCandles: 3,
+        calculator: (index, candles) {
+          double sum = 0;
+          for (int i = index; i < index + 3; i++) {
+            sum += candles[i].close;
+          }
+          final average = sum / 3;
 
-            num sumOfSquaredDiffFromMean = 0;
-            for (int i = index; i < index + 3; i++) {
-              final squareDiffFromMean =
-                  math.pow(candles[i].close - average, 2);
-              sumOfSquaredDiffFromMean += squareDiffFromMean;
-            }
+          num sumOfSquaredDiffFromMean = 0;
+          for (int i = index; i < index + 3; i++) {
+            final squareDiffFromMean = math.pow(candles[i].close - average, 2);
+            sumOfSquaredDiffFromMean += squareDiffFromMean;
+          }
 
-            final variance = sumOfSquaredDiffFromMean / 3;
+          final variance = sumOfSquaredDiffFromMean / 3;
 
-            final standardDeviation = math.sqrt(variance);
+          final standardDeviation = math.sqrt(variance);
 
-            return [
-              average + standardDeviation * 2,
-              average,
-              average - standardDeviation * 2
-            ];
-          },
-          indicatorComponentsStyles: [
-            IndicatorStyle(name: "high", color: Colors.blue.shade900),
-            IndicatorStyle(name: "mid", color: Colors.yellow.shade800),
-            IndicatorStyle(name: "low", color: Colors.pink.shade800)
-          ],
-          onRemove: () {
-            setState(() {
-              indicators.removeWhere((element) => element.name == "BB 20");
-            });
-          }),
+          return [
+            average + standardDeviation * 2,
+            average,
+            average - standardDeviation * 2
+          ];
+        },
+        indicatorComponentsStyles: [
+          IndicatorStyle(name: "high", color: Colors.blue.shade900),
+          IndicatorStyle(name: "mid", color: Colors.yellow.shade800),
+          IndicatorStyle(name: "low", color: Colors.pink.shade800)
+        ],
+      ),
       Indicator(
         name: "MA 100",
         dependsOnNPrevCandles: 1,
@@ -99,11 +95,6 @@ class _MyAppState extends State<MyApp> {
         indicatorComponentsStyles: [
           IndicatorStyle(name: "mv", color: Colors.green.shade600),
         ],
-        onRemove: () {
-          setState(() {
-            indicators.removeWhere((element) => element.name == "MA 1");
-          });
-        },
       ),
     ];
     super.initState();
@@ -231,6 +222,12 @@ class _MyAppState extends State<MyApp> {
                 indicators: indicators,
                 candles: candles,
                 onLoadMoreCandles: loadMoreCandles,
+                onRemoveIndicator: (String indicator) {
+                  setState(() {
+                    indicators
+                        .removeWhere((element) => element.name == indicator);
+                  });
+                },
                 actions: [
                   ToolBarAction(
                     onPressed: () {

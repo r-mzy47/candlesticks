@@ -23,12 +23,15 @@ class Candlesticks extends StatefulWidget {
 
   final List<Indicator>? indicators;
 
+  final void Function(String)? onRemoveIndicator;
+
   Candlesticks({
     Key? key,
     required this.candles,
     this.onLoadMoreCandles,
     this.actions = const [],
     this.indicators,
+    this.onRemoveIndicator,
   }) : super(key: key);
 
   @override
@@ -103,6 +106,7 @@ class _CandlesticksState extends State<Candlesticks> {
                     Platform.isWindows ||
                     Platform.isLinux) {
                   return DesktopChart(
+                    onRemoveIndicator: widget.onRemoveIndicator,
                     mainWidnowDataContainer: mainWidnowDataContainer!,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);
@@ -143,6 +147,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   );
                 } else {
                   return MobileChart(
+                    onRemoveIndicator: widget.onRemoveIndicator,
                     mainWidnowDataContainer: mainWidnowDataContainer!,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);
