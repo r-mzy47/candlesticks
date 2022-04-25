@@ -13,6 +13,14 @@ class Indicator {
     required this.calculator,
     required this.indicatorComponentsStyles,
   });
+
+  bool operator ==(other) {
+    if (other is Indicator) {
+      return other.name == this.name;
+    } else {
+      return false;
+    }
+  }
 }
 
 class IndicatorStyle {

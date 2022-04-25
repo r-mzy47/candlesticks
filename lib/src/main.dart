@@ -64,6 +64,23 @@ class _CandlesticksState extends State<Candlesticks> {
       mainWidnowDataContainer =
           MainWidnowDataContainer(widget.indicators ?? [], widget.candles);
     } else {
+      final currentIndicators = widget.indicators ?? [];
+      final oldIndicators = oldWidget.indicators ?? [];
+      if (currentIndicators.length == oldIndicators.length) {
+        for (int i = 0; i < currentIndicators.length; i++) {
+          if (currentIndicators[i] == oldIndicators[i]) {
+            continue;
+          } else {
+            mainWidnowDataContainer = MainWidnowDataContainer(
+                widget.indicators ?? [], widget.candles);
+            return;
+          }
+        }
+      } else {
+        mainWidnowDataContainer =
+            MainWidnowDataContainer(widget.indicators ?? [], widget.candles);
+        return;
+      }
       mainWidnowDataContainer!.tickUpdate(widget.candles);
     }
   }

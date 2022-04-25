@@ -224,6 +224,7 @@ class _MyAppState extends State<MyApp> {
                 onLoadMoreCandles: loadMoreCandles,
                 onRemoveIndicator: (String indicator) {
                   setState(() {
+                    indicators = [...indicators];
                     indicators
                         .removeWhere((element) => element.name == indicator);
                   });
