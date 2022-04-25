@@ -49,10 +49,8 @@ class MainWidnowDataContainer {
       });
     });
 
-    candles.forEach((candle) {
-      highs.add(candle.high);
-      lows.add(candle.low);
-    });
+    highs = candles.map((e) => e.high).toList();
+    lows = candles.map((e) => e.low).toList();
 
     indicators.forEach((indicator) {
       final List<IndicatorComponentData> containers = indicatorComponentData
@@ -128,6 +126,7 @@ class MainWidnowDataContainer {
     for (int i = candles.length - 1; i >= 0; i--) {
       if (candles[i].date == beginDate) {
         firstCandleIndex = i;
+        break;
       }
     }
     for (int i = firstCandleIndex + 1; i < candles.length; i++) {
@@ -169,6 +168,6 @@ class MainWidnowDataContainer {
         }
       },
     );
-    endDate = candles[0].date;
+    beginDate = candles.last.date;
   }
 }

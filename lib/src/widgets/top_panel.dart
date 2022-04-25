@@ -52,8 +52,9 @@ class _TopPanelState extends State<TopPanel> {
                                 widget.toggleIndicatorVisibility(e.name);
                               },
                               child: widget.unvisibleIndicators.contains(e.name)
-                                  ? Icon(Icons.visibility_outlined)
-                                  : Icon(Icons.visibility_off_outlined),
+                                  ? Icon(Icons.visibility_off_outlined,
+                                      size: 16)
+                                  : Icon(Icons.visibility_outlined, size: 16),
                             ),
                             SizedBox(
                               width: 10,
@@ -63,7 +64,7 @@ class _TopPanelState extends State<TopPanel> {
                                     onTap: () {
                                       widget.onRemoveIndicator!(e.name);
                                     },
-                                    child: Icon(Icons.close),
+                                    child: Icon(Icons.close, size: 16),
                                   )
                                 : Container(),
                           ],
