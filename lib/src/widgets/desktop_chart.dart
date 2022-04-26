@@ -1,12 +1,15 @@
 import 'dart:math';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
+import 'package:candlesticks/src/models/main_window_indicator.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_info_text.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
+import 'package:candlesticks/src/widgets/mainwindow_indicator_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
+import 'package:candlesticks/src/widgets/top_panel.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -46,6 +49,11 @@ class DesktopChart extends StatefulWidget {
 
   final Function() onReachEnd;
 
+  /// holds main window indicators data and high and low prices.
+  final MainWidnowDataContainer mainWidnowDataContainer;
+
+  final void Function(String)? onRemoveIndicator;
+
   DesktopChart({
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -56,6 +64,8 @@ class DesktopChart extends StatefulWidget {
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
+    required this.mainWidnowDataContainer,
+    required this.onRemoveIndicator,
   });
 
   @override
@@ -115,18 +125,22 @@ class _DesktopChartState extends State<DesktopChart> {
           });
         }
 
-        // visible candles highest and lowest price
+        List<Candle> inRangeCandles = widget.candles
+            .getRange(candlesStartIndex, candlesEndIndex + 1)
+            .toList();
+
         double candlesHighPrice = 0;
         double candlesLowPrice = 0;
         if (widget.chartAdjust == ChartAdjust.visibleRange) {
-          List<Candle> inRangeCandles = widget.candles
+          candlesHighPrice = widget.mainWidnowDataContainer.highs
               .getRange(candlesStartIndex, candlesEndIndex + 1)
-              .toList();
-          candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
-          candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
+              .reduce(max);
+          candlesLowPrice = widget.mainWidnowDataContainer.lows
+              .getRange(candlesStartIndex, candlesEndIndex + 1)
+              .reduce(min);
         } else if (widget.chartAdjust == ChartAdjust.fullRange) {
-          candlesHighPrice = widget.candles.map((e) => e.high).reduce(max);
-          candlesLowPrice = widget.candles.map((e) => e.low).reduce(min);
+          candlesHighPrice = widget.mainWidnowDataContainer.highs.reduce(max);
+          candlesLowPrice = widget.mainWidnowDataContainer.lows.reduce(min);
         }
 
         // calcute priceScale
@@ -140,10 +154,7 @@ class _DesktopChartState extends State<DesktopChart> {
         candlesLowPrice = (candlesLowPrice ~/ priceScale) * priceScale;
 
         // calcute highest volume
-        double volumeHigh = 0;
-        for (int i = candlesStartIndex; i <= candlesEndIndex; i++) {
-          volumeHigh = max(widget.candles[i].volume, volumeHigh);
-        }
+        double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
 
         return TweenAnimationBuilder(
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
@@ -219,16 +230,31 @@ class _DesktopChartState extends State<DesktopChart> {
                                                   MAIN_CHART_VERTICAL_PADDING +
                                                       additionalVerticalPadding),
                                           child: RepaintBoundary(
-                                            child: CandleStickWidget(
-                                              candles: widget.candles,
-                                              candleWidth: widget.candleWidth,
-                                              index: widget.index,
-                                              high: high,
-                                              low: low,
-                                              bearColor:
-                                                  Theme.of(context).primaryRed,
-                                              bullColor: Theme.of(context)
-                                                  .primaryGreen,
+                                            child: Stack(
+                                              children: [
+                                                MainWindowIndicatorWidget(
+                                                  indicatorDatas: widget
+                                                      .mainWidnowDataContainer
+                                                      .indicatorComponentData,
+                                                  index: widget.index,
+                                                  candleWidth:
+                                                      widget.candleWidth,
+                                                  low: low,
+                                                  high: high,
+                                                ),
+                                                CandleStickWidget(
+                                                  candles: widget.candles,
+                                                  candleWidth:
+                                                      widget.candleWidth,
+                                                  index: widget.index,
+                                                  high: high,
+                                                  low: low,
+                                                  bearColor: Theme.of(context)
+                                                      .primaryRed,
+                                                  bullColor: Theme.of(context)
+                                                      .primaryGreen,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ),
@@ -365,13 +391,6 @@ class _DesktopChartState extends State<DesktopChart> {
                             )
                           : Container(),
                       Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 4, horizontal: 12),
-                        child: currentCandle != null
-                            ? CandleInfoText(candle: currentCandle)
-                            : null,
-                      ),
-                      Padding(
                         padding: const EdgeInsets.only(right: 50, bottom: 20),
                         child: Listener(
                           onPointerSignal: (pointerSignal) {
@@ -409,7 +428,24 @@ class _DesktopChartState extends State<DesktopChart> {
                             ),
                           ),
                         ),
-                      )
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 4, horizontal: 12),
+                        child: TopPanel(
+                          onRemoveIndicator: widget.onRemoveIndicator,
+                          currentCandle: currentCandle,
+                          indicators: widget.mainWidnowDataContainer.indicators,
+                          toggleIndicatorVisibility: (indicatorName) {
+                            setState(() {
+                              widget.mainWidnowDataContainer
+                                  .toggleIndicatorVisibility(indicatorName);
+                            });
+                          },
+                          unvisibleIndicators: widget
+                              .mainWidnowDataContainer.unvisibleIndicators,
+                        ),
+                      ),
                     ],
                   ),
                 );

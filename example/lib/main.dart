@@ -15,6 +15,19 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   List<Candle> candles = [];
   bool themeIsDark = false;
+  List<Indicator> indicators = [
+    BollingerBandsIndicator(
+      length: 20,
+      stdDev: 2,
+      upperColor: Color(0xFF2962FF),
+      basisColor: Color(0xFFFF6D00),
+      lowerColor: Color(0xFF2962FF),
+    ),
+    WeightedMovingAverageIndicator(
+      length: 100,
+      color: Colors.green.shade600,
+    ),
+  ];
 
   @override
   void initState() {
@@ -61,7 +74,19 @@ class _MyAppState extends State<MyApp> {
           ],
         ),
         body: Center(
-          child: Candlesticks(candles: candles),
+          child: Candlesticks(
+            candles: candles,
+            indicators: indicators,
+            onRemoveIndicator: (indicatorName) {
+              setState(() {
+                setState(() {
+                  indicators = [...indicators];
+                  indicators
+                      .removeWhere((element) => element.name == indicatorName);
+                });
+              });
+            },
+          ),
         ),
       ),
     );
