@@ -44,13 +44,13 @@ class _TimeRowState extends State<TimeRow> {
     int candleNumber = (step + 1) ~/ 2 - 10 + index * step + -1;
     DateTime? _time;
     if (candleNumber < 0)
-      _time = widget.candles[step + candleNumber].date.add(dif);
+      _time = widget.candles[0].date.add(Duration(
+          milliseconds: dif.inMilliseconds ~/ -1 * step * candleNumber));
     else if (candleNumber < widget.candles.length)
       _time = widget.candles[candleNumber].date;
     else {
-      final stepsBack = (candleNumber - widget.candles.length) ~/ step + 1;
-      final newIndex = candleNumber - stepsBack * step;
-      _time = widget.candles[newIndex].date.subtract(dif * stepsBack);
+      _time = widget.candles[0].date.subtract(
+          Duration(milliseconds: dif.inMilliseconds ~/ step * candleNumber));
     }
     return _time;
   }
@@ -97,14 +97,15 @@ class _TimeRowState extends State<TimeRow> {
   @override
   Widget build(BuildContext context) {
     int step = _stepCalculator();
-    final dif = widget.candles[0].date.difference(widget.candles[step].date);
+    final dif =
+        widget.candles[0].date.difference(widget.candles[1].date) * step;
     return Padding(
       padding: const EdgeInsets.only(right: PRICE_BAR_WIDTH + 1.0),
       child: Stack(
         children: [
           ListView.builder(
             physics: NeverScrollableScrollPhysics(),
-            itemCount: widget.candles.length,
+            itemCount: math.max(widget.candles.length, 1000),
             scrollDirection: Axis.horizontal,
             itemExtent: step * widget.candleWidth,
             controller: _scrollController,

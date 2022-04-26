@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:candlesticks/candlesticks.dart';
+import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/main_window_indicator.dart';
 import 'package:candlesticks/src/theme/theme_data.dart';
@@ -41,6 +42,9 @@ class MobileChart extends StatefulWidget {
 
   /// holds main window indicators data and high and low prices.
   final MainWidnowDataContainer mainWidnowDataContainer;
+  
+  /// How chart price range will be adjusted when moving chart
+  final ChartAdjust chartAdjust;
 
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
@@ -55,6 +59,7 @@ class MobileChart extends StatefulWidget {
     required this.candleWidth,
     required this.candles,
     required this.index,
+    required this.chartAdjust,
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
@@ -109,13 +114,19 @@ class _MobileChartState extends State<MobileChart> {
             .getRange(candlesStartIndex, candlesEndIndex + 1)
             .toList();
 
-        // visible candles highest and lowest price
-        double candlesHighPrice = widget.mainWidnowDataContainer.highs
-            .getRange(candlesStartIndex, candlesEndIndex + 1)
-            .reduce(max);
-        double candlesLowPrice = widget.mainWidnowDataContainer.lows
-            .getRange(candlesStartIndex, candlesEndIndex + 1)
-            .reduce(min);
+        double candlesHighPrice = 0;
+        double candlesLowPrice = 0;
+        if (widget.chartAdjust == ChartAdjust.visibleRange) {
+          candlesHighPrice = widget.mainWidnowDataContainer.highs
+              .getRange(candlesStartIndex, candlesEndIndex + 1)
+              .reduce(max);
+          candlesLowPrice = widget.mainWidnowDataContainer.lows
+              .getRange(candlesStartIndex, candlesEndIndex + 1)
+              .reduce(min);
+        } else if (widget.chartAdjust == ChartAdjust.fullRange) {
+          candlesHighPrice = widget.mainWidnowDataContainer.highs.reduce(max);
+          candlesLowPrice = widget.mainWidnowDataContainer.lows.reduce(min);
+        }
 
         // calcute priceScale
         double chartHeight = maxHeight * 0.75 -

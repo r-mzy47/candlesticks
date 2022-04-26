@@ -1,10 +1,14 @@
-## [2.0.0] - Feb 2, 2022
+## [2.1.0] - Feb 22, 2022
+
+- document correction
+
+## [2.0.0] - Feb 21, 2022
 
 - [Improvement] performance improvement
 - [Feature] desktop support
 - [Feature] price scaling
 - [Feature] add light theme
-- [Breaking] `interval` and `onIntervalChange` parameters are deleted from [Candlesticks] widget
+- [Breaking] interval and onIntervalChange parameters are deleted from [Candlesticks] widget
 
 ## [1.1.1] - Sep 10, 2021
 

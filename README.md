@@ -1,18 +1,17 @@
 # candlesticks
 
-[![pub package](https://img.shields.io/badge/pub-v2.0.0-orange.svg)](https://pub.dev/packages/candlesticks)
+[![pub package](https://img.shields.io/badge/pub-v2.0.1-orange.svg)](https://pub.dev/packages/candlesticks)
 
-A high-performance full featured candlesticks chart for all platforms</br>
+A high-performance full featured candlesticks chart for all platforms!
+
 web demo:</br>
 [Binance Candles](https://rmzy.dev/candlesticks/)</br>
 [Binance Candles Github Repository](https://github.com/r-mzy47/binance_candles)
 
 ## Preview
-
-<p float="center">
-  <img src="https://github.com/r-mzy47/candlesticks/blob/develop/example_ios.gif" height="400">
-<img src="https://github.com/r-mzy47/candlesticks/blob/develop/example_macOS.gif" height="400">
-</p>
+|IOS	|macOS		|
+|:------------:|:------------:|
+|	[![](https://github.com/r-mzy47/candlesticks/blob/develop/example_ios.gif)](https://github.com/r-mzy47/candlesticks/blob/master/example/lib/main.dart)   |	[![](https://github.com/r-mzy47/candlesticks/blob/develop/example_macOS.gif)](https://github.com/r-mzy47/candlesticks/blob/master/example/lib/main.dart) | 
 
 ## Installation
 
@@ -20,7 +19,7 @@ web demo:</br>
 
 ```yaml
 dependencies:
-  candlesticks: ^2.0.0
+  candlesticks: ^2.1.0
 ```
 
 2. Get the package using your IDE's GUI or via command line with
