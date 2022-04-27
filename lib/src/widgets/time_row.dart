@@ -1,6 +1,6 @@
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/theme_data.dart';
+import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -10,6 +10,7 @@ class TimeRow extends StatefulWidget {
   final double? indicatorX;
   final DateTime? indicatorTime;
   final int index;
+  final CandleSticksStyle style;
 
   const TimeRow({
     Key? key,
@@ -18,6 +19,7 @@ class TimeRow extends StatefulWidget {
     this.indicatorX,
     required this.indicatorTime,
     required this.index,
+    required this.style,
   }) : super(key: key);
 
   @override
@@ -118,14 +120,12 @@ class _TimeRowState extends State<TimeRow> {
                   Expanded(
                     child: Container(
                       width: 0.05,
-                      color: Theme.of(context).grayColor,
+                      color: widget.style.borderColor,
                     ),
                   ),
                   dif.compareTo(Duration(days: 1)) > 0
-                      ? _monthDayText(
-                          _time, Theme.of(context).scaleNumbersColor)
-                      : _hourMinuteText(
-                          _time, Theme.of(context).scaleNumbersColor),
+                      ? _monthDayText(_time, widget.style.primaryTextColor)
+                      : _hourMinuteText(_time, widget.style.primaryTextColor),
                 ],
               );
             },
@@ -136,12 +136,12 @@ class _TimeRowState extends State<TimeRow> {
                   bottom: 0,
                   left: math.max(widget.indicatorX! - 55, 0),
                   child: Container(
-                    color: Theme.of(context).hoverIndicatorBackgroundColor,
+                    color: widget.style.hoverIndicatorBackgroundColor,
                     child: Center(
                       child: Text(
                         dateFormatter(widget.indicatorTime!),
                         style: TextStyle(
-                          color: Theme.of(context).hoverIndicatorTextColor,
+                          color: widget.style.secondaryTextColor,
                           fontSize: 12,
                         ),
                       ),

@@ -1,4 +1,3 @@
-import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:flutter/material.dart';
 
 /// Top toolbar button widget.
@@ -6,12 +5,14 @@ class ToolBarAction extends StatelessWidget {
   final void Function() onPressed;
   final Widget child;
   final double width;
+  final Color? color;
 
   const ToolBarAction({
     Key? key,
     required this.child,
     required this.onPressed,
     this.width = 30,
+    this.color,
   }) : super(key: key);
 
   @override
@@ -21,7 +22,7 @@ class ToolBarAction extends StatelessWidget {
       height: 30,
       child: RawMaterialButton(
         elevation: 0,
-        fillColor: Theme.of(context).background,
+        fillColor: color,
         onPressed: onPressed,
         child: Center(child: child),
       ),

@@ -1,5 +1,4 @@
 import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 
@@ -7,9 +6,15 @@ class CandleInfoText extends StatelessWidget {
   const CandleInfoText({
     Key? key,
     required this.candle,
+    required this.bullColor,
+    required this.bearColor,
+    required this.defaultStyle,
   }) : super(key: key);
 
   final Candle candle;
+  final Color bullColor;
+  final Color bearColor;
+  final TextStyle defaultStyle;
 
   String numberFormat(int value) {
     return "${value < 10 ? 0 : ""}$value";
@@ -24,36 +29,36 @@ class CandleInfoText extends StatelessWidget {
     return RichText(
       text: TextSpan(
         text: dateFormatter(candle.date),
-        style: TextStyle(color: Theme.of(context).grayColor, fontSize: 10),
+        style: defaultStyle,
         children: <TextSpan>[
           TextSpan(text: " O:"),
           TextSpan(
-              text: HelperFunctions.priceToString(candle.open),
-              style: TextStyle(
-                  color: candle.isBull
-                      ? Theme.of(context).primaryGreen
-                      : Theme.of(context).primaryRed)),
+            text: HelperFunctions.priceToString(candle.open),
+            style: TextStyle(
+              color: candle.isBull ? bullColor : bearColor,
+            ),
+          ),
           TextSpan(text: " H:"),
           TextSpan(
-              text: HelperFunctions.priceToString(candle.high),
-              style: TextStyle(
-                  color: candle.isBull
-                      ? Theme.of(context).primaryGreen
-                      : Theme.of(context).primaryRed)),
+            text: HelperFunctions.priceToString(candle.high),
+            style: TextStyle(
+              color: candle.isBull ? bullColor : bearColor,
+            ),
+          ),
           TextSpan(text: " L:"),
           TextSpan(
-              text: HelperFunctions.priceToString(candle.low),
-              style: TextStyle(
-                  color: candle.isBull
-                      ? Theme.of(context).primaryGreen
-                      : Theme.of(context).primaryRed)),
+            text: HelperFunctions.priceToString(candle.low),
+            style: TextStyle(
+              color: candle.isBull ? bullColor : bearColor,
+            ),
+          ),
           TextSpan(text: " C:"),
           TextSpan(
-              text: HelperFunctions.priceToString(candle.close),
-              style: TextStyle(
-                  color: candle.isBull
-                      ? Theme.of(context).primaryGreen
-                      : Theme.of(context).primaryRed)),
+            text: HelperFunctions.priceToString(candle.close),
+            style: TextStyle(
+              color: candle.isBull ? bullColor : bearColor,
+            ),
+          ),
         ],
       ),
     );
