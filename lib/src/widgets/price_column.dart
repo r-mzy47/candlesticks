@@ -1,6 +1,6 @@
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/candle.dart';
-import 'package:candlesticks/src/theme/theme_data.dart';
+import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +15,7 @@ class PriceColumn extends StatefulWidget {
     required this.lastCandle,
     required this.onScale,
     required this.additionalVerticalPadding,
+    required this.style,
   }) : super(key: key);
 
   final double low;
@@ -25,6 +26,7 @@ class PriceColumn extends StatefulWidget {
   final Candle lastCandle;
   final double additionalVerticalPadding;
   final void Function(double) onScale;
+  final CandleSticksStyle style;
 
   @override
   State<PriceColumn> createState() => _PriceColumnState();
@@ -74,14 +76,14 @@ class _PriceColumnState extends State<PriceColumn> {
                             Container(
                               width: widget.width - PRICE_BAR_WIDTH,
                               height: 0.05,
-                              color: Theme.of(context).grayColor,
+                              color: widget.style.borderColor,
                             ),
                             Expanded(
                               child: Text(
                                 "${HelperFunctions.priceToString(widget.high - widget.priceScale * i)}",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  color: Theme.of(context).scaleNumbersColor,
+                                  color: widget.style.primaryTextColor,
                                   fontSize: 11,
                                 ),
                               ),
@@ -105,14 +107,14 @@ class _PriceColumnState extends State<PriceColumn> {
                   children: [
                     Container(
                       color: widget.lastCandle.isBull
-                          ? Theme.of(context).primaryGreen
-                          : Theme.of(context).primaryRed,
+                          ? widget.style.primaryBull
+                          : widget.style.primaryBear,
                       child: Center(
                         child: Text(
                           HelperFunctions.priceToString(
                               widget.lastCandle.close),
                           style: TextStyle(
-                            color: Theme.of(context).currentPriceColor,
+                            color: widget.style.secondaryTextColor,
                             fontSize: 11,
                           ),
                         ),

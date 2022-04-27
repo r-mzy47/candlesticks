@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 
+import 'models/candle_sticks_style.dart';
+
 enum ChartAdjust {
   /// Will adjust chart size by max and min value from visible area
   visibleRange,
@@ -20,17 +22,19 @@ enum ChartAdjust {
 /// current position and candles width).
 class Candlesticks extends StatefulWidget {
   /// The arrangement of the array should be such that
-  ///  the newest item is in position 0
+  /// the newest item is in position 0
   final List<Candle> candles;
 
-  /// this callback calls when the last candle gets visible
+  /// This callback calls when the last candle gets visible
   final Future<void> Function()? onLoadMoreCandles;
 
-  /// list of buttons you what to add on top tool bar
+  /// List of buttons you what to add on top tool bar
   final List<ToolBarAction> actions;
 
+  /// List of indicators to draw
   final List<Indicator>? indicators;
 
+  /// This callback calls when ever user clicks a spcesific indicator close button (X)
   final void Function(String)? onRemoveIndicator;
 
   /// How chart price range will be adjusted when moving chart
@@ -42,18 +46,20 @@ class Candlesticks extends StatefulWidget {
   /// Custom loader widget
   final Widget? loadingWidget;
 
-  Candlesticks(
-      {Key? key,
-      required this.candles,
-      this.onLoadMoreCandles,
-      this.actions = const [],
-      this.chartAdjust = ChartAdjust.visibleRange,
-      this.displayZoomActions = true,
-      this.loadingWidget,
-      this.indicators,
-      this.onRemoveIndicator,
-      })
-      : assert(candles.length == 0 || candles.length > 1,
+  final CandleSticksStyle? style;
+
+  const Candlesticks({
+    Key? key,
+    required this.candles,
+    this.onLoadMoreCandles,
+    this.actions = const [],
+    this.chartAdjust = ChartAdjust.visibleRange,
+    this.displayZoomActions = true,
+    this.loadingWidget,
+    this.indicators,
+    this.onRemoveIndicator,
+    this.style,
+  })  : assert(candles.length == 0 || candles.length > 1,
             "Please provide at least 2 candles"),
         super(key: key);
 
@@ -110,31 +116,51 @@ class _CandlesticksState extends State<Candlesticks> {
 
   @override
   Widget build(BuildContext context) {
+    final style = widget.style ??
+        (Theme.of(context).brightness == Brightness.dark
+            ? CandleSticksStyle.dark()
+            : CandleSticksStyle.light());
     return Column(
       children: [
-        ToolBar(
-          displayZoomActions: widget.displayZoomActions,
-          onZoomInPressed: () {
-            setState(() {
-              candleWidth += 2;
-              candleWidth = min(candleWidth, 16);
-            });
-          },
-          onZoomOutPressed: () {
-            setState(() {
-              candleWidth -= 2;
-              candleWidth = max(candleWidth, 4);
-            });
-          },
-          children: widget.actions,
-        ),
+        if (widget.displayZoomActions == true || widget.actions.isNotEmpty) ...[
+          ToolBar(
+            color: style.toolBarColor,
+            children: [
+              if (widget.displayZoomActions) ...[
+                ToolBarAction(
+                  onPressed: () {
+                    setState(() {
+                      candleWidth -= 2;
+                      candleWidth = max(candleWidth, 4);
+                    });
+                  },
+                  child: Icon(
+                    Icons.remove,
+                    color: style.borderColor,
+                  ),
+                ),
+                ToolBarAction(
+                  onPressed: () {
+                    setState(() {
+                      candleWidth += 2;
+                      candleWidth = min(candleWidth, 16);
+                    });
+                  },
+                  child: Icon(
+                    Icons.add,
+                    color: style.borderColor,
+                  ),
+                ),
+              ],
+              ...widget.actions
+            ],
+          ),
+        ],
         if (widget.candles.length == 0 || mainWidnowDataContainer == null)
           Expanded(
             child: Center(
               child: widget.loadingWidget ??
-                  CircularProgressIndicator(
-                    color: Theme.of(context).gold,
-                  ),
+                  CircularProgressIndicator(color: style.loadingColor),
             ),
           )
         else
@@ -148,6 +174,7 @@ class _CandlesticksState extends State<Candlesticks> {
                     Platform.isWindows ||
                     Platform.isLinux) {
                   return DesktopChart(
+                    style: style,
                     onRemoveIndicator: widget.onRemoveIndicator,
                     mainWidnowDataContainer: mainWidnowDataContainer!,
                     chartAdjust: widget.chartAdjust,
@@ -190,6 +217,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   );
                 } else {
                   return MobileChart(
+                    style: style,
                     onRemoveIndicator: widget.onRemoveIndicator,
                     mainWidnowDataContainer: mainWidnowDataContainer!,
                     chartAdjust: widget.chartAdjust,

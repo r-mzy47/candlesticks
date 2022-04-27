@@ -1,11 +1,9 @@
 import 'dart:math';
 import 'package:candlesticks/candlesticks.dart';
-import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
+import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/models/main_window_indicator.dart';
-import 'package:candlesticks/src/theme/theme_data.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
-import 'package:candlesticks/src/widgets/candle_info_text.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/mainwindow_indicator_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
@@ -13,7 +11,6 @@ import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/top_panel.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
-import '../models/candle.dart';
 import 'dash_line.dart';
 
 /// This widget manages gestures
@@ -42,9 +39,11 @@ class MobileChart extends StatefulWidget {
 
   /// holds main window indicators data and high and low prices.
   final MainWidnowDataContainer mainWidnowDataContainer;
-  
+
   /// How chart price range will be adjusted when moving chart
   final ChartAdjust chartAdjust;
+
+  final CandleSticksStyle style;
 
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
@@ -54,6 +53,7 @@ class MobileChart extends StatefulWidget {
   final Function() onReachEnd;
 
   MobileChart({
+    required this.style,
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
     required this.candleWidth,
@@ -81,6 +81,8 @@ class _MobileChartState extends State<MobileChart> {
     int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
     minTiles = max(2, minTiles);
     double sizeRange = high - low;
+    assert(sizeRange != 0,
+        "highest highs and lowest lows of visible candles are equal.");
     double minStepSize = sizeRange / minTiles;
     double base =
         pow(10, HelperFunctions.log10(minStepSize).floor()).toDouble();
@@ -165,10 +167,11 @@ class _MobileChartState extends State<MobileChart> {
                             0),
                         widget.candles.length - 1)];
                 return Container(
-                  color: Theme.of(context).background,
+                  color: widget.style.background,
                   child: Stack(
                     children: [
                       TimeRow(
+                        style: widget.style,
                         indicatorX: longPressX,
                         candles: widget.candles,
                         candleWidth: widget.candleWidth,
@@ -182,6 +185,7 @@ class _MobileChartState extends State<MobileChart> {
                             child: Stack(
                               children: [
                                 PriceColumn(
+                                  style: widget.style,
                                   low: candlesLowPrice,
                                   high: candlesHighPrice,
                                   priceScale: priceScale,
@@ -209,8 +213,7 @@ class _MobileChartState extends State<MobileChart> {
                                         decoration: BoxDecoration(
                                           border: Border(
                                             right: BorderSide(
-                                              color:
-                                                  Theme.of(context).grayColor,
+                                              color: widget.style.borderColor,
                                               width: 1,
                                             ),
                                           ),
@@ -241,10 +244,10 @@ class _MobileChartState extends State<MobileChart> {
                                                   index: widget.index,
                                                   high: high,
                                                   low: low,
-                                                  bearColor: Theme.of(context)
-                                                      .primaryRed,
-                                                  bullColor: Theme.of(context)
-                                                      .primaryGreen,
+                                                  bearColor:
+                                                      widget.style.primaryBear,
+                                                  bullColor:
+                                                      widget.style.primaryBull,
                                                 ),
                                               ],
                                             ),
@@ -269,7 +272,7 @@ class _MobileChartState extends State<MobileChart> {
                                     decoration: BoxDecoration(
                                       border: Border(
                                         right: BorderSide(
-                                          color: Theme.of(context).grayColor,
+                                          color: widget.style.borderColor,
                                           width: 1,
                                         ),
                                       ),
@@ -282,10 +285,8 @@ class _MobileChartState extends State<MobileChart> {
                                         index: widget.index,
                                         high:
                                             HelperFunctions.getRoof(volumeHigh),
-                                        bearColor:
-                                            Theme.of(context).secondaryRed,
-                                        bullColor:
-                                            Theme.of(context).secondaryGreen,
+                                        bearColor: widget.style.secondaryBear,
+                                        bullColor: widget.style.secondaryBull,
                                       ),
                                     ),
                                   ),
@@ -303,8 +304,8 @@ class _MobileChartState extends State<MobileChart> {
                                               Text(
                                                 "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh))}",
                                                 style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .grayColor,
+                                                  color:
+                                                      widget.style.borderColor,
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -331,13 +332,13 @@ class _MobileChartState extends State<MobileChart> {
                                 children: [
                                   DashLine(
                                     length: maxWidth,
-                                    color: Theme.of(context).grayColor,
+                                    color: widget.style.borderColor,
                                     direction: Axis.horizontal,
                                     thickness: 0.5,
                                   ),
                                   Container(
-                                    color: Theme.of(context)
-                                        .hoverIndicatorBackgroundColor,
+                                    color: widget
+                                        .style.hoverIndicatorBackgroundColor,
                                     child: Center(
                                       child: Text(
                                         longPressY! < maxHeight * 0.75
@@ -358,8 +359,8 @@ class _MobileChartState extends State<MobileChart> {
                                                             (maxHeight * 0.25 -
                                                                 10))),
                                         style: TextStyle(
-                                          color: Theme.of(context)
-                                              .hoverIndicatorTextColor,
+                                          color:
+                                              widget.style.secondaryTextColor,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -376,7 +377,7 @@ class _MobileChartState extends State<MobileChart> {
                               child: Container(
                                 width: widget.candleWidth,
                                 height: maxHeight,
-                                color: Theme.of(context).gold.withOpacity(0.2),
+                                color: widget.style.mobileCandleHoverColor,
                               ),
                               right: (maxWidth - longPressX!) ~/
                                       widget.candleWidth *
@@ -426,6 +427,7 @@ class _MobileChartState extends State<MobileChart> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
                         child: TopPanel(
+                          style: widget.style,
                           onRemoveIndicator: widget.onRemoveIndicator,
                           currentCandle: currentCandle,
                           indicators: widget.mainWidnowDataContainer.indicators,
