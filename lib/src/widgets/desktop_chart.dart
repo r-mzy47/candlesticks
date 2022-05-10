@@ -79,6 +79,7 @@ class _DesktopChartState extends State<DesktopChart> {
   double? mouseHoverY;
   bool isDragging = false;
   double additionalVerticalPadding = 0;
+  bool showHoverIndicator = true;
 
   void _onMouseExit(PointerEvent details) {
     setState(() {
@@ -335,7 +336,7 @@ class _DesktopChartState extends State<DesktopChart> {
                           ),
                         ],
                       ),
-                      mouseHoverY != null && !isDragging
+                      mouseHoverY != null && showHoverIndicator
                           ? Positioned(
                               top: mouseHoverY! - 10,
                               child: Row(
@@ -382,7 +383,7 @@ class _DesktopChartState extends State<DesktopChart> {
                               ),
                             )
                           : Container(),
-                      mouseHoverX != null && !isDragging
+                      mouseHoverX != null && showHoverIndicator
                           ? Positioned(
                               child: DashLine(
                                 length: constraints.maxHeight - 20,
@@ -421,11 +422,18 @@ class _DesktopChartState extends State<DesktopChart> {
                                 setState(() {
                                   isDragging = false;
                                 });
+                                Future.delayed(
+                                    Duration(milliseconds: 300), () {
+                                      setState(() {
+                                        showHoverIndicator = true;
+                                      });
+                                    });
                               },
                               onPanDown: (update) {
                                 widget.onPanDown(update.localPosition.dx);
                                 setState(() {
                                   isDragging = true;
+                                  showHoverIndicator = false;
                                 });
                               },
                             ),
