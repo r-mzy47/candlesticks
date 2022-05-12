@@ -44,13 +44,27 @@ class _TimeRowState extends State<TimeRow> {
     int candleNumber = (step + 1) ~/ 2 - 10 + index * step + -1;
     DateTime? _time;
     if (candleNumber < 0)
-      _time = widget.candles[step + candleNumber].date.add(dif);
+      _time = widget
+          .candles[step + candleNumber < widget.candles.length
+              ? step + candleNumber
+              : widget.candles.length - 1]
+          .date
+          .add(dif);
     else if (candleNumber < widget.candles.length)
-      _time = widget.candles[candleNumber].date;
+      _time = widget
+          .candles[candleNumber < widget.candles.length
+              ? candleNumber
+              : widget.candles.length - 1]
+          .date;
     else {
       final stepsBack = (candleNumber - widget.candles.length) ~/ step + 1;
       final newIndex = candleNumber - stepsBack * step;
-      _time = widget.candles[newIndex].date.subtract(dif * stepsBack);
+      _time = widget
+          .candles[newIndex < widget.candles.length && newIndex >= 0
+              ? newIndex
+              : widget.candles.length - 1]
+          .date
+          .subtract(dif * stepsBack);
     }
     return _time;
   }
@@ -97,7 +111,10 @@ class _TimeRowState extends State<TimeRow> {
   @override
   Widget build(BuildContext context) {
     int step = _stepCalculator();
-    final dif = widget.candles[0].date.difference(widget.candles[step].date);
+    final dif = widget.candles[0].date.difference(step < widget.candles.length
+        ? widget.candles[step].date
+        : widget.candles.last.date);
+
     return Padding(
       padding: const EdgeInsets.only(right: PRICE_BAR_WIDTH + 1.0),
       child: Stack(

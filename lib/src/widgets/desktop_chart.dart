@@ -141,6 +141,11 @@ class _DesktopChartState extends State<DesktopChart> {
         double candlesHighPrice = inRangeCandles.map((e) => e.high).reduce(max);
         double candlesLowPrice = inRangeCandles.map((e) => e.low).reduce(min);
 
+        double maxMa = inRangeCandles.map((e) => e.maxMa ?? candlesHighPrice).reduce(max);
+        if (maxMa > candlesHighPrice) candlesHighPrice = maxMa;
+        double minMa = inRangeCandles.map((e) => e.minMa ?? candlesLowPrice).reduce(min);
+        if (minMa < candlesLowPrice) candlesLowPrice = minMa;
+
         // calculate priceScale
         double chartHeight = maxHeight * 0.75 - 2 * (MAIN_CHART_VERTICAL_PADDING + additionalVerticalPadding);
         double priceScale = calculatePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
@@ -159,16 +164,10 @@ class _DesktopChartState extends State<DesktopChart> {
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
           duration: Duration(milliseconds: 300),
           builder: (context, double high, _) {
-            double maxMaHigh = candles.map((e) => e.maxMa ?? high).reduce(max);
-            if (maxMaHigh > high) high = maxMaHigh;
-
             return TweenAnimationBuilder(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
               duration: Duration(milliseconds: 300),
               builder: (context, double low, _) {
-                double minMaHigh = candles.map((e) => e.minMa ?? low).reduce(min);
-                if (minMaHigh < low) low = minMaHigh;
-
                 final currentCandle = mouseHoverX == null
                     ? (candles.isNotEmpty ? candles.first : null)
                     : candles[min(
