@@ -78,7 +78,7 @@ class _DesktopChartState extends State<DesktopChart> {
   double? mouseHoverX;
   double? mouseHoverY;
   bool isDragging = false;
-  double additionalVerticalPadding = 0;
+  double verticalScale = 0;
   bool showHoverIndicator = true;
 
   void _onMouseExit(PointerEvent details) {
@@ -149,8 +149,8 @@ class _DesktopChartState extends State<DesktopChart> {
         }
 
         // calcute priceScale
-        double chartHeight = maxHeight * 0.75 -
-            2 * (MAIN_CHART_VERTICAL_PADDING + additionalVerticalPadding);
+        double chartHeight =
+            maxHeight * 0.75 - 2 * (MAIN_CHART_VERTICAL_PADDING);
         double priceScale =
             calcutePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
 
@@ -204,18 +204,7 @@ class _DesktopChartState extends State<DesktopChart> {
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[
                                       widget.index < 0 ? 0 : widget.index],
-                                  onScale: (delta) {
-                                    setState(() {
-                                      additionalVerticalPadding += delta;
-                                      additionalVerticalPadding = min(
-                                          maxHeight / 4,
-                                          additionalVerticalPadding);
-                                      additionalVerticalPadding =
-                                          max(0, additionalVerticalPadding);
-                                    });
-                                  },
-                                  additionalVerticalPadding:
-                                      additionalVerticalPadding,
+                                  onScale: (delta) {},
                                 ),
                                 Row(
                                   children: [
@@ -233,8 +222,7 @@ class _DesktopChartState extends State<DesktopChart> {
                                           duration: Duration(milliseconds: 300),
                                           padding: EdgeInsets.symmetric(
                                               vertical:
-                                                  MAIN_CHART_VERTICAL_PADDING +
-                                                      additionalVerticalPadding),
+                                                  MAIN_CHART_VERTICAL_PADDING),
                                           child: RepaintBoundary(
                                             child: Stack(
                                               children: [
@@ -422,12 +410,11 @@ class _DesktopChartState extends State<DesktopChart> {
                                 setState(() {
                                   isDragging = false;
                                 });
-                                Future.delayed(
-                                    Duration(milliseconds: 300), () {
-                                      setState(() {
-                                        showHoverIndicator = true;
-                                      });
-                                    });
+                                Future.delayed(Duration(milliseconds: 300), () {
+                                  setState(() {
+                                    showHoverIndicator = true;
+                                  });
+                                });
                               },
                               onPanDown: (update) {
                                 widget.onPanDown(update.localPosition.dx);

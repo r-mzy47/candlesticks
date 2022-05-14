@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
-import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/models/main_window_indicator.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
@@ -74,7 +73,6 @@ class MobileChart extends StatefulWidget {
 class _MobileChartState extends State<MobileChart> {
   double? longPressX;
   double? longPressY;
-  double additionalVerticalPadding = 0;
   bool showIndicatorNames = false;
 
   double calcutePriceScale(double height, double high, double low) {
@@ -131,8 +129,7 @@ class _MobileChartState extends State<MobileChart> {
         }
 
         // calcute priceScale
-        double chartHeight = maxHeight * 0.75 -
-            2 * (MAIN_CHART_VERTICAL_PADDING + additionalVerticalPadding);
+        double chartHeight = maxHeight * 0.75 - 2 * MAIN_CHART_VERTICAL_PADDING;
         double priceScale =
             calcutePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
 
@@ -193,18 +190,7 @@ class _MobileChartState extends State<MobileChart> {
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[
                                       widget.index < 0 ? 0 : widget.index],
-                                  onScale: (delta) {
-                                    setState(() {
-                                      additionalVerticalPadding += delta;
-                                      additionalVerticalPadding = min(
-                                          maxHeight / 4,
-                                          additionalVerticalPadding);
-                                      additionalVerticalPadding =
-                                          max(0, additionalVerticalPadding);
-                                    });
-                                  },
-                                  additionalVerticalPadding:
-                                      additionalVerticalPadding,
+                                  onScale: (delta) {},
                                 ),
                                 Row(
                                   children: [
@@ -222,8 +208,7 @@ class _MobileChartState extends State<MobileChart> {
                                           duration: Duration(milliseconds: 300),
                                           padding: EdgeInsets.symmetric(
                                               vertical:
-                                                  MAIN_CHART_VERTICAL_PADDING +
-                                                      additionalVerticalPadding),
+                                                  MAIN_CHART_VERTICAL_PADDING),
                                           child: RepaintBoundary(
                                             child: Stack(
                                               children: [

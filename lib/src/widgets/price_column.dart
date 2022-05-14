@@ -14,7 +14,6 @@ class PriceColumn extends StatefulWidget {
     required this.chartHeight,
     required this.lastCandle,
     required this.onScale,
-    required this.additionalVerticalPadding,
     required this.style,
   }) : super(key: key);
 
@@ -24,7 +23,6 @@ class PriceColumn extends StatefulWidget {
   final double width;
   final double chartHeight;
   final Candle lastCandle;
-  final double additionalVerticalPadding;
   final void Function(double) onScale;
   final CandleSticksStyle style;
 
@@ -51,82 +49,77 @@ class _PriceColumnState extends State<PriceColumn> {
         widget.onScale(details.delta.dy);
       },
       child: AbsorbPointer(
-        child: Padding(
-          padding:
-              EdgeInsets.symmetric(vertical: widget.additionalVerticalPadding),
-          child: Stack(
-            children: [
-              AnimatedPositioned(
-                duration: Duration(milliseconds: 300),
-                top: MAIN_CHART_VERTICAL_PADDING - priceTileHeight / 2,
-                height: widget.chartHeight +
-                    MAIN_CHART_VERTICAL_PADDING +
-                    priceTileHeight / 2,
-                width: widget.width,
-                child: ListView(
-                  controller: scrollController,
-                  children: List<Widget>.generate(20, (i) {
-                    return AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      height: priceTileHeight,
-                      width: double.infinity,
-                      child: Center(
-                        child: Row(
-                          children: [
-                            Container(
-                              width: widget.width - PRICE_BAR_WIDTH,
-                              height: 0.05,
-                              color: widget.style.borderColor,
-                            ),
-                            Expanded(
-                              child: Text(
-                                "${HelperFunctions.priceToString(widget.high - widget.priceScale * i)}",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: widget.style.primaryTextColor,
-                                  fontSize: 11,
-                                ),
+        child: Stack(
+          children: [
+            AnimatedPositioned(
+              duration: Duration(milliseconds: 300),
+              top: MAIN_CHART_VERTICAL_PADDING - priceTileHeight / 2,
+              height: widget.chartHeight +
+                  MAIN_CHART_VERTICAL_PADDING +
+                  priceTileHeight / 2,
+              width: widget.width,
+              child: ListView(
+                controller: scrollController,
+                children: List<Widget>.generate(20, (i) {
+                  return AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    height: priceTileHeight,
+                    width: double.infinity,
+                    child: Center(
+                      child: Row(
+                        children: [
+                          Container(
+                            width: widget.width - PRICE_BAR_WIDTH,
+                            height: 0.05,
+                            color: widget.style.borderColor,
+                          ),
+                          Expanded(
+                            child: Text(
+                              "${HelperFunctions.priceToString(widget.high - widget.priceScale * i)}",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: widget.style.primaryTextColor,
+                                fontSize: 11,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              AnimatedPositioned(
-                duration: Duration(milliseconds: 300),
-                right: 0,
-                top: calcutePriceIndicatorTopPadding(
-                  widget.chartHeight,
-                  widget.low,
-                  widget.high,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      color: widget.lastCandle.isBull
-                          ? widget.style.primaryBull
-                          : widget.style.primaryBear,
-                      child: Center(
-                        child: Text(
-                          HelperFunctions.priceToString(
-                              widget.lastCandle.close),
-                          style: TextStyle(
-                            color: widget.style.secondaryTextColor,
-                            fontSize: 11,
                           ),
+                        ],
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+            AnimatedPositioned(
+              duration: Duration(milliseconds: 300),
+              right: 0,
+              top: calcutePriceIndicatorTopPadding(
+                widget.chartHeight,
+                widget.low,
+                widget.high,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    color: widget.lastCandle.isBull
+                        ? widget.style.primaryBull
+                        : widget.style.primaryBear,
+                    child: Center(
+                      child: Text(
+                        HelperFunctions.priceToString(widget.lastCandle.close),
+                        style: TextStyle(
+                          color: widget.style.secondaryTextColor,
+                          fontSize: 11,
                         ),
                       ),
-                      width: PRICE_BAR_WIDTH,
-                      height: PRICE_INDICATOR_HEIGHT,
                     ),
-                  ],
-                ),
+                    width: PRICE_BAR_WIDTH,
+                    height: PRICE_INDICATOR_HEIGHT,
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -22,13 +22,13 @@ class HelperFunctions {
   }
 
   static String priceToString(double price) {
-    return price > 1000
+    return price.abs() > 1000
         ? price.toStringAsFixed(2)
-        : price > 100
+        : price.abs() > 100
             ? price.toStringAsFixed(3)
-            : price > 10
+            : price.abs() > 10
                 ? price.toStringAsFixed(4)
-                : price > 1
+                : price.abs() > 1
                     ? price.toStringAsFixed(5)
                     : price.toStringAsFixed(7);
   }
