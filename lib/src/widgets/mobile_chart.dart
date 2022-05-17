@@ -115,12 +115,6 @@ class _MobileChartState extends State<MobileChart> {
 
         // calcute priceScale
         double chartHeight = maxHeight * 0.75 - 2 * MAIN_CHART_VERTICAL_PADDING;
-        double priceScale =
-            HelperFunctions.calculatePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
-
-        // high and low calibrations revision
-        candlesHighPrice = (candlesHighPrice ~/ priceScale + 1) * priceScale;
-        candlesLowPrice = (candlesLowPrice ~/ priceScale) * priceScale;
 
         // calcute highest volume
         double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
@@ -170,7 +164,6 @@ class _MobileChartState extends State<MobileChart> {
                                   style: widget.style,
                                   low: candlesLowPrice,
                                   high: candlesHighPrice,
-                                  priceScale: priceScale,
                                   width: constraints.maxWidth,
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[

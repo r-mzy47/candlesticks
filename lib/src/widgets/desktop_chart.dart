@@ -79,6 +79,8 @@ class _DesktopChartState extends State<DesktopChart> {
   double? mouseHoverY;
   bool isDragging = false;
   bool showHoverIndicator = true;
+  double? manualScaleHigh;
+  double? manualScaleLow;
 
   void _onMouseExit(PointerEvent details) {
     setState(() {
@@ -93,8 +95,6 @@ class _DesktopChartState extends State<DesktopChart> {
       mouseHoverY = details.localPosition.dy;
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +122,10 @@ class _DesktopChartState extends State<DesktopChart> {
 
         double candlesHighPrice = 0;
         double candlesLowPrice = 0;
-        if (widget.chartAdjust == ChartAdjust.visibleRange) {
+        if (manualScaleHigh != null) {
+          candlesHighPrice = manualScaleHigh!;
+          candlesLowPrice = manualScaleLow!;
+        } else if (widget.chartAdjust == ChartAdjust.visibleRange) {
           candlesHighPrice = widget.mainWidnowDataContainer.highs
               .getRange(candlesStartIndex, candlesEndIndex + 1)
               .reduce(max);
@@ -137,23 +140,17 @@ class _DesktopChartState extends State<DesktopChart> {
         // calcute priceScale
         double chartHeight =
             maxHeight * 0.75 - 2 * (MAIN_CHART_VERTICAL_PADDING);
-        double priceScale =
-            HelperFunctions.calculatePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
-
-        // high and low calibrations revision
-        candlesHighPrice = (candlesHighPrice ~/ priceScale + 1) * priceScale;
-        candlesLowPrice = (candlesLowPrice ~/ priceScale) * priceScale;
 
         // calcute highest volume
         double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
 
         return TweenAnimationBuilder(
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
           builder: (context, double high, _) {
             return TweenAnimationBuilder(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
-              duration: Duration(milliseconds: 300),
+              duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
               builder: (context, double low, _) {
                 final currentCandle = mouseHoverX == null
                     ? null
@@ -185,12 +182,25 @@ class _DesktopChartState extends State<DesktopChart> {
                                   style: widget.style,
                                   low: candlesLowPrice,
                                   high: candlesHighPrice,
-                                  priceScale: priceScale,
                                   width: constraints.maxWidth,
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[
                                       widget.index < 0 ? 0 : widget.index],
-                                  onScale: (delta) {},
+                                  onScale: (delta) {
+                                    if (manualScaleHigh == null) {
+                                      manualScaleHigh = candlesHighPrice;
+                                      manualScaleLow = candlesLowPrice;
+                                    }
+                                    setState(() {
+                                      double deltaPrice = delta /
+                                          chartHeight *
+                                          (manualScaleHigh! - manualScaleLow!);
+                                      manualScaleHigh =
+                                          manualScaleHigh! + deltaPrice;
+                                      manualScaleLow =
+                                          manualScaleLow! - deltaPrice;
+                                    });
+                                  },
                                 ),
                                 Row(
                                   children: [
@@ -327,12 +337,13 @@ class _DesktopChartState extends State<DesktopChart> {
                                     child: Center(
                                       child: Text(
                                         mouseHoverY! < maxHeight * 0.75
-                                            ? HelperFunctions.priceToString(
-                                                high -
-                                                    (mouseHoverY! - 20) /
-                                                        (maxHeight * 0.75 -
-                                                            40) *
-                                                        (high - low))
+                                            ? HelperFunctions.priceToString(high -
+                                                (mouseHoverY! -
+                                                        MAIN_CHART_VERTICAL_PADDING) /
+                                                    (maxHeight * 0.75 -
+                                                        2 *
+                                                            MAIN_CHART_VERTICAL_PADDING) *
+                                                    (high - low))
                                             : HelperFunctions.addMetricPrefix(
                                                 HelperFunctions.getRoof(
                                                         volumeHigh) *
@@ -390,6 +401,17 @@ class _DesktopChartState extends State<DesktopChart> {
                                 mouseHoverY = update.localPosition.dy;
                                 widget.onHorizontalDragUpdate(
                                     update.localPosition.dx);
+                                setState(() {
+                                  if (manualScaleHigh != null) {
+                                    double deltaPrice = update.delta.dy /
+                                        chartHeight *
+                                        (manualScaleHigh! - manualScaleLow!);
+                                    manualScaleHigh =
+                                        manualScaleHigh! + deltaPrice;
+                                    manualScaleLow =
+                                        manualScaleLow! + deltaPrice;
+                                  }
+                                });
                               },
                               onPanEnd: (update) {
                                 widget.onPanEnd();

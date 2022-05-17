@@ -9,7 +9,6 @@ class PriceColumn extends StatefulWidget {
     Key? key,
     required this.low,
     required this.high,
-    required this.priceScale,
     required this.width,
     required this.chartHeight,
     required this.lastCandle,
@@ -19,7 +18,6 @@ class PriceColumn extends StatefulWidget {
 
   final double low;
   final double high;
-  final double priceScale;
   final double width;
   final double chartHeight;
   final Candle lastCandle;
@@ -37,13 +35,19 @@ class _PriceColumnState extends State<PriceColumn> {
       double chartHeight, double low, double high) {
     return chartHeight +
         10 -
-        (widget.lastCandle.close - low) / (high - low) * chartHeight;
+        (widget.lastCandle.close - low) / (high - low) * chartHeight - MAIN_CHART_VERTICAL_PADDING;
   }
 
   @override
   Widget build(BuildContext context) {
+    final double priceScale = HelperFunctions.calculatePriceScale(
+        widget.chartHeight, widget.high, widget.low);
     final double priceTileHeight =
-        widget.chartHeight / ((widget.high - widget.low) / widget.priceScale);
+        widget.chartHeight / ((widget.high - widget.low) / priceScale);
+    final double newHigh = (widget.high ~/ priceScale + 1) * priceScale;
+    final double top = -priceTileHeight / priceScale * (newHigh - widget.high) +
+                  MAIN_CHART_VERTICAL_PADDING -
+                  priceTileHeight / 2;
     return GestureDetector(
       onVerticalDragUpdate: (details) {
         widget.onScale(details.delta.dy);
@@ -53,10 +57,8 @@ class _PriceColumnState extends State<PriceColumn> {
           children: [
             AnimatedPositioned(
               duration: Duration(milliseconds: 300),
-              top: MAIN_CHART_VERTICAL_PADDING - priceTileHeight / 2,
-              height: widget.chartHeight +
-                  MAIN_CHART_VERTICAL_PADDING +
-                  priceTileHeight / 2,
+              top: top,
+              height: widget.chartHeight + 2 * MAIN_CHART_VERTICAL_PADDING - top,
               width: widget.width,
               child: ListView(
                 controller: scrollController,
@@ -75,7 +77,7 @@ class _PriceColumnState extends State<PriceColumn> {
                           ),
                           Expanded(
                             child: Text(
-                              "${HelperFunctions.priceToString(widget.high - widget.priceScale * i)}",
+                              "${HelperFunctions.priceToString(newHigh - priceScale * i)}",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: widget.style.primaryTextColor,
