@@ -78,7 +78,6 @@ class _DesktopChartState extends State<DesktopChart> {
   double? mouseHoverX;
   double? mouseHoverY;
   bool isDragging = false;
-  double verticalScale = 0;
   bool showHoverIndicator = true;
 
   void _onMouseExit(PointerEvent details) {
@@ -95,20 +94,7 @@ class _DesktopChartState extends State<DesktopChart> {
     });
   }
 
-  double calcutePriceScale(double height, double high, double low) {
-    int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
-    minTiles = max(2, minTiles);
-    double sizeRange = high - low;
-    assert(sizeRange != 0,
-        "highest highs and lowest lows of visible candles are equal.");
-    double minStepSize = sizeRange / minTiles;
-    double base =
-        pow(10, HelperFunctions.log10(minStepSize).floor()).toDouble();
 
-    if (2 * base > minStepSize) return 2 * base;
-    if (5 * base > minStepSize) return 5 * base;
-    return 10 * base;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +138,7 @@ class _DesktopChartState extends State<DesktopChart> {
         double chartHeight =
             maxHeight * 0.75 - 2 * (MAIN_CHART_VERTICAL_PADDING);
         double priceScale =
-            calcutePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
+            HelperFunctions.calculatePriceScale(chartHeight, candlesHighPrice, candlesLowPrice);
 
         // high and low calibrations revision
         candlesHighPrice = (candlesHighPrice ~/ priceScale + 1) * priceScale;

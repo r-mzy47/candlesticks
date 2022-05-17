@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:candlesticks/src/constant/view_constants.dart';
+
 class HelperFunctions {
   static double log10(num x) => log(x) / ln10;
 
@@ -31,5 +33,20 @@ class HelperFunctions {
                 : price.abs() > 1
                     ? price.toStringAsFixed(5)
                     : price.toStringAsFixed(7);
+  }
+
+  static double calculatePriceScale(double height, double high, double low) {
+    int minTiles = (height / MIN_PRICETILE_HEIGHT).floor();
+    minTiles = max(2, minTiles);
+    double sizeRange = high - low;
+    assert(sizeRange != 0,
+        "highest highs and lowest lows of visible candles are equal.");
+    double minStepSize = sizeRange / minTiles;
+    double base =
+        pow(10, HelperFunctions.log10(minStepSize).floor()).toDouble();
+
+    if (2 * base > minStepSize) return 2 * base;
+    if (5 * base > minStepSize) return 5 * base;
+    return 10 * base;
   }
 }
