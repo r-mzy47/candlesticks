@@ -150,7 +150,8 @@ class _DesktopChartState extends State<DesktopChart> {
           builder: (context, double high, _) {
             return TweenAnimationBuilder(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
-              duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
+              duration:
+                  Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
               builder: (context, double low, _) {
                 final currentCandle = mouseHoverX == null
                     ? null
@@ -453,6 +454,27 @@ class _DesktopChartState extends State<DesktopChart> {
                               .mainWidnowDataContainer.unvisibleIndicators,
                         ),
                       ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        width: PRICE_BAR_WIDTH,
+                        height: 20,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            primary: widget.style.hoverIndicatorBackgroundColor,
+                          ),
+                          child: Text("Auto"),
+                          onPressed: manualScaleHigh == null
+                              ? null
+                              : () {
+                                  setState(() {
+                                    manualScaleHigh = null;
+                                    manualScaleLow = null;
+                                  });
+                                },
+                        ),
+                      )
                     ],
                   ),
                 );
