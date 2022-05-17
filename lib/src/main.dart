@@ -131,7 +131,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   onPressed: () {
                     setState(() {
                       candleWidth -= 2;
-                      candleWidth = max(candleWidth, 4);
+                      candleWidth = max(candleWidth, 2);
                     });
                   },
                   child: Icon(
@@ -143,7 +143,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   onPressed: () {
                     setState(() {
                       candleWidth += 2;
-                      candleWidth = min(candleWidth, 16);
+                      candleWidth = min(candleWidth, 20);
                     });
                   },
                   child: Icon(
@@ -183,8 +183,8 @@ class _CandlesticksState extends State<Candlesticks> {
                       scale = min(1.1, scale);
                       setState(() {
                         candleWidth *= scale;
-                        candleWidth = min(candleWidth, 16);
-                        candleWidth = max(candleWidth, 4);
+                        candleWidth = min(candleWidth, 20);
+                        candleWidth = max(candleWidth, 2);
                       });
                     },
                     onPanEnd: () {
@@ -226,8 +226,8 @@ class _CandlesticksState extends State<Candlesticks> {
                       scale = min(1.1, scale);
                       setState(() {
                         candleWidth *= scale;
-                        candleWidth = min(candleWidth, 16);
-                        candleWidth = max(candleWidth, 4);
+                        candleWidth = min(candleWidth, 20);
+                        candleWidth = max(candleWidth, 2);
                       });
                     },
                     onPanEnd: () {

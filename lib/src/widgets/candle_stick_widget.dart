@@ -125,7 +125,7 @@ class CandleStickRenderObject extends RenderBox {
       context.canvas.drawLine(
         Offset(x, openCandleY),
         Offset(x, closeCandleY),
-        paint..strokeWidth = _candleWidth - 1,
+        paint..strokeWidth = _candleWidth * 0.8,
       );
     } else {
       // if the candle body is too small
@@ -133,7 +133,7 @@ class CandleStickRenderObject extends RenderBox {
       context.canvas.drawLine(
         Offset(x, mid - 0.5),
         Offset(x, mid + 0.5),
-        paint..strokeWidth = _candleWidth - 1,
+        paint..strokeWidth = _candleWidth * 0.8,
       );
     }
   }

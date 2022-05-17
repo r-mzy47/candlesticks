@@ -385,7 +385,7 @@ class _DesktopChartState extends State<DesktopChart> {
                           onPointerSignal: (pointerSignal) {
                             if (pointerSignal is PointerScrollEvent) {
                               widget.onScaleUpdate(
-                                  pointerSignal.scrollDelta.direction);
+                                  pointerSignal.scrollDelta.direction * -1);
                             }
                           },
                           child: MouseRegion(
