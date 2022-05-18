@@ -74,6 +74,8 @@ class _MobileChartState extends State<MobileChart> {
   double? longPressX;
   double? longPressY;
   bool showIndicatorNames = false;
+  double? manualScaleHigh;
+  double? manualScaleLow;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +103,10 @@ class _MobileChartState extends State<MobileChart> {
 
         double candlesHighPrice = 0;
         double candlesLowPrice = 0;
-        if (widget.chartAdjust == ChartAdjust.visibleRange) {
+        if (manualScaleHigh != null) {
+          candlesHighPrice = manualScaleHigh!;
+          candlesLowPrice = manualScaleLow!;
+        } else if (widget.chartAdjust == ChartAdjust.visibleRange) {
           candlesHighPrice = widget.mainWidnowDataContainer.highs
               .getRange(candlesStartIndex, candlesEndIndex + 1)
               .reduce(max);
@@ -128,11 +133,11 @@ class _MobileChartState extends State<MobileChart> {
 
         return TweenAnimationBuilder(
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
           builder: (context, double high, _) {
             return TweenAnimationBuilder(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
-              duration: Duration(milliseconds: 300),
+              duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
               builder: (context, double low, _) {
                 final currentCandle = longPressX == null
                     ? null
@@ -168,7 +173,21 @@ class _MobileChartState extends State<MobileChart> {
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[
                                       widget.index < 0 ? 0 : widget.index],
-                                  onScale: (delta) {},
+                                  onScale: (delta) {
+                                    if (manualScaleHigh == null) {
+                                      manualScaleHigh = candlesHighPrice;
+                                      manualScaleLow = candlesLowPrice;
+                                    }
+                                    setState(() {
+                                      double deltaPrice = delta /
+                                          chartHeight *
+                                          (manualScaleHigh! - manualScaleLow!);
+                                      manualScaleHigh =
+                                          manualScaleHigh! + deltaPrice;
+                                      manualScaleLow =
+                                          manualScaleLow! - deltaPrice;
+                                    });
+                                  },
                                 ),
                                 Row(
                                   children: [
@@ -364,6 +383,16 @@ class _MobileChartState extends State<MobileChart> {
                             if (details.scale == 1) {
                               widget.onHorizontalDragUpdate(
                                   details.focalPoint.dx);
+                              setState(() {
+                                if (manualScaleHigh != null) {
+                                  double deltaPrice = details.focalPointDelta.dy /
+                                      chartHeight *
+                                      (manualScaleHigh! - manualScaleLow!);
+                                  manualScaleHigh =
+                                      manualScaleHigh! + deltaPrice;
+                                  manualScaleLow = manualScaleLow! + deltaPrice;
+                                }
+                              });
                             }
                             widget.onScaleUpdate(details.scale);
                           },
@@ -404,6 +433,27 @@ class _MobileChartState extends State<MobileChart> {
                               .mainWidnowDataContainer.unvisibleIndicators,
                         ),
                       ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        width: PRICE_BAR_WIDTH,
+                        height: 20,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            primary: widget.style.hoverIndicatorBackgroundColor,
+                          ),
+                          child: Text("Auto"),
+                          onPressed: manualScaleHigh == null
+                              ? null
+                              : () {
+                                  setState(() {
+                                    manualScaleHigh = null;
+                                    manualScaleLow = null;
+                                  });
+                                },
+                        ),
+                      )
                     ],
                   ),
                 );
