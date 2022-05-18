@@ -8,8 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 
-import 'models/candle_sticks_style.dart';
-
 enum ChartAdjust {
   /// Will adjust chart size by max and min value from visible area
   visibleRange,
@@ -43,7 +41,7 @@ class Candlesticks extends StatefulWidget {
   /// Will zoom buttons be displayed in toolbar
   final bool displayZoomActions;
 
-  /// Custom loader widget
+  /// Custom loading widget
   final Widget? loadingWidget;
 
   final CandleSticksStyle? style;
