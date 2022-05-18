@@ -31,7 +31,7 @@ class PriceColumn extends StatefulWidget {
 class _PriceColumnState extends State<PriceColumn> {
   ScrollController scrollController = new ScrollController();
 
-  double calcutePriceIndicatorTopPadding(
+  double calculatePriceIndicatorTopPadding(
       double chartHeight, double low, double high) {
     return chartHeight +
         10 -
@@ -97,7 +97,7 @@ class _PriceColumnState extends State<PriceColumn> {
             AnimatedPositioned(
               duration: Duration(milliseconds: 300),
               right: 0,
-              top: calcutePriceIndicatorTopPadding(
+              top: calculatePriceIndicatorTopPadding(
                 widget.chartHeight,
                 widget.low,
                 widget.high,

@@ -137,11 +137,11 @@ class _DesktopChartState extends State<DesktopChart> {
           candlesLowPrice = widget.mainWidnowDataContainer.lows.reduce(min);
         }
 
-        // calcute priceScale
+        // calculate priceScale
         double chartHeight =
             maxHeight * 0.75 - 2 * (MAIN_CHART_VERTICAL_PADDING);
 
-        // calcute highest volume
+        // calculate highest volume
         double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
 
         return TweenAnimationBuilder(

@@ -5,7 +5,7 @@ class Candle {
   /// DateTime for the candle
   final DateTime date;
 
-  /// The highet price during this candle lifetime
+  /// The highest price during this candle lifetime
   /// It if always more than low, open and close
   final double high;
 
@@ -13,7 +13,7 @@ class Candle {
   /// It if always less than high, open and close
   final double low;
 
-  /// Price at the beginnig of the period
+  /// Price at the beginning of the period
   final double open;
 
   /// Price at the end of the period
