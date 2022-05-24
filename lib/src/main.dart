@@ -82,6 +82,18 @@ class _CandlesticksState extends State<Candlesticks> {
   MainWidnowDataContainer? mainWidnowDataContainer;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.candles.length == 0) {
+      return;
+    }
+    if (mainWidnowDataContainer == null) {
+      mainWidnowDataContainer =
+          MainWidnowDataContainer(widget.indicators ?? [], widget.candles);
+    }
+  }
+
+  @override
   void didUpdateWidget(covariant Candlesticks oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.candles.length == 0) {
