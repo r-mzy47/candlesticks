@@ -6,6 +6,9 @@ class HelperFunctions {
   static double log10(num x) => log(x) / ln10;
 
   static double getRoof(double number) {
+    if (number == 0) {
+      return 1;
+    }
     int log = log10(number).floor();
     return (number ~/ pow(10, log) + 1) * pow(10, log).toDouble();
   }
