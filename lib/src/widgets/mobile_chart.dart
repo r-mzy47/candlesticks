@@ -118,6 +118,11 @@ class _MobileChartState extends State<MobileChart> {
           candlesLowPrice = widget.mainWidnowDataContainer.lows.reduce(min);
         }
 
+        if (candlesHighPrice == candlesLowPrice) {
+          candlesHighPrice += 10;
+          candlesLowPrice -= 10;
+        }
+
         // calculate priceScale
         double chartHeight = maxHeight * 0.75 - 2 * MAIN_CHART_VERTICAL_PADDING;
 
