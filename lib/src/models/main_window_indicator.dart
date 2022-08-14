@@ -12,7 +12,7 @@ class IndicatorComponentData {
   bool visible = true;
 }
 
-class MainWidnowDataContainer {
+class MainWindowDataContainer {
   List<IndicatorComponentData> indicatorComponentData = [];
   List<Indicator> indicators;
   List<double> highs = [];
@@ -39,7 +39,7 @@ class MainWidnowDataContainer {
     }
   }
 
-  MainWidnowDataContainer(this.indicators, List<Candle> candles) {
+  MainWindowDataContainer(this.indicators, List<Candle> candles) {
     endDate = candles[0].date;
     beginDate = candles.last.date;
     indicators.forEach((indicator) {

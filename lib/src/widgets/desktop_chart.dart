@@ -51,7 +51,7 @@ class DesktopChart extends StatefulWidget {
   final Function() onReachEnd;
 
   /// holds main window indicators data and high and low prices.
-  final MainWidnowDataContainer mainWidnowDataContainer;
+  final MainWindowDataContainer mainWindowDataContainer;
 
   final void Function(String)? onRemoveIndicator;
 
@@ -65,7 +65,7 @@ class DesktopChart extends StatefulWidget {
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
-    required this.mainWidnowDataContainer,
+    required this.mainWindowDataContainer,
     required this.onRemoveIndicator,
     required this.style,
   });
@@ -126,15 +126,15 @@ class _DesktopChartState extends State<DesktopChart> {
           candlesHighPrice = manualScaleHigh!;
           candlesLowPrice = manualScaleLow!;
         } else if (widget.chartAdjust == ChartAdjust.visibleRange) {
-          candlesHighPrice = widget.mainWidnowDataContainer.highs
+          candlesHighPrice = widget.mainWindowDataContainer.highs
               .getRange(candlesStartIndex, candlesEndIndex + 1)
               .reduce(max);
-          candlesLowPrice = widget.mainWidnowDataContainer.lows
+          candlesLowPrice = widget.mainWindowDataContainer.lows
               .getRange(candlesStartIndex, candlesEndIndex + 1)
               .reduce(min);
         } else if (widget.chartAdjust == ChartAdjust.fullRange) {
-          candlesHighPrice = widget.mainWidnowDataContainer.highs.reduce(max);
-          candlesLowPrice = widget.mainWidnowDataContainer.lows.reduce(min);
+          candlesHighPrice = widget.mainWindowDataContainer.highs.reduce(max);
+          candlesLowPrice = widget.mainWindowDataContainer.lows.reduce(min);
         }
 
         if (candlesHighPrice == candlesLowPrice) {
@@ -230,7 +230,7 @@ class _DesktopChartState extends State<DesktopChart> {
                                               children: [
                                                 MainWindowIndicatorWidget(
                                                   indicatorDatas: widget
-                                                      .mainWidnowDataContainer
+                                                      .mainWindowDataContainer
                                                       .indicatorComponentData,
                                                   index: widget.index,
                                                   candleWidth:
@@ -448,15 +448,15 @@ class _DesktopChartState extends State<DesktopChart> {
                           style: widget.style,
                           onRemoveIndicator: widget.onRemoveIndicator,
                           currentCandle: currentCandle,
-                          indicators: widget.mainWidnowDataContainer.indicators,
+                          indicators: widget.mainWindowDataContainer.indicators,
                           toggleIndicatorVisibility: (indicatorName) {
                             setState(() {
-                              widget.mainWidnowDataContainer
+                              widget.mainWindowDataContainer
                                   .toggleIndicatorVisibility(indicatorName);
                             });
                           },
                           unvisibleIndicators: widget
-                              .mainWidnowDataContainer.unvisibleIndicators,
+                              .mainWindowDataContainer.unvisibleIndicators,
                         ),
                       ),
                       Positioned(

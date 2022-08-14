@@ -37,7 +37,7 @@ class MobileChart extends StatefulWidget {
   final int index;
 
   /// holds main window indicators data and high and low prices.
-  final MainWidnowDataContainer mainWidnowDataContainer;
+  final MainWindowDataContainer mainWindowDataContainer;
 
   /// How chart price range will be adjusted when moving chart
   final ChartAdjust chartAdjust;
@@ -62,7 +62,7 @@ class MobileChart extends StatefulWidget {
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
-    required this.mainWidnowDataContainer,
+    required this.mainWindowDataContainer,
     required this.onRemoveIndicator,
   });
 
@@ -107,15 +107,15 @@ class _MobileChartState extends State<MobileChart> {
           candlesHighPrice = manualScaleHigh!;
           candlesLowPrice = manualScaleLow!;
         } else if (widget.chartAdjust == ChartAdjust.visibleRange) {
-          candlesHighPrice = widget.mainWidnowDataContainer.highs
+          candlesHighPrice = widget.mainWindowDataContainer.highs
               .getRange(candlesStartIndex, candlesEndIndex + 1)
               .reduce(max);
-          candlesLowPrice = widget.mainWidnowDataContainer.lows
+          candlesLowPrice = widget.mainWindowDataContainer.lows
               .getRange(candlesStartIndex, candlesEndIndex + 1)
               .reduce(min);
         } else if (widget.chartAdjust == ChartAdjust.fullRange) {
-          candlesHighPrice = widget.mainWidnowDataContainer.highs.reduce(max);
-          candlesLowPrice = widget.mainWidnowDataContainer.lows.reduce(min);
+          candlesHighPrice = widget.mainWindowDataContainer.highs.reduce(max);
+          candlesLowPrice = widget.mainWindowDataContainer.lows.reduce(min);
         }
 
         if (candlesHighPrice == candlesLowPrice) {
@@ -216,7 +216,7 @@ class _MobileChartState extends State<MobileChart> {
                                               children: [
                                                 MainWindowIndicatorWidget(
                                                   indicatorDatas: widget
-                                                      .mainWidnowDataContainer
+                                                      .mainWindowDataContainer
                                                       .indicatorComponentData,
                                                   index: widget.index,
                                                   candleWidth:
@@ -427,15 +427,15 @@ class _MobileChartState extends State<MobileChart> {
                           style: widget.style,
                           onRemoveIndicator: widget.onRemoveIndicator,
                           currentCandle: currentCandle,
-                          indicators: widget.mainWidnowDataContainer.indicators,
+                          indicators: widget.mainWindowDataContainer.indicators,
                           toggleIndicatorVisibility: (indicatorName) {
                             setState(() {
-                              widget.mainWidnowDataContainer
+                              widget.mainWindowDataContainer
                                   .toggleIndicatorVisibility(indicatorName);
                             });
                           },
                           unvisibleIndicators: widget
-                              .mainWidnowDataContainer.unvisibleIndicators,
+                              .mainWindowDataContainer.unvisibleIndicators,
                         ),
                       ),
                       Positioned(

@@ -79,7 +79,7 @@ class _CandlesticksState extends State<Candlesticks> {
   /// true when widget.onLoadMoreCandles is fetching new candles.
   bool isCallingLoadMore = false;
 
-  MainWidnowDataContainer? mainWidnowDataContainer;
+  MainWindowDataContainer? mainWindowDataContainer;
 
   @override
   void initState() {
@@ -87,9 +87,9 @@ class _CandlesticksState extends State<Candlesticks> {
     if (widget.candles.length == 0) {
       return;
     }
-    if (mainWidnowDataContainer == null) {
-      mainWidnowDataContainer =
-          MainWidnowDataContainer(widget.indicators ?? [], widget.candles);
+    if (mainWindowDataContainer == null) {
+      mainWindowDataContainer =
+          MainWindowDataContainer(widget.indicators ?? [], widget.candles);
     }
   }
 
@@ -99,9 +99,9 @@ class _CandlesticksState extends State<Candlesticks> {
     if (widget.candles.length == 0) {
       return;
     }
-    if (mainWidnowDataContainer == null) {
-      mainWidnowDataContainer =
-          MainWidnowDataContainer(widget.indicators ?? [], widget.candles);
+    if (mainWindowDataContainer == null) {
+      mainWindowDataContainer =
+          MainWindowDataContainer(widget.indicators ?? [], widget.candles);
     } else {
       final currentIndicators = widget.indicators ?? [];
       final oldIndicators = oldWidget.indicators ?? [];
@@ -110,17 +110,17 @@ class _CandlesticksState extends State<Candlesticks> {
           if (currentIndicators[i] == oldIndicators[i]) {
             continue;
           } else {
-            mainWidnowDataContainer = MainWidnowDataContainer(
+            mainWindowDataContainer = MainWindowDataContainer(
                 widget.indicators ?? [], widget.candles);
             return;
           }
         }
       } else {
-        mainWidnowDataContainer =
-            MainWidnowDataContainer(widget.indicators ?? [], widget.candles);
+        mainWindowDataContainer =
+            MainWindowDataContainer(widget.indicators ?? [], widget.candles);
         return;
       }
-      mainWidnowDataContainer!.tickUpdate(widget.candles);
+      mainWindowDataContainer!.tickUpdate(widget.candles);
     }
   }
 
@@ -166,7 +166,7 @@ class _CandlesticksState extends State<Candlesticks> {
             ],
           ),
         ],
-        if (widget.candles.length == 0 || mainWidnowDataContainer == null)
+        if (widget.candles.length == 0 || mainWindowDataContainer == null)
           Expanded(
             child: Center(
               child: widget.loadingWidget ??
@@ -186,7 +186,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   return DesktopChart(
                     style: style,
                     onRemoveIndicator: widget.onRemoveIndicator,
-                    mainWidnowDataContainer: mainWidnowDataContainer!,
+                    mainWindowDataContainer: mainWindowDataContainer!,
                     chartAdjust: widget.chartAdjust,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);
@@ -229,7 +229,7 @@ class _CandlesticksState extends State<Candlesticks> {
                   return MobileChart(
                     style: style,
                     onRemoveIndicator: widget.onRemoveIndicator,
-                    mainWidnowDataContainer: mainWidnowDataContainer!,
+                    mainWindowDataContainer: mainWindowDataContainer!,
                     chartAdjust: widget.chartAdjust,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);
