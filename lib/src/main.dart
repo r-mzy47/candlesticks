@@ -120,7 +120,12 @@ class _CandlesticksState extends State<Candlesticks> {
             MainWindowDataContainer(widget.indicators ?? [], widget.candles);
         return;
       }
-      mainWindowDataContainer!.tickUpdate(widget.candles);
+      try {
+        mainWindowDataContainer!.tickUpdate(widget.candles);
+      } catch (_) {
+        mainWindowDataContainer =
+            MainWindowDataContainer(widget.indicators ?? [], widget.candles);
+      }
     }
   }
 

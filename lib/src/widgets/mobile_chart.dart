@@ -142,7 +142,8 @@ class _MobileChartState extends State<MobileChart> {
           builder: (context, double high, _) {
             return TweenAnimationBuilder(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
-              duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
+              duration:
+                  Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
               builder: (context, double low, _) {
                 final currentCandle = longPressX == null
                     ? null
@@ -390,9 +391,10 @@ class _MobileChartState extends State<MobileChart> {
                                   details.focalPoint.dx);
                               setState(() {
                                 if (manualScaleHigh != null) {
-                                  double deltaPrice = details.focalPointDelta.dy /
-                                      chartHeight *
-                                      (manualScaleHigh! - manualScaleLow!);
+                                  double deltaPrice =
+                                      details.focalPointDelta.dy /
+                                          chartHeight *
+                                          (manualScaleHigh! - manualScaleLow!);
                                   manualScaleHigh =
                                       manualScaleHigh! + deltaPrice;
                                   manualScaleLow = manualScaleLow! + deltaPrice;
