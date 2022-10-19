@@ -451,7 +451,13 @@ class _MobileChartState extends State<MobileChart> {
                             padding: EdgeInsets.zero,
                             primary: widget.style.hoverIndicatorBackgroundColor,
                           ),
-                          child: Text("Auto"),
+                          child: Text(
+                            "Auto",
+                            style: TextStyle(
+                              color: widget.style.secondaryTextColor,
+                              fontSize: 12,
+                            ),
+                          ),
                           onPressed: manualScaleHigh == null
                               ? null
                               : () {
