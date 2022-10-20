@@ -330,12 +330,13 @@ class _MobileChartState extends State<MobileChart> {
                                     child: Center(
                                       child: Text(
                                         longPressY! < maxHeight * 0.75
-                                            ? HelperFunctions.priceToString(
-                                                high -
-                                                    (longPressY! - 20) /
-                                                        (maxHeight * 0.75 -
-                                                            40) *
-                                                        (high - low))
+                                            ? HelperFunctions.priceToString(high -
+                                                (longPressY! -
+                                                        MAIN_CHART_VERTICAL_PADDING) /
+                                                    (maxHeight * 0.75 -
+                                                        2 *
+                                                            MAIN_CHART_VERTICAL_PADDING) *
+                                                    (high - low))
                                             : HelperFunctions.addMetricPrefix(
                                                 HelperFunctions.getRoof(
                                                         volumeHigh) *
@@ -450,7 +451,13 @@ class _MobileChartState extends State<MobileChart> {
                             padding: EdgeInsets.zero,
                             primary: widget.style.hoverIndicatorBackgroundColor,
                           ),
-                          child: Text("Auto"),
+                          child: Text(
+                            "Auto",
+                            style: TextStyle(
+                              color: widget.style.secondaryTextColor,
+                              fontSize: 12,
+                            ),
+                          ),
                           onPressed: manualScaleHigh == null
                               ? null
                               : () {
