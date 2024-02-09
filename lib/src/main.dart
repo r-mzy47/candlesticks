@@ -1,12 +1,13 @@
+import 'dart:io' show Platform;
 import 'dart:math';
+
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/models/main_window_indicator.dart';
-import 'package:candlesticks/src/widgets/mobile_chart.dart';
 import 'package:candlesticks/src/widgets/desktop_chart.dart';
+import 'package:candlesticks/src/widgets/mobile_chart.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
 
 enum ChartAdjust {
   /// Will adjust chart size by max and min value from visible area
@@ -41,6 +42,9 @@ class Candlesticks extends StatefulWidget {
   /// Will zoom buttons be displayed in toolbar
   final bool displayZoomActions;
 
+  /// Determines whether to show the volume at the bottom of the chart or not
+  final bool showVolume;
+
   /// Custom loading widget
   final Widget? loadingWidget;
 
@@ -53,12 +57,12 @@ class Candlesticks extends StatefulWidget {
     this.actions = const [],
     this.chartAdjust = ChartAdjust.visibleRange,
     this.displayZoomActions = true,
+    this.showVolume = true,
     this.loadingWidget,
     this.indicators,
     this.onRemoveIndicator,
     this.style,
-  })  : assert(candles.length == 0 || candles.length > 1,
-            "Please provide at least 2 candles"),
+  })  : assert(candles.length == 0 || candles.length > 1, "Please provide at least 2 candles"),
         super(key: key);
 
   @override
@@ -88,8 +92,7 @@ class _CandlesticksState extends State<Candlesticks> {
       return;
     }
     if (mainWindowDataContainer == null) {
-      mainWindowDataContainer =
-          MainWindowDataContainer(widget.indicators ?? [], widget.candles);
+      mainWindowDataContainer = MainWindowDataContainer(widget.indicators ?? [], widget.candles);
     }
   }
 
@@ -100,8 +103,7 @@ class _CandlesticksState extends State<Candlesticks> {
       return;
     }
     if (mainWindowDataContainer == null) {
-      mainWindowDataContainer =
-          MainWindowDataContainer(widget.indicators ?? [], widget.candles);
+      mainWindowDataContainer = MainWindowDataContainer(widget.indicators ?? [], widget.candles);
     } else {
       final currentIndicators = widget.indicators ?? [];
       final oldIndicators = oldWidget.indicators ?? [];
@@ -110,21 +112,18 @@ class _CandlesticksState extends State<Candlesticks> {
           if (currentIndicators[i] == oldIndicators[i]) {
             continue;
           } else {
-            mainWindowDataContainer = MainWindowDataContainer(
-                widget.indicators ?? [], widget.candles);
+            mainWindowDataContainer = MainWindowDataContainer(widget.indicators ?? [], widget.candles);
             return;
           }
         }
       } else {
-        mainWindowDataContainer =
-            MainWindowDataContainer(widget.indicators ?? [], widget.candles);
+        mainWindowDataContainer = MainWindowDataContainer(widget.indicators ?? [], widget.candles);
         return;
       }
       try {
         mainWindowDataContainer!.tickUpdate(widget.candles);
       } catch (_) {
-        mainWindowDataContainer =
-            MainWindowDataContainer(widget.indicators ?? [], widget.candles);
+        mainWindowDataContainer = MainWindowDataContainer(widget.indicators ?? [], widget.candles);
       }
     }
   }
@@ -132,9 +131,7 @@ class _CandlesticksState extends State<Candlesticks> {
   @override
   Widget build(BuildContext context) {
     final style = widget.style ??
-        (Theme.of(context).brightness == Brightness.dark
-            ? CandleSticksStyle.dark()
-            : CandleSticksStyle.light());
+        (Theme.of(context).brightness == Brightness.dark ? CandleSticksStyle.dark() : CandleSticksStyle.light());
     return Column(
       children: [
         if (widget.displayZoomActions == true || widget.actions.isNotEmpty) ...[
@@ -174,8 +171,7 @@ class _CandlesticksState extends State<Candlesticks> {
         if (widget.candles.length == 0 || mainWindowDataContainer == null)
           Expanded(
             child: Center(
-              child: widget.loadingWidget ??
-                  CircularProgressIndicator(color: style.loadingColor),
+              child: widget.loadingWidget ?? CircularProgressIndicator(color: style.loadingColor),
             ),
           )
         else
@@ -184,10 +180,7 @@ class _CandlesticksState extends State<Candlesticks> {
               tween: Tween(begin: 6.toDouble(), end: candleWidth),
               duration: Duration(milliseconds: 120),
               builder: (_, double width, __) {
-                if (kIsWeb ||
-                    Platform.isMacOS ||
-                    Platform.isWindows ||
-                    Platform.isLinux) {
+                if (kIsWeb || Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
                   return DesktopChart(
                     style: style,
                     onRemoveIndicator: widget.onRemoveIndicator,
@@ -218,8 +211,7 @@ class _CandlesticksState extends State<Candlesticks> {
                       lastIndex = index;
                     },
                     onReachEnd: () {
-                      if (isCallingLoadMore == false &&
-                          widget.onLoadMoreCandles != null) {
+                      if (isCallingLoadMore == false && widget.onLoadMoreCandles != null) {
                         isCallingLoadMore = true;
                         widget.onLoadMoreCandles!().then((_) {
                           isCallingLoadMore = false;
@@ -229,6 +221,7 @@ class _CandlesticksState extends State<Candlesticks> {
                     candleWidth: width,
                     candles: widget.candles,
                     index: index,
+                    showVolume: widget.showVolume,
                   );
                 } else {
                   return MobileChart(
@@ -261,8 +254,7 @@ class _CandlesticksState extends State<Candlesticks> {
                       lastIndex = index;
                     },
                     onReachEnd: () {
-                      if (isCallingLoadMore == false &&
-                          widget.onLoadMoreCandles != null) {
+                      if (isCallingLoadMore == false && widget.onLoadMoreCandles != null) {
                         isCallingLoadMore = true;
                         widget.onLoadMoreCandles!().then((_) {
                           isCallingLoadMore = false;
@@ -272,6 +264,7 @@ class _CandlesticksState extends State<Candlesticks> {
                     candleWidth: width,
                     candles: widget.candles,
                     index: index,
+                    showVolume: widget.showVolume,
                   );
                 }
               },
