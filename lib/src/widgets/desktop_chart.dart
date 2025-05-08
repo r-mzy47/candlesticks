@@ -200,7 +200,8 @@ class _DesktopChartState extends State<DesktopChart> {
                                     setState(() {
                                       double deltaPrice = delta /
                                           chartHeight *
-                                          (manualScaleHigh! - manualScaleLow!);
+                                          (manualScaleHigh! -
+                                              manualScaleLow!);
                                       manualScaleHigh =
                                           manualScaleHigh! + deltaPrice;
                                       manualScaleLow =
@@ -221,7 +222,8 @@ class _DesktopChartState extends State<DesktopChart> {
                                           ),
                                         ),
                                         child: AnimatedPadding(
-                                          duration: Duration(milliseconds: 300),
+                                          duration:
+                                              Duration(milliseconds: 300),
                                           padding: EdgeInsets.symmetric(
                                               vertical:
                                                   MAIN_CHART_VERTICAL_PADDING),
@@ -279,15 +281,18 @@ class _DesktopChartState extends State<DesktopChart> {
                                       ),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.only(top: 10.0),
+                                      padding: const EdgeInsets.only(
+                                          top: 10.0),
                                       child: VolumeWidget(
                                         candles: widget.candles,
                                         barWidth: widget.candleWidth,
                                         index: widget.index,
-                                        high:
-                                            HelperFunctions.getRoof(volumeHigh),
-                                        bearColor: widget.style.secondaryBear,
-                                        bullColor: widget.style.secondaryBull,
+                                        high: HelperFunctions
+                                            .getRoof(volumeHigh),
+                                        bearColor:
+                                            widget.style.secondaryBear,
+                                        bullColor:
+                                            widget.style.secondaryBull,
                                       ),
                                     ),
                                   ),
@@ -305,8 +310,8 @@ class _DesktopChartState extends State<DesktopChart> {
                                               Text(
                                                 "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh))}",
                                                 style: TextStyle(
-                                                  color:
-                                                      widget.style.borderColor,
+                                                  color: widget
+                                                      .style.borderColor,
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -338,31 +343,34 @@ class _DesktopChartState extends State<DesktopChart> {
                                     thickness: 0.5,
                                   ),
                                   Container(
-                                    color: widget
-                                        .style.hoverIndicatorBackgroundColor,
+                                    color: widget.style
+                                        .hoverIndicatorBackgroundColor,
                                     child: Center(
                                       child: Text(
                                         mouseHoverY! < maxHeight * 0.75
-                                            ? HelperFunctions.priceToString(high -
-                                                (mouseHoverY! -
-                                                        MAIN_CHART_VERTICAL_PADDING) /
-                                                    (maxHeight * 0.75 -
-                                                        2 *
-                                                            MAIN_CHART_VERTICAL_PADDING) *
-                                                    (high - low))
+                                            ? HelperFunctions.priceToString(
+                                                high -
+                                                    (mouseHoverY! -
+                                                                MAIN_CHART_VERTICAL_PADDING) /
+                                                            (maxHeight *
+                                                                    0.75 -
+                                                                2 *
+                                                                    MAIN_CHART_VERTICAL_PADDING) *
+                                                            (high - low))
                                             : HelperFunctions.addMetricPrefix(
-                                                HelperFunctions.getRoof(
-                                                        volumeHigh) *
+                                                HelperFunctions
+                                                    .getRoof(volumeHigh) *
                                                     (1 -
                                                         (mouseHoverY! -
-                                                                maxHeight *
-                                                                    0.75 -
-                                                                10) /
-                                                            (maxHeight * 0.25 -
-                                                                10))),
+                                                                    maxHeight *
+                                                                        0.75 -
+                                                                    10) /
+                                                                (maxHeight *
+                                                                        0.25 -
+                                                                    10))),
                                         style: TextStyle(
-                                          color:
-                                              widget.style.secondaryTextColor,
+                                          color: widget
+                                              .style.secondaryTextColor,
                                           fontSize: 12,
                                         ),
                                       ),
@@ -386,12 +394,14 @@ class _DesktopChartState extends State<DesktopChart> {
                             )
                           : Container(),
                       Padding(
-                        padding: const EdgeInsets.only(right: 50, bottom: 20),
+                        padding: const EdgeInsets.only(
+                            right: 50, bottom: 20),
                         child: Listener(
                           onPointerSignal: (pointerSignal) {
                             if (pointerSignal is PointerScrollEvent) {
                               widget.onScaleUpdate(
-                                  pointerSignal.scrollDelta.direction * -1);
+                                  pointerSignal.scrollDelta.direction *
+                                      -1);
                             }
                           },
                           child: MouseRegion(
@@ -403,19 +413,25 @@ class _DesktopChartState extends State<DesktopChart> {
                             child: GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onPanUpdate: (update) {
-                                mouseHoverX = update.localPosition.dx;
-                                mouseHoverY = update.localPosition.dy;
+                                mouseHoverX =
+                                    update.localPosition.dx;
+                                mouseHoverY =
+                                    update.localPosition.dy;
                                 widget.onHorizontalDragUpdate(
                                     update.localPosition.dx);
                                 setState(() {
                                   if (manualScaleHigh != null) {
-                                    double deltaPrice = update.delta.dy /
-                                        chartHeight *
-                                        (manualScaleHigh! - manualScaleLow!);
+                                    double deltaPrice =
+                                        update.delta.dy /
+                                            chartHeight *
+                                            (manualScaleHigh! -
+                                                manualScaleLow!);
                                     manualScaleHigh =
-                                        manualScaleHigh! + deltaPrice;
+                                        manualScaleHigh! +
+                                            deltaPrice;
                                     manualScaleLow =
-                                        manualScaleLow! + deltaPrice;
+                                        manualScaleLow! +
+                                            deltaPrice;
                                   }
                                 });
                               },
@@ -424,14 +440,16 @@ class _DesktopChartState extends State<DesktopChart> {
                                 setState(() {
                                   isDragging = false;
                                 });
-                                Future.delayed(Duration(milliseconds: 300), () {
+                                Future.delayed(
+                                    Duration(milliseconds: 300), () {
                                   setState(() {
                                     showHoverIndicator = true;
                                   });
                                 });
                               },
                               onPanDown: (update) {
-                                widget.onPanDown(update.localPosition.dx);
+                                widget.onPanDown(
+                                    update.localPosition.dx);
                                 setState(() {
                                   isDragging = true;
                                   showHoverIndicator = false;
@@ -446,17 +464,22 @@ class _DesktopChartState extends State<DesktopChart> {
                             vertical: 4, horizontal: 12),
                         child: TopPanel(
                           style: widget.style,
-                          onRemoveIndicator: widget.onRemoveIndicator,
+                          onRemoveIndicator:
+                              widget.onRemoveIndicator,
                           currentCandle: currentCandle,
-                          indicators: widget.mainWindowDataContainer.indicators,
-                          toggleIndicatorVisibility: (indicatorName) {
+                          indicators: widget
+                              .mainWindowDataContainer.indicators,
+                          toggleIndicatorVisibility:
+                              (indicatorName) {
                             setState(() {
                               widget.mainWindowDataContainer
-                                  .toggleIndicatorVisibility(indicatorName);
+                                  .toggleIndicatorVisibility(
+                                      indicatorName);
                             });
                           },
                           unvisibleIndicators: widget
-                              .mainWindowDataContainer.unvisibleIndicators,
+                              .mainWindowDataContainer
+                              .unvisibleIndicators,
                         ),
                       ),
                       Positioned(
@@ -467,12 +490,14 @@ class _DesktopChartState extends State<DesktopChart> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            primary: widget.style.hoverIndicatorBackgroundColor,
+                            backgroundColor: widget.style
+                                .hoverIndicatorBackgroundColor,
                           ),
                           child: Text(
                             "Auto",
                             style: TextStyle(
-                              color: widget.style.secondaryTextColor,
+                              color: widget.style
+                                  .secondaryTextColor,
                               fontSize: 12,
                             ),
                           ),
@@ -497,3 +522,4 @@ class _DesktopChartState extends State<DesktopChart> {
     );
   }
 }
+
