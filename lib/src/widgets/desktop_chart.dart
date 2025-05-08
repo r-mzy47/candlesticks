@@ -18,7 +18,7 @@ import 'dash_line.dart';
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
 /// Updates right-hand side numbers.
-/// And pass values down to [CandleStickWidget].
+/// And passes values down to [CandleStickWidget].
 class DesktopChart extends StatefulWidget {
   /// onScaleUpdate callback
   /// called when user scales chart using buttons or scale gesture
@@ -163,8 +163,7 @@ class _DesktopChartState extends State<DesktopChart> {
                     ? null
                     : widget.candles[min(
                         max(
-                          (maxWidth - mouseHoverX!) ~/
-                              widget.candleWidth +
+                          (maxWidth - mouseHoverX!) ~/ widget.candleWidth +
                               widget.index,
                           0,
                         ),
@@ -233,7 +232,8 @@ class _DesktopChartState extends State<DesktopChart> {
                                           duration:
                                               Duration(milliseconds: 300),
                                           padding: EdgeInsets.symmetric(
-                                            vertical: MAIN_CHART_VERTICAL_PADDING,
+                                            vertical:
+                                                MAIN_CHART_VERTICAL_PADDING,
                                           ),
                                           child: RepaintBoundary(
                                             child: Stack(
@@ -523,5 +523,6 @@ class _DesktopChartState extends State<DesktopChart> {
     );
   }
 }
+
 
 
