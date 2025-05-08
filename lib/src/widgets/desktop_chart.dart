@@ -44,10 +44,8 @@ class DesktopChart extends StatefulWidget {
   final ChartAdjust chartAdjust;
 
   final CandleSticksStyle style;
-
   final void Function(double) onPanDown;
   final void Function() onPanEnd;
-
   final Function() onReachEnd;
 
   /// holds main window indicators data and high and low prices.
@@ -111,29 +109,30 @@ class _DesktopChartState extends State<DesktopChart> {
             widget.candles.length - 1);
 
         if (candlesEndIndex == widget.candles.length - 1) {
-          Future(() {
-            widget.onReachEnd();
-          });
+          Future(() => widget.onReachEnd());
         }
 
-        List<Candle> inRangeCandles = widget.candles
+        final inRangeCandles = widget.candles
             .getRange(candlesStartIndex, candlesEndIndex + 1)
             .toList();
 
-        double candlesHighPrice = 0;
-        double candlesLowPrice = 0;
+        double candlesHighPrice;
+        double candlesLowPrice;
         if (manualScaleHigh != null) {
           candlesHighPrice = manualScaleHigh!;
           candlesLowPrice = manualScaleLow!;
         } else if (widget.chartAdjust == ChartAdjust.visibleRange) {
-          candlesHighPrice = widget.mainWindowDataContainer.highs
+          candlesHighPrice = widget
+              .mainWindowDataContainer.highs
               .getRange(candlesStartIndex, candlesEndIndex + 1)
               .reduce(max);
-          candlesLowPrice = widget.mainWindowDataContainer.lows
+          candlesLowPrice = widget
+              .mainWindowDataContainer.lows
               .getRange(candlesStartIndex, candlesEndIndex + 1)
               .reduce(min);
-        } else if (widget.chartAdjust == ChartAdjust.fullRange) {
-          candlesHighPrice = widget.mainWindowDataContainer.highs.reduce(max);
+        } else {
+          candlesHighPrice =
+              widget.mainWindowDataContainer.highs.reduce(max);
           candlesLowPrice = widget.mainWindowDataContainer.lows.reduce(min);
         }
 
@@ -143,29 +142,35 @@ class _DesktopChartState extends State<DesktopChart> {
         }
 
         // calculate priceScale
-        double chartHeight =
-            maxHeight * 0.75 - 2 * (MAIN_CHART_VERTICAL_PADDING);
+        final chartHeight =
+            maxHeight * 0.75 - 2 * MAIN_CHART_VERTICAL_PADDING;
 
         // calculate highest volume
-        double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
+        final volumeHigh =
+            inRangeCandles.map((e) => e.volume).reduce(max);
 
-        return TweenAnimationBuilder(
+        return TweenAnimationBuilder<double>(
           tween: Tween(begin: candlesHighPrice, end: candlesHighPrice),
-          duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
-          builder: (context, double high, _) {
-            return TweenAnimationBuilder(
+          duration:
+              Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
+          builder: (context, high, _) {
+            return TweenAnimationBuilder<double>(
               tween: Tween(begin: candlesLowPrice, end: candlesLowPrice),
               duration:
                   Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
-              builder: (context, double low, _) {
+              builder: (context, low, _) {
                 final currentCandle = mouseHoverX == null
                     ? null
                     : widget.candles[min(
                         max(
-                            (maxWidth - mouseHoverX!) ~/ widget.candleWidth +
-                                widget.index,
-                            0),
-                        widget.candles.length - 1)];
+                          (maxWidth - mouseHoverX!) ~/
+                              widget.candleWidth +
+                              widget.index,
+                          0,
+                        ),
+                        widget.candles.length - 1,
+                      )];
+
                 return Container(
                   color: widget.style.background,
                   child: Stack(
@@ -190,15 +195,17 @@ class _DesktopChartState extends State<DesktopChart> {
                                   high: candlesHighPrice,
                                   width: constraints.maxWidth,
                                   chartHeight: chartHeight,
-                                  lastCandle: widget.candles[
-                                      widget.index < 0 ? 0 : widget.index],
+                                  lastCandle: widget
+                                      .candles[widget.index < 0
+                                          ? 0
+                                          : widget.index],
                                   onScale: (delta) {
                                     if (manualScaleHigh == null) {
                                       manualScaleHigh = candlesHighPrice;
                                       manualScaleLow = candlesLowPrice;
                                     }
                                     setState(() {
-                                      double deltaPrice = delta /
+                                      final deltaPrice = delta /
                                           chartHeight *
                                           (manualScaleHigh! -
                                               manualScaleLow!);
@@ -216,7 +223,8 @@ class _DesktopChartState extends State<DesktopChart> {
                                         decoration: BoxDecoration(
                                           border: Border(
                                             right: BorderSide(
-                                              color: widget.style.borderColor,
+                                              color:
+                                                  widget.style.borderColor,
                                               width: 1,
                                             ),
                                           ),
@@ -225,8 +233,8 @@ class _DesktopChartState extends State<DesktopChart> {
                                           duration:
                                               Duration(milliseconds: 300),
                                           padding: EdgeInsets.symmetric(
-                                              vertical:
-                                                  MAIN_CHART_VERTICAL_PADDING),
+                                            vertical: MAIN_CHART_VERTICAL_PADDING,
+                                          ),
                                           child: RepaintBoundary(
                                             child: Stack(
                                               children: [
@@ -247,10 +255,10 @@ class _DesktopChartState extends State<DesktopChart> {
                                                   index: widget.index,
                                                   high: high,
                                                   low: low,
-                                                  bearColor:
-                                                      widget.style.primaryBear,
-                                                  bullColor:
-                                                      widget.style.primaryBull,
+                                                  bearColor: widget
+                                                      .style.primaryBear,
+                                                  bullColor: widget
+                                                      .style.primaryBull,
                                                 ),
                                               ],
                                             ),
@@ -258,9 +266,7 @@ class _DesktopChartState extends State<DesktopChart> {
                                         ),
                                       ),
                                     ),
-                                    SizedBox(
-                                      width: PRICE_BAR_WIDTH,
-                                    ),
+                                    SizedBox(width: PRICE_BAR_WIDTH),
                                   ],
                                 ),
                               ],
@@ -275,29 +281,31 @@ class _DesktopChartState extends State<DesktopChart> {
                                     decoration: BoxDecoration(
                                       border: Border(
                                         right: BorderSide(
-                                          color: widget.style.borderColor,
+                                          color:
+                                              widget.style.borderColor,
                                           width: 1,
                                         ),
                                       ),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 10.0),
+                                      padding:
+                                          const EdgeInsets.only(top: 10.0),
                                       child: VolumeWidget(
                                         candles: widget.candles,
                                         barWidth: widget.candleWidth,
                                         index: widget.index,
-                                        high: HelperFunctions
-                                            .getRoof(volumeHigh),
-                                        bearColor:
-                                            widget.style.secondaryBear,
-                                        bullColor:
-                                            widget.style.secondaryBull,
+                                        high:
+                                            HelperFunctions.getRoof(volumeHigh),
+                                        bearColor: widget
+                                            .style.secondaryBear,
+                                        bullColor: widget
+                                            .style.secondaryBull,
                                       ),
                                     ),
                                   ),
                                 ),
                                 SizedBox(
+                                  width: PRICE_BAR_WIDTH,
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -305,103 +313,97 @@ class _DesktopChartState extends State<DesktopChart> {
                                       SizedBox(
                                         height: DATE_BAR_HEIGHT,
                                         child: Center(
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh))}",
-                                                style: TextStyle(
-                                                  color: widget
-                                                      .style.borderColor,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ],
+                                          child: Text(
+                                            "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh))}",
+                                            style: TextStyle(
+                                              color: widget
+                                                  .style.borderColor,
+                                              fontSize: 12,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  width: PRICE_BAR_WIDTH,
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(
-                            height: DATE_BAR_HEIGHT,
-                          ),
+                          SizedBox(height: DATE_BAR_HEIGHT),
                         ],
                       ),
-                      mouseHoverY != null && showHoverIndicator
-                          ? Positioned(
-                              top: mouseHoverY! - 10,
-                              child: Row(
-                                children: [
-                                  DashLine(
-                                    length: maxWidth,
-                                    color: widget.style.borderColor,
-                                    direction: Axis.horizontal,
-                                    thickness: 0.5,
-                                  ),
-                                  Container(
-                                    color: widget.style
-                                        .hoverIndicatorBackgroundColor,
-                                    child: Center(
-                                      child: Text(
-                                        mouseHoverY! < maxHeight * 0.75
-                                            ? HelperFunctions.priceToString(
-                                                high -
-                                                    (mouseHoverY! -
-                                                                MAIN_CHART_VERTICAL_PADDING) /
-                                                            (maxHeight *
-                                                                    0.75 -
-                                                                2 *
-                                                                    MAIN_CHART_VERTICAL_PADDING) *
-                                                            (high - low))
-                                            : HelperFunctions.addMetricPrefix(
-                                                HelperFunctions
-                                                    .getRoof(volumeHigh) *
-                                                    (1 -
-                                                        (mouseHoverY! -
-                                                                    maxHeight *
-                                                                        0.75 -
-                                                                    10) /
-                                                                (maxHeight *
-                                                                        0.25 -
-                                                                    10))),
-                                        style: TextStyle(
-                                          color: widget
-                                              .style.secondaryTextColor,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
-                                    width: PRICE_BAR_WIDTH,
-                                    height: 20,
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Container(),
-                      mouseHoverX != null && showHoverIndicator
-                          ? Positioned(
-                              child: DashLine(
-                                length: constraints.maxHeight - 20,
+
+                      // horizontal hover line + price label
+                      if (mouseHoverY != null && showHoverIndicator)
+                        Positioned(
+                          top: mouseHoverY! - 10,
+                          child: Row(
+                            children: [
+                              DashLine(
+                                length: maxWidth,
                                 color: widget.style.borderColor,
-                                direction: Axis.vertical,
+                                direction: Axis.horizontal,
                                 thickness: 0.5,
                               ),
-                              left: mouseHoverX,
-                            )
-                          : Container(),
+                              Container(
+                                color: widget
+                                    .style.hoverIndicatorBackgroundColor,
+                                width: PRICE_BAR_WIDTH,
+                                height: 20,
+                                child: Center(
+                                  child: Text(
+                                    mouseHoverY! < maxHeight * 0.75
+                                        ? HelperFunctions.priceToString(
+                                            high -
+                                                (mouseHoverY! -
+                                                        MAIN_CHART_VERTICAL_PADDING) /
+                                                    (maxHeight * 0.75 -
+                                                        2 *
+                                                            MAIN_CHART_VERTICAL_PADDING) *
+                                                    (high - low),
+                                          )
+                                        : HelperFunctions.addMetricPrefix(
+                                            HelperFunctions.getRoof(volumeHigh) *
+                                                (1 -
+                                                    (mouseHoverY! -
+                                                            maxHeight * 0.75 -
+                                                            10) /
+                                                        (maxHeight * 0.25 -
+                                                            10)),
+                                          ),
+                                    style: TextStyle(
+                                      color: widget
+                                          .style.secondaryTextColor,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // vertical hover bar
+                      if (mouseHoverX != null && showHoverIndicator)
+                        Positioned(
+                          left: mouseHoverX,
+                          child: DashLine(
+                            length: constraints.maxHeight - 20,
+                            color: widget.style.borderColor,
+                            direction: Axis.vertical,
+                            thickness: 0.5,
+                          ),
+                        ),
+
+                      // interaction layer
                       Padding(
-                        padding: const EdgeInsets.only(
-                            right: 50, bottom: 20),
+                        padding:
+                            const EdgeInsets.only(right: 50, bottom: 20),
                         child: Listener(
-                          onPointerSignal: (pointerSignal) {
-                            if (pointerSignal is PointerScrollEvent) {
+                          onPointerSignal: (signal) {
+                            if (signal is PointerScrollEvent) {
                               widget.onScaleUpdate(
-                                  pointerSignal.scrollDelta.direction *
-                                      -1);
+                                  signal.scrollDelta.direction * -1);
                             }
                           },
                           child: MouseRegion(
@@ -413,29 +415,32 @@ class _DesktopChartState extends State<DesktopChart> {
                             child: GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onPanUpdate: (update) {
-                                mouseHoverX =
-                                    update.localPosition.dx;
-                                mouseHoverY =
-                                    update.localPosition.dy;
+                                mouseHoverX = update.localPosition.dx;
+                                mouseHoverY = update.localPosition.dy;
                                 widget.onHorizontalDragUpdate(
                                     update.localPosition.dx);
                                 setState(() {
                                   if (manualScaleHigh != null) {
-                                    double deltaPrice =
-                                        update.delta.dy /
-                                            chartHeight *
-                                            (manualScaleHigh! -
-                                                manualScaleLow!);
+                                    final deltaPrice = update.delta.dy /
+                                        chartHeight *
+                                        (manualScaleHigh! -
+                                            manualScaleLow!);
                                     manualScaleHigh =
-                                        manualScaleHigh! +
-                                            deltaPrice;
+                                        manualScaleHigh! + deltaPrice;
                                     manualScaleLow =
-                                        manualScaleLow! +
-                                            deltaPrice;
+                                        manualScaleLow! + deltaPrice;
                                   }
                                 });
                               },
-                              onPanEnd: (update) {
+                              onPanDown: (details) {
+                                widget.onPanDown(
+                                    details.localPosition.dx);
+                                setState(() {
+                                  isDragging = true;
+                                  showHoverIndicator = false;
+                                });
+                              },
+                              onPanEnd: (_) {
                                 widget.onPanEnd();
                                 setState(() {
                                   isDragging = false;
@@ -447,18 +452,12 @@ class _DesktopChartState extends State<DesktopChart> {
                                   });
                                 });
                               },
-                              onPanDown: (update) {
-                                widget.onPanDown(
-                                    update.localPosition.dx);
-                                setState(() {
-                                  isDragging = true;
-                                  showHoverIndicator = false;
-                                });
-                              },
                             ),
                           ),
                         ),
                       ),
+
+                      // top toolbar
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
@@ -482,6 +481,8 @@ class _DesktopChartState extends State<DesktopChart> {
                               .unvisibleIndicators,
                         ),
                       ),
+
+                      // Auto scale button (bottom right)
                       Positioned(
                         right: 0,
                         bottom: 0,
@@ -490,14 +491,14 @@ class _DesktopChartState extends State<DesktopChart> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            backgroundColor: widget.style
-                                .hoverIndicatorBackgroundColor,
+                            backgroundColor: widget
+                                .style.hoverIndicatorBackgroundColor,
                           ),
                           child: Text(
                             "Auto",
                             style: TextStyle(
-                              color: widget.style
-                                  .secondaryTextColor,
+                              color:
+                                  widget.style.secondaryTextColor,
                               fontSize: 12,
                             ),
                           ),
@@ -510,7 +511,7 @@ class _DesktopChartState extends State<DesktopChart> {
                                   });
                                 },
                         ),
-                      )
+                      ),
                     ],
                   ),
                 );
@@ -522,4 +523,5 @@ class _DesktopChartState extends State<DesktopChart> {
     );
   }
 }
+
 
