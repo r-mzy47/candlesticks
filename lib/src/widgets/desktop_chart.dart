@@ -523,6 +523,3 @@ class _DesktopChartState extends State<DesktopChart> {
     );
   }
 }
-
-
-
