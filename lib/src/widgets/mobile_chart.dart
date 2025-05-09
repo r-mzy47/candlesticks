@@ -109,20 +109,19 @@ class _MobileChartState extends State<MobileChart> {
 
         return TweenAnimationBuilder<double>(
           tween: Tween(begin: highPrice, end: highPrice),
-          duration: Duration(
-              milliseconds: manualScaleHigh == null ? 300 : 0),
+          duration:
+              Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
           builder: (context, high, _) {
             return TweenAnimationBuilder<double>(
               tween: Tween(begin: lowPrice, end: lowPrice),
-              duration: Duration(
-                  milliseconds: manualScaleHigh == null ? 300 : 0),
+              duration:
+                  Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
               builder: (context, low, _) {
                 final current = longPressX == null
                     ? null
                     : widget.candles[min(
                         max(
-                          (maxWidth - longPressX!) ~/
-                              widget.candleWidth +
+                          (maxWidth - longPressX!) ~/ widget.candleWidth +
                               widget.index,
                           0,
                         ),
@@ -141,6 +140,8 @@ class _MobileChartState extends State<MobileChart> {
                         indicatorTime: current?.date,
                         index: widget.index,
                       ),
+
+                      // Main + volume charts
                       Column(
                         children: [
                           Expanded(
@@ -163,8 +164,7 @@ class _MobileChartState extends State<MobileChart> {
                                       manualScaleLow = lowPrice;
                                     }
                                     setState(() {
-                                      final d = delta /
-                                          chartHeight *
+                                      final d = delta / chartHeight *
                                           (manualScaleHigh! -
                                               manualScaleLow!);
                                       manualScaleHigh =
@@ -181,8 +181,8 @@ class _MobileChartState extends State<MobileChart> {
                                         decoration: BoxDecoration(
                                           border: Border(
                                             right: BorderSide(
-                                              color: widget
-                                                  .style.borderColor,
+                                              color:
+                                                  widget.style.borderColor,
                                               width: 1,
                                             ),
                                           ),
@@ -240,8 +240,8 @@ class _MobileChartState extends State<MobileChart> {
                                     decoration: BoxDecoration(
                                       border: Border(
                                         right: BorderSide(
-                                          color: widget
-                                              .style.borderColor,
+                                          color:
+                                              widget.style.borderColor,
                                           width: 1,
                                         ),
                                       ),
@@ -253,12 +253,12 @@ class _MobileChartState extends State<MobileChart> {
                                         candles: widget.candles,
                                         barWidth: widget.candleWidth,
                                         index: widget.index,
-                                        high: HelperFunctions
-                                            .getRoof(volumeHigh),
-                                        bearColor: widget
-                                            .style.secondaryBear,
-                                        bullColor: widget
-                                            .style.secondaryBull,
+                                        high:
+                                            HelperFunctions.getRoof(volumeHigh),
+                                        bearColor:
+                                            widget.style.secondaryBear,
+                                        bullColor:
+                                            widget.style.secondaryBull,
                                       ),
                                     ),
                                   ),
@@ -275,8 +275,8 @@ class _MobileChartState extends State<MobileChart> {
                                           child: Text(
                                             "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh))}",
                                             style: TextStyle(
-                                              color: widget
-                                                  .style.borderColor,
+                                              color:
+                                                  widget.style.borderColor,
                                               fontSize: 12,
                                             ),
                                           ),
@@ -305,8 +305,8 @@ class _MobileChartState extends State<MobileChart> {
                                 thickness: 0.5,
                               ),
                               Container(
-                                color: widget.style
-                                    .hoverIndicatorBackgroundColor,
+                                // grey tooltip background
+                                color: Colors.grey.shade800,
                                 width: PRICE_BAR_WIDTH,
                                 height: 20,
                                 child: Center(
@@ -331,8 +331,8 @@ class _MobileChartState extends State<MobileChart> {
                                                             10)),
                                           ),
                                     style: TextStyle(
-                                      color: widget
-                                          .style.secondaryTextColor,
+                                      color:
+                                          widget.style.secondaryTextColor,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -352,8 +352,7 @@ class _MobileChartState extends State<MobileChart> {
                           child: Container(
                             width: widget.candleWidth,
                             height: maxHeight,
-                            color: widget
-                                .style.mobileCandleHoverColor,
+                            color: widget.style.mobileCandleHoverColor,
                           ),
                         ),
 
@@ -434,7 +433,8 @@ class _MobileChartState extends State<MobileChart> {
                         ),
                       ),
 
-                      // auto-scale button
+                      // **Auto-scale button removed**
+                      /*
                       Positioned(
                         right: 0,
                         bottom: 0,
@@ -462,6 +462,7 @@ class _MobileChartState extends State<MobileChart> {
                                   }),
                         ),
                       ),
+                      */
                     ],
                   ),
                 );
@@ -473,4 +474,5 @@ class _MobileChartState extends State<MobileChart> {
     );
   }
 }
+
 
