@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/main_window_indicator.dart';
@@ -10,12 +11,9 @@ import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/top_panel.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
+
 import 'dash_line.dart';
 
-/// This widget manages gestures
-/// Calculates the highest and lowest price of visible candles.
-/// Updates right-hand side numbers.
-/// And passes values down to [CandleStickWidget].
 class MobileChart extends StatefulWidget {
   final Function onScaleUpdate;
   final Function onHorizontalDragUpdate;
@@ -30,7 +28,11 @@ class MobileChart extends StatefulWidget {
   final void Function(String)? onRemoveIndicator;
   final Function() onReachEnd;
 
+  /// ✱ NEW – set to `false` to hide tooltip / cross‑hair
+  final bool showTooltip;
+
   MobileChart({
+    super.key,
     required this.style,
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -43,6 +45,7 @@ class MobileChart extends StatefulWidget {
     required this.onReachEnd,
     required this.mainWindowDataContainer,
     required this.onRemoveIndicator,
+    this.showTooltip = true,
   });
 
   @override
@@ -52,6 +55,7 @@ class MobileChart extends StatefulWidget {
 class _MobileChartState extends State<MobileChart> {
   double? longPressX;
   double? longPressY;
+
   double? manualScaleHigh;
   double? manualScaleLow;
 
@@ -59,89 +63,77 @@ class _MobileChartState extends State<MobileChart> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxWidth = constraints.maxWidth - PRICE_BAR_WIDTH;
+        final maxWidth  = constraints.maxWidth  - PRICE_BAR_WIDTH;
         final maxHeight = constraints.maxHeight - DATE_BAR_HEIGHT;
 
         final start = max(widget.index, 0);
-        final end = min(
-          maxWidth ~/ widget.candleWidth + widget.index,
-          widget.candles.length - 1,
-        );
+        final end   = min(maxWidth ~/ widget.candleWidth + widget.index,
+                          widget.candles.length - 1);
 
         if (end == widget.candles.length - 1) {
-          Future(() => widget.onReachEnd());
+          // ask upstream to load more once we reach the right‑edge
+          Future(widget.onReachEnd);
         }
 
-        final visible =
-            widget.candles.getRange(start, end + 1).toList();
+        final visible = widget.candles.getRange(start, end + 1).toList();
 
         double highPrice, lowPrice;
         if (manualScaleHigh != null) {
           highPrice = manualScaleHigh!;
-          lowPrice = manualScaleLow!;
+          lowPrice  = manualScaleLow!;
         } else if (widget.chartAdjust == ChartAdjust.visibleRange) {
           highPrice = widget.mainWindowDataContainer.highs
-              .getRange(start, end + 1)
-              .reduce(max);
-          lowPrice = widget.mainWindowDataContainer.lows
-              .getRange(start, end + 1)
-              .reduce(min);
+              .getRange(start, end + 1).reduce(max);
+          lowPrice  = widget.mainWindowDataContainer.lows
+              .getRange(start, end + 1).reduce(min);
         } else {
           highPrice = widget.mainWindowDataContainer.highs.reduce(max);
-          lowPrice = widget.mainWindowDataContainer.lows.reduce(min);
+          lowPrice  = widget.mainWindowDataContainer.lows.reduce(min);
         }
 
         if (highPrice == lowPrice) {
           highPrice += 10;
-          lowPrice -= 10;
+          lowPrice  -= 10;
         }
 
-        final chartHeight =
-            maxHeight * 0.75 - 2 * MAIN_CHART_VERTICAL_PADDING;
-        final volumeHigh =
-            visible.map((c) => c.volume).reduce(max);
+        final chartHeight = maxHeight * .75 - 2 * MAIN_CHART_VERTICAL_PADDING;
+        final volumeHigh  = visible.map((c) => c.volume).reduce(max);
 
-        // clamp long-press within bounds
+        // clamp overlay inside chart bounds
         if (longPressX != null && longPressY != null) {
           longPressX = longPressX!.clamp(0.0, maxWidth);
           longPressY = longPressY!.clamp(0.0, maxHeight);
         }
 
         return TweenAnimationBuilder<double>(
-          tween: Tween(begin: highPrice, end: highPrice),
-          duration:
-              Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
-          builder: (context, high, _) {
+          duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
+          tween   : Tween(begin: highPrice, end: highPrice),
+          builder : (context, high, _) {
             return TweenAnimationBuilder<double>(
-              tween: Tween(begin: lowPrice, end: lowPrice),
-              duration:
-                  Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
-              builder: (context, low, _) {
-                final current = longPressX == null
-                    ? null
-                    : widget.candles[min(
-                        max(
-                          (maxWidth - longPressX!) ~/ widget.candleWidth +
-                              widget.index,
-                          0,
-                        ),
-                        widget.candles.length - 1,
-                      )];
+              duration: Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
+              tween   : Tween(begin: lowPrice, end: lowPrice),
+              builder : (context, low, _) {
+                // current candle under cross‑hair
+                final current = (widget.showTooltip && longPressX != null)
+                    ? widget.candles[min(
+                        max((maxWidth - longPressX!) ~/ widget.candleWidth +
+                            widget.index, 0), widget.candles.length - 1)]
+                    : null;
 
                 return Container(
                   color: widget.style.background,
                   child: Stack(
                     children: [
                       TimeRow(
-                        style: widget.style,
-                        indicatorX: longPressX,
-                        candles: widget.candles,
-                        candleWidth: widget.candleWidth,
+                        style        : widget.style,
+                        indicatorX   : widget.showTooltip ? longPressX : null,
+                        candles      : widget.candles,
+                        candleWidth  : widget.candleWidth,
                         indicatorTime: current?.date,
-                        index: widget.index,
+                        index        : widget.index,
                       ),
 
-                      // Main + volume charts
+                      /// ────────── MAIN + VOLUME CHARTS ──────────
                       Column(
                         children: [
                           Expanded(
@@ -149,28 +141,23 @@ class _MobileChartState extends State<MobileChart> {
                             child: Stack(
                               children: [
                                 PriceColumn(
-                                  style: widget.style,
-                                  low: lowPrice,
-                                  high: highPrice,
-                                  width: constraints.maxWidth,
+                                  style      : widget.style,
+                                  low        : lowPrice,
+                                  high       : highPrice,
+                                  width      : constraints.maxWidth,
                                   chartHeight: chartHeight,
-                                  lastCandle: widget
-                                      .candles[widget.index < 0
-                                          ? 0
-                                          : widget.index],
-                                  onScale: (delta) {
+                                  lastCandle : widget.candles[
+                                      widget.index < 0 ? 0 : widget.index],
+                                  onScale    : (delta) {
                                     if (manualScaleHigh == null) {
                                       manualScaleHigh = highPrice;
-                                      manualScaleLow = lowPrice;
+                                      manualScaleLow  = lowPrice;
                                     }
                                     setState(() {
                                       final d = delta / chartHeight *
-                                          (manualScaleHigh! -
-                                              manualScaleLow!);
-                                      manualScaleHigh =
-                                          manualScaleHigh! + d;
-                                      manualScaleLow =
-                                          manualScaleLow! - d;
+                                          (manualScaleHigh! - manualScaleLow!);
+                                      manualScaleHigh = manualScaleHigh! + d;
+                                      manualScaleLow  = manualScaleLow! - d;
                                     });
                                   },
                                 ),
@@ -181,19 +168,15 @@ class _MobileChartState extends State<MobileChart> {
                                         decoration: BoxDecoration(
                                           border: Border(
                                             right: BorderSide(
-                                              color:
-                                                  widget.style.borderColor,
+                                              color: widget.style.borderColor,
                                               width: 1,
                                             ),
                                           ),
                                         ),
                                         child: AnimatedPadding(
-                                          duration:
-                                              Duration(milliseconds: 300),
-                                          padding: EdgeInsets.symmetric(
-                                            vertical:
-                                                MAIN_CHART_VERTICAL_PADDING,
-                                          ),
+                                          duration: const Duration(milliseconds: 300),
+                                          padding : const EdgeInsets.symmetric(
+                                              vertical: MAIN_CHART_VERTICAL_PADDING),
                                           child: RepaintBoundary(
                                             child: Stack(
                                               children: [
@@ -201,23 +184,19 @@ class _MobileChartState extends State<MobileChart> {
                                                   indicatorDatas: widget
                                                       .mainWindowDataContainer
                                                       .indicatorComponentData,
-                                                  index: widget.index,
-                                                  candleWidth:
-                                                      widget.candleWidth,
-                                                  low: low,
-                                                  high: high,
+                                                  index       : widget.index,
+                                                  candleWidth : widget.candleWidth,
+                                                  low         : low,
+                                                  high        : high,
                                                 ),
                                                 CandleStickWidget(
-                                                  candles: widget.candles,
-                                                  candleWidth:
-                                                      widget.candleWidth,
-                                                  index: widget.index,
-                                                  high: high,
-                                                  low: low,
-                                                  bearColor: widget
-                                                      .style.primaryBear,
-                                                  bullColor: widget
-                                                      .style.primaryBull,
+                                                  candles    : widget.candles,
+                                                  candleWidth: widget.candleWidth,
+                                                  index      : widget.index,
+                                                  high       : high,
+                                                  low        : low,
+                                                  bearColor  : widget.style.primaryBear,
+                                                  bullColor  : widget.style.primaryBull,
                                                 ),
                                               ],
                                             ),
@@ -225,7 +204,7 @@ class _MobileChartState extends State<MobileChart> {
                                         ),
                                       ),
                                     ),
-                                    SizedBox(width: PRICE_BAR_WIDTH),
+                                    const SizedBox(width: PRICE_BAR_WIDTH),
                                   ],
                                 ),
                               ],
@@ -240,43 +219,36 @@ class _MobileChartState extends State<MobileChart> {
                                     decoration: BoxDecoration(
                                       border: Border(
                                         right: BorderSide(
-                                          color:
-                                              widget.style.borderColor,
+                                          color: widget.style.borderColor,
                                           width: 1,
                                         ),
                                       ),
                                     ),
                                     child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          top: 10.0),
+                                      padding: const EdgeInsets.only(top: 10),
                                       child: VolumeWidget(
-                                        candles: widget.candles,
-                                        barWidth: widget.candleWidth,
-                                        index: widget.index,
-                                        high:
-                                            HelperFunctions.getRoof(volumeHigh),
-                                        bearColor:
-                                            widget.style.secondaryBear,
-                                        bullColor:
-                                            widget.style.secondaryBull,
+                                        candles   : widget.candles,
+                                        barWidth  : widget.candleWidth,
+                                        index     : widget.index,
+                                        high      : HelperFunctions.getRoof(volumeHigh),
+                                        bearColor : widget.style.secondaryBear,
+                                        bullColor : widget.style.secondaryBull,
                                       ),
                                     ),
                                   ),
                                 ),
                                 SizedBox(
-                                  width: PRICE_BAR_WIDTH,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                  width : PRICE_BAR_WIDTH,
+                                  child : Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       SizedBox(
                                         height: DATE_BAR_HEIGHT,
-                                        child: Center(
+                                        child : Center(
                                           child: Text(
                                             "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh))}",
                                             style: TextStyle(
-                                              color:
-                                                  widget.style.borderColor,
+                                              color: widget.style.borderColor,
                                               fontSize: 12,
                                             ),
                                           ),
@@ -288,51 +260,47 @@ class _MobileChartState extends State<MobileChart> {
                               ],
                             ),
                           ),
-                          SizedBox(height: DATE_BAR_HEIGHT),
+                          const SizedBox(height: DATE_BAR_HEIGHT),
                         ],
                       ),
 
-                      // horizontal hover line + price label
-                      if (longPressY != null)
+                      /// ────────── CROSS‑HAIR OVERLAY ──────────
+                      if (widget.showTooltip && longPressY != null)
                         Positioned(
                           top: longPressY! - 10,
                           child: Row(
                             children: [
                               DashLine(
-                                length: maxWidth,
-                                color: widget.style.borderColor,
+                                length   : maxWidth,
+                                color    : widget.style.borderColor,
                                 direction: Axis.horizontal,
                                 thickness: 0.5,
                               ),
                               Container(
-                                // grey tooltip background
                                 color: Colors.grey.shade800,
-                                width: PRICE_BAR_WIDTH,
+                                width : PRICE_BAR_WIDTH,
                                 height: 20,
-                                child: Center(
+                                child : Center(
                                   child: Text(
-                                    longPressY! < maxHeight * 0.75
+                                    longPressY! < maxHeight * .75
                                         ? HelperFunctions.priceToString(
                                             high -
                                                 (longPressY! -
                                                         MAIN_CHART_VERTICAL_PADDING) /
-                                                    (maxHeight * 0.75 -
-                                                        2 *
-                                                            MAIN_CHART_VERTICAL_PADDING) *
+                                                    (maxHeight * .75 -
+                                                        2 * MAIN_CHART_VERTICAL_PADDING) *
                                                     (high - low),
                                           )
                                         : HelperFunctions.addMetricPrefix(
                                             HelperFunctions.getRoof(volumeHigh) *
                                                 (1 -
                                                     (longPressY! -
-                                                            maxHeight * 0.75 -
+                                                            maxHeight * .75 -
                                                             10) /
-                                                        (maxHeight * 0.25 -
-                                                            10)),
+                                                        (maxHeight * .25 - 10)),
                                           ),
                                     style: TextStyle(
-                                      color:
-                                          widget.style.secondaryTextColor,
+                                      color: widget.style.secondaryTextColor,
                                       fontSize: 12,
                                     ),
                                   ),
@@ -342,127 +310,85 @@ class _MobileChartState extends State<MobileChart> {
                           ),
                         ),
 
-                      // vertical hover bar
-                      if (longPressX != null)
+                      if (widget.showTooltip && longPressX != null)
                         Positioned(
                           right: (maxWidth - longPressX!) ~/
-                                  widget.candleWidth *
-                                  widget.candleWidth +
-                              PRICE_BAR_WIDTH,
+                                      widget.candleWidth *
+                                      widget.candleWidth +
+                                  PRICE_BAR_WIDTH,
                           child: Container(
-                            width: widget.candleWidth,
+                            width : widget.candleWidth,
                             height: maxHeight,
-                            color: widget.style.mobileCandleHoverColor,
+                            color : widget.style.mobileCandleHoverColor,
                           ),
                         ),
 
-                      // pan & zoom gestures
+                      /// ────────── GESTURES ──────────
                       Padding(
-                        padding: const EdgeInsets.only(
-                            right: 50, bottom: 20),
+                        padding: const EdgeInsets.only(right: 50, bottom: 20),
                         child: GestureDetector(
-                          onLongPressEnd: (_) => setState(() {
-                            longPressX = null;
-                            longPressY = null;
-                          }),
-                          onScaleEnd: (_) => widget.onPanEnd(),
+                          behavior: HitTestBehavior.translucent,
+                          onScaleStart: (d) =>
+                              widget.onPanDown(d.localFocalPoint.dx),
                           onScaleUpdate: (details) {
                             if (details.scale == 1) {
-                              widget.onHorizontalDragUpdate(
-                                  details.focalPoint.dx);
-                              setState(() {
-                                if (manualScaleHigh != null) {
+                              widget.onHorizontalDragUpdate(details.focalPoint.dx);
+                              if (manualScaleHigh != null) {
+                                setState(() {
                                   final d = details.focalPointDelta.dy /
                                       chartHeight *
-                                      (manualScaleHigh! -
-                                          manualScaleLow!);
-                                  manualScaleHigh =
-                                      manualScaleHigh! + d;
-                                  manualScaleLow =
-                                      manualScaleLow! + d;
-                                }
-                              });
+                                      (manualScaleHigh! - manualScaleLow!);
+                                  manualScaleHigh = manualScaleHigh! + d;
+                                  manualScaleLow  = manualScaleLow! + d;
+                                });
+                              }
                             }
                             widget.onScaleUpdate(details.scale);
                           },
-                          onScaleStart: (details) =>
-                              widget.onPanDown(
-                                  details.localFocalPoint.dx),
-                          onLongPressStart:
-                              (LongPressStartDetails details) {
-                            setState(() {
-                              longPressX =
-                                  details.localPosition.dx;
-                              longPressY =
-                                  details.localPosition.dy;
-                            });
-                          },
-                          onLongPressMoveUpdate:
-                              (LongPressMoveUpdateDetails details) {
-                            setState(() {
-                              longPressX =
-                                  details.localPosition.dx;
-                              longPressY =
-                                  details.localPosition.dy;
-                            });
-                          },
-                          behavior: HitTestBehavior.translucent,
+                          onScaleEnd: (_) => widget.onPanEnd(),
+
+                          // only track long‑press when tooltip enabled
+                          onLongPressStart: widget.showTooltip
+                              ? (d) => setState(() {
+                                    longPressX = d.localPosition.dx;
+                                    longPressY = d.localPosition.dy;
+                                  })
+                              : null,
+                          onLongPressMoveUpdate: widget.showTooltip
+                              ? (d) => setState(() {
+                                    longPressX = d.localPosition.dx;
+                                    longPressY = d.localPosition.dy;
+                                  })
+                              : null,
+                          onLongPressEnd: widget.showTooltip
+                              ? (_) => setState(() {
+                                    longPressX = null;
+                                    longPressY = null;
+                                  })
+                              : null,
                         ),
                       ),
 
-                      // top toolbar
+                      /// ────────── TOP INFO BAR ──────────
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
                         child: TopPanel(
-                          style: widget.style,
-                          onRemoveIndicator:
-                              widget.onRemoveIndicator,
-                          currentCandle: current,
-                          indicators: widget
+                          style        : widget.style,
+                          onRemoveIndicator: widget.onRemoveIndicator,
+                          currentCandle    : current,
+                          indicators       : widget
                               .mainWindowDataContainer.indicators,
-                          toggleIndicatorVisibility:
-                              (name) {
+                          toggleIndicatorVisibility: (name) {
                             setState(() {
                               widget.mainWindowDataContainer
                                   .toggleIndicatorVisibility(name);
                             });
                           },
-                          unvisibleIndicators: widget
-                              .mainWindowDataContainer.unvisibleIndicators,
+                          unvisibleIndicators:
+                              widget.mainWindowDataContainer.unvisibleIndicators,
                         ),
                       ),
-
-                      // **Auto-scale button removed**
-                      /*
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        width: PRICE_BAR_WIDTH,
-                        height: 20,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            backgroundColor: widget
-                                .style.hoverIndicatorBackgroundColor,
-                          ),
-                          child: Text(
-                            "Auto",
-                            style: TextStyle(
-                              color: widget
-                                  .style.secondaryTextColor,
-                              fontSize: 12,
-                            ),
-                          ),
-                          onPressed: manualScaleHigh == null
-                              ? null
-                              : () => setState(() {
-                                    manualScaleHigh = null;
-                                    manualScaleLow = null;
-                                  }),
-                        ),
-                      ),
-                      */
                     ],
                   ),
                 );

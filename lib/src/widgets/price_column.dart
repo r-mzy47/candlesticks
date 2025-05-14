@@ -14,6 +14,7 @@ class PriceColumn extends StatefulWidget {
     required this.lastCandle,
     required this.onScale,
     required this.style,
+    this.showLastPrice = true,          // ← NEW (default keeps old behaviour)
   }) : super(key: key);
 
   final double low;
@@ -24,49 +25,52 @@ class PriceColumn extends StatefulWidget {
   final void Function(double) onScale;
   final CandleSticksStyle style;
 
+  /// Whether to draw the red/green “current price” chip on the right edge.
+  final bool showLastPrice;              // ← NEW
+
   @override
   State<PriceColumn> createState() => _PriceColumnState();
 }
 
 class _PriceColumnState extends State<PriceColumn> {
-  ScrollController scrollController = new ScrollController();
+  final ScrollController scrollController = ScrollController();
 
-  double calculatePriceIndicatorTopPadding(
-      double chartHeight, double low, double high) {
-    return chartHeight +
-        10 -
-        (widget.lastCandle.close - low) / (high - low) * chartHeight -
-        MAIN_CHART_VERTICAL_PADDING;
-  }
+  double _priceIndicatorTop(
+          double chartHeight, double low, double high) =>
+      chartHeight +
+      10 -
+      (widget.lastCandle.close - low) / (high - low) * chartHeight -
+      MAIN_CHART_VERTICAL_PADDING;
 
   @override
   Widget build(BuildContext context) {
-    final double priceScale = HelperFunctions.calculatePriceScale(
-        widget.chartHeight, widget.high, widget.low);
+    final double priceScale =
+        HelperFunctions.calculatePriceScale(widget.chartHeight, widget.high, widget.low);
     final double priceTileHeight =
         widget.chartHeight / ((widget.high - widget.low) / priceScale);
     final double newHigh = (widget.high ~/ priceScale + 1) * priceScale;
     final double top = -priceTileHeight / priceScale * (newHigh - widget.high) +
         MAIN_CHART_VERTICAL_PADDING -
         priceTileHeight / 2;
+
     return GestureDetector(
-      onVerticalDragUpdate: (details) {
-        widget.onScale(details.delta.dy);
-      },
+      onVerticalDragUpdate: (details) => widget.onScale(details.delta.dy),
       child: AbsorbPointer(
         child: Stack(
           children: [
+            // ── horizontal price grid + labels ────────────────────────────
             AnimatedPositioned(
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               top: top,
-              height:
-                  widget.chartHeight + 2 * MAIN_CHART_VERTICAL_PADDING - top,
+              height: widget.chartHeight +
+                  2 * MAIN_CHART_VERTICAL_PADDING -
+                  top,
               width: widget.width,
               child: ListView(
                 controller: scrollController,
-                children: List<Widget>.generate(20, (i) {
+                children: List.generate(20, (i) {
                   return AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     height: priceTileHeight,
                     width: double.infinity,
                     child: Center(
@@ -79,7 +83,8 @@ class _PriceColumnState extends State<PriceColumn> {
                           ),
                           Expanded(
                             child: Text(
-                              "${HelperFunctions.priceToString(newHigh - priceScale * i)}",
+                              HelperFunctions.priceToString(
+                                  newHigh - priceScale * i),
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 color: widget.style.primaryTextColor,
@@ -91,38 +96,36 @@ class _PriceColumnState extends State<PriceColumn> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ),
             ),
-            AnimatedPositioned(
-              duration: Duration(milliseconds: 300),
-              right: 0,
-              top: calculatePriceIndicatorTopPadding(
-                widget.chartHeight,
-                widget.low,
-                widget.high,
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    color: widget.lastCandle.isBull
-                        ? widget.style.primaryBull
-                        : widget.style.primaryBear,
-                    child: Center(
-                      child: Text(
-                        HelperFunctions.priceToString(widget.lastCandle.close),
-                        style: TextStyle(
-                          color: widget.style.secondaryTextColor,
-                          fontSize: 11,
-                        ),
-                      ),
+
+            // ── red/green last‑price chip (optional) ───────────────────────
+            if (widget.showLastPrice)                                    // ← NEW
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 300),
+                right: 0,
+                top: _priceIndicatorTop(
+                  widget.chartHeight,
+                  widget.low,
+                  widget.high,
+                ),
+                child: Container(
+                  width: PRICE_BAR_WIDTH,
+                  height: PRICE_INDICATOR_HEIGHT,
+                  color: widget.lastCandle.isBull
+                      ? widget.style.primaryBull
+                      : widget.style.primaryBear,
+                  alignment: Alignment.center,
+                  child: Text(
+                    HelperFunctions.priceToString(widget.lastCandle.close),
+                    style: TextStyle(
+                      color: widget.style.secondaryTextColor,
+                      fontSize: 11,
                     ),
-                    width: PRICE_BAR_WIDTH,
-                    height: PRICE_INDICATOR_HEIGHT,
                   ),
-                ],
+                ),
               ),
-            ),
           ],
         ),
       ),
