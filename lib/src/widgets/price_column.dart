@@ -3,10 +3,11 @@ import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:flutter/material.dart';
 
-/// Transparent hit‑box on the right edge of the main chart.
-/// • forwards vertical‑drag so the user can manual‑scale
-/// • static price ladder is *removed*
-/// • the coloured last‑price chip is optional
+/// Transparent hit‑box that sits *flush against the right edge* of the chart.
+///
+/// * forwards vertical‑drag so the user can manual‑scale  
+/// * static price ladder is **gone**  
+/// * coloured last‑price chip is optional via [showLastPrice]
 class PriceColumn extends StatelessWidget {
   const PriceColumn({
     super.key,
@@ -18,32 +19,32 @@ class PriceColumn extends StatelessWidget {
     required this.style,
     this.showLastPrice = true,
 
-    // kept only so existing calls (DesktopChart / MobileChart) still match
+    // kept only so DesktopChart / MobileChart calls still compile
     double? width, // ignored
   });
 
-  /// lowest visible price
+  /// Lowest visible price in the current viewport.
   final double low;
 
-  /// highest visible price
+  /// Highest visible price in the current viewport.
   final double high;
 
-  /// height of the candle pane (excluding paddings)
+  /// Height of the candle pane (without paddings).
   final double chartHeight;
 
-  /// most‑recent candle (to colour the chip)
+  /// Latest candle – used to determine chip colour & value.
   final Candle lastCandle;
 
-  /// callback used for manual vertical scaling
+  /// Callback used for manual vertical scaling.
   final void Function(double) onScale;
 
-  /// current colour palette
+  /// Current colour palette.
   final CandleSticksStyle style;
 
-  /// toggles the coloured last‑price chip
+  /// Toggle the coloured last‑price chip.
   final bool showLastPrice;
 
-  // pixel y‑offset for the price chip
+  /// Pixel offset (from the top of the chart) for the chip.
   double _chipTop() => chartHeight +
       10 -
       (lastCandle.close - low) / (high - low) * chartHeight -
@@ -52,33 +53,39 @@ class PriceColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onVerticalDragUpdate: (d) => onScale(d.delta.dy),
-      child: SizedBox(
-        width: PRICE_BAR_WIDTH, // keeps hit‑box the same size as before
-        height: double.infinity,
-        child: Stack(
-          children: [
-            if (showLastPrice)
-              Positioned(
-                right: 0,
-                top: _chipTop(),
-                width: PRICE_BAR_WIDTH,
-                height: PRICE_INDICATOR_HEIGHT,
-                child: Container(
-                  alignment: Alignment.center,
-                  color: lastCandle.isBull
-                      ? style.primaryBull
-                      : style.primaryBear,
-                  child: Text(
-                    lastCandle.close.toStringAsFixed(5),
-                    style: TextStyle(
-                      color: style.secondaryTextColor,
-                      fontSize: 11,
+      // Manual scale = vertical drag inside this 40 px strip.
+      onVerticalDragUpdate: (details) => onScale(details.delta.dy),
+
+      // Always stick the whole hit‑box to the RIGHT edge.
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: SizedBox(
+          width: PRICE_BAR_WIDTH,          // ← identical width as before
+          height: double.infinity,
+          child: Stack(
+            children: [
+              if (showLastPrice)
+                Positioned(
+                  right : 0,               // always at the far‑right
+                  top   : _chipTop(),
+                  width : PRICE_BAR_WIDTH,
+                  height: PRICE_INDICATOR_HEIGHT,
+                  child: Container(
+                    alignment: Alignment.center,
+                    color: lastCandle.isBull
+                        ? style.primaryBull
+                        : style.primaryBear,
+                    child: Text(
+                      lastCandle.close.toStringAsFixed(5),
+                      style: TextStyle(
+                        color: style.secondaryTextColor,
+                        fontSize: 11,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
