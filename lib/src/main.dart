@@ -7,53 +7,27 @@ import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
+import 'package:collection/collection.dart';           // ✱ FIX
 
-enum ChartAdjust {
-  /// Adjust chart size by max/min of **visible** candles
-  visibleRange,
+enum ChartAdjust { visibleRange, fullRange }
 
-  /// Adjust chart size by max/min of the **whole** series
-  fullRange,
-}
-
-/// Stateful widget that owns chart state (scroll index + candle width).
 class Candlesticks extends StatefulWidget {
-  /// Candle list; default expectation is **oldest → newest**.
-  ///
-  /// If your list is newest‑first, just set `reversed:true`.
   final List<Candle> candles;
-
-  /// Flip the array once so the library sees “newest at 0”.
   final bool reversed;
-
-  /// Called when the last candle becomes visible.
   final Future<void> Function()? onLoadMoreCandles;
-
-  /// Extra buttons for the top toolbar.
   final List<ToolBarAction> actions;
-
-  /// Indicators to draw.
   final List<Indicator>? indicators;
-
-  /// Fires when user clicks the X on an indicator label.
   final void Function(String)? onRemoveIndicator;
-
-  /// How price range is calculated while panning.
   final ChartAdjust chartAdjust;
-
-  /// Show ± zoom buttons in the toolbar.
   final bool displayZoomActions;
-
-  /// Replace the default loader.
   final Widget? loadingWidget;
-
-  /// Customise colours & fonts.
   final CandleSticksStyle? style;
 
-  const Candlesticks({
+  // ✱ FIX: remove `const` — assert uses runtime values
+  Candlesticks({
     Key? key,
     required this.candles,
-    this.reversed = false,                        // ← NEW
+    this.reversed = false,
     this.onLoadMoreCandles,
     this.actions = const [],
     this.chartAdjust = ChartAdjust.visibleRange,
@@ -71,30 +45,20 @@ class Candlesticks extends StatefulWidget {
 }
 
 class _CandlesticksState extends State<Candlesticks> {
-  // ───────── internal helpers ────────────────────────────────────────────────
-
-  /// Effective candle list in the order the library expects
-  /// (index 0 = newest). Flipped once if [widget.reversed] is true.
   List<Candle> get _candles =>
       widget.reversed ? widget.candles.reversed.toList() : widget.candles;
 
-  // ───────── mutable state ──────────────────────────────────────────────────
-  int index = -10;            // scroll offset (newest index displayed)
-  double lastX = 0;           // drag tracking
+  int index = -10;
+  double lastX = 0;
   int lastIndex = -10;
-
-  double candleWidth = 6;     // 2 … 20 px
-
+  double candleWidth = 6;
   bool isCallingLoadMore = false;
-
   MainWindowDataContainer? mainWindowDataContainer;
 
-  // ───────── lifecycle ──────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
     if (_candles.isEmpty) return;
-
     mainWindowDataContainer ??=
         MainWindowDataContainer(widget.indicators ?? [], _candles);
   }
@@ -113,15 +77,14 @@ class _CandlesticksState extends State<Candlesticks> {
     final currentIndicators = widget.indicators ?? [];
     final oldIndicators = oldWidget.indicators ?? [];
 
-    // Re‑create container if indicator list changed
     if (currentIndicators.length != oldIndicators.length ||
-        !ListEquality().equals(currentIndicators, oldIndicators)) {
+        !const ListEquality()
+            .equals(currentIndicators, oldIndicators)) {      // ✱ FIX
       mainWindowDataContainer =
           MainWindowDataContainer(currentIndicators, _candles);
       return;
     }
 
-    // Otherwise just tick‑update
     try {
       mainWindowDataContainer!.tickUpdate(_candles);
     } catch (_) {
@@ -130,13 +93,12 @@ class _CandlesticksState extends State<Candlesticks> {
     }
   }
 
-  // ───────── UI ─────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final style = widget.style ??
         (Theme.of(context).brightness == Brightness.dark
-            ? const CandleSticksStyle.dark()
-            : const CandleSticksStyle.light());
+            ? CandleSticksStyle.dark()      // ✱ FIX: no `const`
+            : CandleSticksStyle.light());    // ✱ FIX
 
     return Column(
       children: [
@@ -147,17 +109,13 @@ class _CandlesticksState extends State<Candlesticks> {
               if (widget.displayZoomActions) ...[
                 ToolBarAction(
                   onPressed: () {
-                    setState(() {
-                      candleWidth = max(candleWidth - 2, 2);
-                    });
+                    setState(() => candleWidth = max(candleWidth - 2, 2));
                   },
                   child: Icon(Icons.remove, color: style.borderColor),
                 ),
                 ToolBarAction(
                   onPressed: () {
-                    setState(() {
-                      candleWidth = min(candleWidth + 2, 20);
-                    });
+                    setState(() => candleWidth = min(candleWidth + 2, 20));
                   },
                   child: Icon(Icons.add, color: style.borderColor),
                 ),
@@ -166,8 +124,6 @@ class _CandlesticksState extends State<Candlesticks> {
             ],
           ),
         ],
-
-        // ── chart or loader ────────────────────────────────────────────────
         if (_candles.isEmpty || mainWindowDataContainer == null)
           Expanded(
             child: Center(
@@ -221,19 +177,17 @@ class _CandlesticksState extends State<Candlesticks> {
     );
   }
 
-  // ───────── gesture helpers ───────────────────────────────────────────────
+  // ── gesture helpers ────────────────────────────────────────────────────
   void _handleScale(double scale) {
     scale = scale.clamp(0.90, 1.10);
-    setState(() {
-      candleWidth = (candleWidth * scale).clamp(2, 20);
-    });
+    setState(() => candleWidth = (candleWidth * scale).clamp(2, 20));
   }
 
   void _handleHorizontalDrag(double x) {
     setState(() {
       final delta = x - lastX;
-      index = (lastIndex + delta ~/ candleWidth)
-          .clamp(-10, _candles.length - 1);
+      index =
+          (lastIndex + delta ~/ candleWidth).clamp(-10, _candles.length - 1);
     });
   }
 
