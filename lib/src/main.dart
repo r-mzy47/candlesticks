@@ -1,3 +1,4 @@
+// packages/candlesticks/lib/src/main.dart
 import 'dart:io' show Platform;
 import 'dart:math';
 
@@ -8,7 +9,7 @@ import 'package:candlesticks/src/widgets/mobile_chart.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:collection/collection.dart';   // ListEquality
+import 'package:collection/collection.dart';
 
 // ──────────────────────────────────────────────────────────────
 //  ChartAdjust
@@ -29,7 +30,7 @@ class Candlesticks extends StatefulWidget {
   final double initialCandleWidth;
 
   /// Disable / enable long‑press tool‑tip & cross‑hair
-  final bool showTooltip;                        // ← NEW
+  final bool showTooltip;
 
   /// Callback when right edge is reached
   final Future<void> Function()? onLoadMoreCandles;
@@ -56,19 +57,19 @@ class Candlesticks extends StatefulWidget {
   Candlesticks({
     Key? key,
     required this.candles,
-    this.reversed            = false,
-    this.initialCandleWidth  = 6,
-    this.showTooltip         = true,            // ← NEW
+    this.reversed           = false,
+    this.initialCandleWidth = 6,
+    this.showTooltip        = true,
     this.onLoadMoreCandles,
-    this.actions             = const [],
-    this.chartAdjust         = ChartAdjust.visibleRange,
-    this.displayZoomActions  = true,
+    this.actions            = const [],
+    this.chartAdjust        = ChartAdjust.visibleRange,
+    this.displayZoomActions = true,
     this.loadingWidget,
     this.indicators,
     this.onRemoveIndicator,
     this.style,
   })  : assert(candles.isEmpty || candles.length > 1,
-            'Please provide at least 2 candles'),
+          'Please provide at least 2 candles'),
         super(key: key);
 
   @override
@@ -172,38 +173,50 @@ class _CandlesticksState extends State<Candlesticks> {
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 6, end: candleWidth),
               duration: const Duration(milliseconds: 120),
-              builder: (_, width, __) => _chart(style, width),
+              builder: (_, width, __) => _buildChart(style, width),
             ),
           ),
       ],
     );
   }
 
-  Widget _chart(CandleSticksStyle style, double width) {
-    final commonProps = {
-      'style'                  : style,
-      'onRemoveIndicator'      : widget.onRemoveIndicator,
-      'mainWindowDataContainer': mainWindowDataContainer!,
-      'chartAdjust'            : widget.chartAdjust,
-      'onScaleUpdate'          : _handleScale,
-      'onPanEnd'               : () => lastIndex = index,
-      'onHorizontalDragUpdate' : _handleHorizontalDrag,
-      'onPanDown'              : _handlePanDown,
-      'onReachEnd'             : _handleReachEnd,
-      'candleWidth'            : width,
-      'candles'                : _candles,
-      'index'                  : index,
-      'showTooltip'            : widget.showTooltip,   // ← NEW
-    };
+  Widget _buildChart(CandleSticksStyle style, double width) {
+    final isDesktop = kIsWeb ||
+        Platform.isMacOS ||
+        Platform.isWindows ||
+        Platform.isLinux;
 
-    final chart = (kIsWeb ||
-            Platform.isMacOS ||
-            Platform.isWindows ||
-            Platform.isLinux)
-        ? DesktopChart.fromMap(commonProps)
-        : MobileChart .fromMap(commonProps);
-
-    return chart;
+    return isDesktop
+        ? DesktopChart(
+            style: style,
+            onRemoveIndicator: widget.onRemoveIndicator,
+            mainWindowDataContainer: mainWindowDataContainer!,
+            chartAdjust: widget.chartAdjust,
+            onScaleUpdate: _handleScale,
+            onPanEnd: () => lastIndex = index,
+            onHorizontalDragUpdate: _handleHorizontalDrag,
+            onPanDown: _handlePanDown,
+            onReachEnd: _handleReachEnd,
+            candleWidth: width,
+            candles: _candles,
+            index: index,
+            showTooltip: widget.showTooltip,
+          )
+        : MobileChart(
+            style: style,
+            onRemoveIndicator: widget.onRemoveIndicator,
+            mainWindowDataContainer: mainWindowDataContainer!,
+            chartAdjust: widget.chartAdjust,
+            onScaleUpdate: _handleScale,
+            onPanEnd: () => lastIndex = index,
+            onHorizontalDragUpdate: _handleHorizontalDrag,
+            onPanDown: _handlePanDown,
+            onReachEnd: _handleReachEnd,
+            candleWidth: width,
+            candles: _candles,
+            index: index,
+            showTooltip: widget.showTooltip,
+          );
   }
 
   // ── gestures ────────────────────────────────────────────────
@@ -234,4 +247,3 @@ class _CandlesticksState extends State<Candlesticks> {
     }
   }
 }
-
