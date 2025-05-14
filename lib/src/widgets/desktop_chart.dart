@@ -1,3 +1,4 @@
+// desktop_chart.dart
 import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -18,23 +19,7 @@ import '../models/candle.dart';
 import 'dash_line.dart';
 
 class DesktopChart extends StatefulWidget {
-  final Function(double)              onScaleUpdate;
-  final Function(double)              onHorizontalDragUpdate;
-  final double                        candleWidth;
-  final List<Candle>                  candles;
-  final int                           index;
-  final ChartAdjust                   chartAdjust;
-  final CandleSticksStyle             style;
-  final void Function(double)         onPanDown;
-  final void Function()               onPanEnd;
-  final Function()                    onReachEnd;
-  final MainWindowDataContainer       mainWindowDataContainer;
-  final void Function(String)?        onRemoveIndicator;
-
-  /// ⬇︎ NEW – hide tooltip / cross‑hair when `false`
-  final bool showTooltip;
-
-  DesktopChart({
+  const DesktopChart({
     super.key,
     required this.onScaleUpdate,
     required this.onHorizontalDragUpdate,
@@ -48,53 +33,73 @@ class DesktopChart extends StatefulWidget {
     required this.mainWindowDataContainer,
     required this.onRemoveIndicator,
     required this.style,
-    this.showTooltip = true,
+    this.showTooltip   = true,
+    this.showLastPrice = true,   // ← NEW
   });
+
+  final Function(double)              onScaleUpdate;
+  final Function(double)              onHorizontalDragUpdate;
+  final double                        candleWidth;
+  final List<Candle>                  candles;
+  final int                           index;
+  final ChartAdjust                   chartAdjust;
+  final CandleSticksStyle             style;
+  final void Function(double)         onPanDown;
+  final VoidCallback                  onPanEnd;
+  final VoidCallback                  onReachEnd;
+  final MainWindowDataContainer       mainWindowDataContainer;
+  final void Function(String)?        onRemoveIndicator;
+
+  /// Hide / show cross‑hair & hover tooltip
+  final bool showTooltip;
+
+  /// Hide / show coloured last‑price chip on the RHS
+  final bool showLastPrice;
 
   @override
   State<DesktopChart> createState() => _DesktopChartState();
 }
 
 class _DesktopChartState extends State<DesktopChart> {
-  double? mouseX;
-  double? mouseY;
+  double? _mouseX;
+  double? _mouseY;
 
-  bool    isDragging         = false;
-  bool    hoverVisible       = true;          // hidden while dragging
-  double? manualScaleHigh;
-  double? manualScaleLow;
+  bool  _isDragging   = false;
+  bool  _hoverVisible = true;        // disables while panning
+  double? _manualHi;
+  double? _manualLo;
 
-  // ───────────────────────── helpers ──────────────────────────
-  void _onExit(PointerEvent _) =>
-      setState(() { mouseX = mouseY = null; });
-
-  void _onHover(PointerEvent e) {
+  // ═══════════════════ Pointer helpers ═══════════════════════════
+  void _handleExit(PointerEvent _)   => setState(() { _mouseX = _mouseY = null; });
+  void _handleHover(PointerEvent e) {
     if (!widget.showTooltip) return;
     setState(() {
-      mouseX = e.localPosition.dx;
-      mouseY = e.localPosition.dy;
+      _mouseX = e.localPosition.dx;
+      _mouseY = e.localPosition.dy;
     });
   }
 
-  // ───────────────────────── build ────────────────────────────
+  // ═══════════════════  Build  ═══════════════════════════════════
   @override
-  Widget build(BuildContext ctx) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(builder: (_, c) {
       final maxW = c.maxWidth  - PRICE_BAR_WIDTH;
       final maxH = c.maxHeight - DATE_BAR_HEIGHT;
 
       final start = max(widget.index, 0);
-      final end   = min(maxW ~/ widget.candleWidth + widget.index,
-                        widget.candles.length - 1);
+      final end   = min(
+        maxW ~/ widget.candleWidth + widget.index,
+        widget.candles.length - 1,
+      );
 
       if (end == widget.candles.length - 1) Future(widget.onReachEnd);
 
       final visible = widget.candles.getRange(start, end + 1).toList();
 
-      // ── price scales ───────────────────────────────────────
+      // ── price range
       double hi, lo;
-      if (manualScaleHigh != null) {
-        hi = manualScaleHigh!; lo = manualScaleLow!;
+      if (_manualHi != null) {
+        hi = _manualHi!; lo = _manualLo!;
       } else if (widget.chartAdjust == ChartAdjust.visibleRange) {
         hi = widget.mainWindowDataContainer.highs
                .getRange(start, end + 1).reduce(max);
@@ -102,19 +107,21 @@ class _DesktopChartState extends State<DesktopChart> {
                .getRange(start, end + 1).reduce(min);
       } else {
         hi = widget.mainWindowDataContainer.highs.reduce(max);
-        lo = widget.mainWindowDataContainer.lows.reduce(min);
+        lo = widget.mainWindowDataContainer.lows .reduce(min);
       }
       if (hi == lo) { hi += 10; lo -= 10; }
 
-      final chartH   = maxH * .75 - 2 * MAIN_CHART_VERTICAL_PADDING;
-      final volHi    = visible.map((e) => e.volume).reduce(max);
-      final candleAtCursor = (widget.showTooltip && mouseX != null)
-          ? widget.candles[min(max((maxW - mouseX!) ~/ widget.candleWidth +
-                                   widget.index, 0),
-                               widget.candles.length - 1)]
+      final chartH  = maxH * .75 - 2 * MAIN_CHART_VERTICAL_PADDING;
+      final volHi   = visible.map((e) => e.volume).reduce(max);
+
+      final hoverOK = widget.showTooltip && _hoverVisible;
+      final candleAtCursor = hoverOK && _mouseX != null
+          ? widget.candles[min(
+              max((maxW - _mouseX!) ~/ widget.candleWidth + widget.index, 0),
+              widget.candles.length - 1,
+            )]
           : null;
 
-      // ── UI ────────────────────────────────────────────────
       return Container(
         color: widget.style.background,
         child: Listener(
@@ -122,40 +129,44 @@ class _DesktopChartState extends State<DesktopChart> {
             if (s is PointerScrollEvent) widget.onScaleUpdate(-s.scrollDelta.dy);
           },
           child: MouseRegion(
-            cursor : isDragging
+            cursor: _isDragging
                 ? SystemMouseCursors.grabbing
                 : SystemMouseCursors.precise,
-            onHover: _onHover,
-            onExit : _onExit,
+            onHover: _handleHover,
+            onExit : _handleExit,
             child  : GestureDetector(
               behavior: HitTestBehavior.translucent,
               onPanDown: (d) {
                 widget.onPanDown(d.localPosition.dx);
-                setState(() { isDragging = true; hoverVisible = false; });
+                setState(() { _isDragging = true; _hoverVisible = false; });
               },
               onPanUpdate: (d) {
                 if (widget.showTooltip) {
-                  mouseX = d.localPosition.dx;
-                  mouseY = d.localPosition.dy;
+                  _mouseX = d.localPosition.dx;
+                  _mouseY = d.localPosition.dy;
                 }
                 widget.onHorizontalDragUpdate(d.localPosition.dx);
-                if (manualScaleHigh != null) {
-                  final delta = d.delta.dy / chartH * (manualScaleHigh! - manualScaleLow!);
+
+                if (_manualHi != null) {
+                  final delta = d.delta.dy / chartH * (_manualHi! - _manualLo!);
                   setState(() {
-                    manualScaleHigh = manualScaleHigh! + delta;
-                    manualScaleLow  = manualScaleLow! + delta;
+                    _manualHi = _manualHi! + delta;
+                    _manualLo = _manualLo! + delta;
                   });
                 }
               },
               onPanEnd: (_) {
                 widget.onPanEnd();
-                setState(() => isDragging = false);
-                Future.delayed(const Duration(milliseconds: 300),
-                    () => mounted ? setState(() => hoverVisible = true) : null);
+                setState(() => _isDragging = false);
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (mounted) setState(() => _hoverVisible = true);
+                });
               },
               child: RepaintBoundary(
-                child: _buildChart(ctx, maxW, maxH, chartH,
-                                   hi, lo, volHi, candleAtCursor),
+                child: _layers(
+                  context, maxW, maxH, chartH,
+                  hi, lo, volHi, candleAtCursor,
+                ),
               ),
             ),
           ),
@@ -164,8 +175,8 @@ class _DesktopChartState extends State<DesktopChart> {
     });
   }
 
-  // ───────────────── helper to build chart layers ─────────────
-  Widget _buildChart(
+  // ═══════════════════  stacked layers ═══════════════════════════
+  Widget _layers(
     BuildContext ctx,
     double maxW,
     double maxH,
@@ -173,21 +184,22 @@ class _DesktopChartState extends State<DesktopChart> {
     double hi,
     double lo,
     double volHi,
-    Candle?  current,
+    Candle? current,
   ) {
-    final hover = widget.showTooltip && hoverVisible;
+    final hover = widget.showTooltip && _hoverVisible;
+
     return Stack(children: [
-      // time row
+      // time axis
       TimeRow(
         style         : widget.style,
-        indicatorX    : hover ? mouseX : null,
+        indicatorX    : hover ? _mouseX : null,
         candles       : widget.candles,
         candleWidth   : widget.candleWidth,
         indicatorTime : current?.date,
         index         : widget.index,
       ),
 
-      // main chart & volume
+      // main + volume charts
       Column(children: [
         Expanded(
           flex: 3,
@@ -200,14 +212,15 @@ class _DesktopChartState extends State<DesktopChart> {
               chartHeight: chartH,
               lastCandle : widget.candles[widget.index < 0 ? 0 : widget.index],
               onScale    : (dy) {
-                manualScaleHigh ??= hi;
-                manualScaleLow  ??= lo;
+                _manualHi ??= hi;
+                _manualLo ??= lo;
                 setState(() {
-                  final d = dy / chartH * (manualScaleHigh! - manualScaleLow!);
-                  manualScaleHigh = manualScaleHigh! + d;
-                  manualScaleLow  = manualScaleLow! - d;
+                  final d = dy / chartH * (_manualHi! - _manualLo!);
+                  _manualHi = _manualHi! + d;
+                  _manualLo = _manualLo! - d;
                 });
               },
+              showLastPrice: widget.showLastPrice,          // ← NEW
             ),
             Row(children: [
               Expanded(
@@ -223,8 +236,8 @@ class _DesktopChartState extends State<DesktopChart> {
                         vertical: MAIN_CHART_VERTICAL_PADDING),
                     child: Stack(children: [
                       MainWindowIndicatorWidget(
-                        indicatorDatas: widget.mainWindowDataContainer
-                            .indicatorComponentData,
+                        indicatorDatas: widget
+                            .mainWindowDataContainer.indicatorComponentData,
                         index       : widget.index,
                         candleWidth : widget.candleWidth,
                         low         : lo,
@@ -279,7 +292,10 @@ class _DesktopChartState extends State<DesktopChart> {
                     child : Center(
                       child: Text(
                         "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volHi))}",
-                        style: TextStyle(color: widget.style.borderColor, fontSize: 12),
+                        style: TextStyle(
+                          color: widget.style.borderColor,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),
@@ -291,10 +307,10 @@ class _DesktopChartState extends State<DesktopChart> {
         const SizedBox(height: DATE_BAR_HEIGHT),
       ]),
 
-      // horizontal price tooltip
-      if (hover && mouseY != null)
+      // horizontal hover & price tooltip
+      if (hover && _mouseY != null)
         Positioned(
-          top: mouseY! - 10,
+          top: _mouseY! - 10,
           child: Row(children: [
             DashLine(
               length   : maxW,
@@ -306,34 +322,32 @@ class _DesktopChartState extends State<DesktopChart> {
               color : Colors.grey.shade800,
               width : PRICE_BAR_WIDTH,
               height: 20,
-              child : Center(
-                child: Text(
-                  mouseY! < maxH * .75
-                      ? HelperFunctions.priceToString(
-                          hi -
-                              (mouseY! - MAIN_CHART_VERTICAL_PADDING) /
-                                  (maxH * .75 -
-                                      2 * MAIN_CHART_VERTICAL_PADDING) *
-                                  (hi - lo),
-                        )
-                      : HelperFunctions.addMetricPrefix(
-                          HelperFunctions.getRoof(volHi) *
-                              (1 -
-                                  (mouseY! - maxH * .75 - 10) /
-                                      (maxH * .25 - 10)),
-                        ),
-                  style: TextStyle(
-                      color: widget.style.secondaryTextColor, fontSize: 12),
-                ),
+              alignment: Alignment.center,
+              child: Text(
+                _mouseY! < maxH * .75
+                    ? HelperFunctions.priceToString(
+                        hi -
+                            (_mouseY! - MAIN_CHART_VERTICAL_PADDING) /
+                                (maxH * .75 - 2 * MAIN_CHART_VERTICAL_PADDING) *
+                                (hi - lo),
+                      )
+                    : HelperFunctions.addMetricPrefix(
+                        HelperFunctions.getRoof(volHi) *
+                            (1 -
+                                (_mouseY! - maxH * .75 - 10) /
+                                    (maxH * .25 - 10)),
+                      ),
+                style: TextStyle(
+                    color: widget.style.secondaryTextColor, fontSize: 12),
               ),
             ),
           ]),
         ),
 
-      // vertical cross‑hair
-      if (hover && mouseX != null)
+      // vertical hover line
+      if (hover && _mouseX != null)
         Positioned(
-          left: mouseX,
+          left: _mouseX,
           child: DashLine(
             length   : ctx.size!.height - 20,
             color    : widget.style.borderColor,
@@ -342,7 +356,7 @@ class _DesktopChartState extends State<DesktopChart> {
           ),
         ),
 
-      // top info bar
+      // top info panel
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
         child : TopPanel(
