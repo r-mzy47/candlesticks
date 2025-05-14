@@ -9,46 +9,51 @@ import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 
 enum ChartAdjust {
-  /// Will adjust chart size by max and min value from visible area
+  /// Adjust chart size by max/min of **visible** candles
   visibleRange,
 
-  /// Will adjust chart size by max and min value from the whole data
-  fullRange
+  /// Adjust chart size by max/min of the **whole** series
+  fullRange,
 }
 
-/// StatefulWidget that holds Chart's State (index of
-/// current position and candles width).
+/// Stateful widget that owns chart state (scroll index + candle width).
 class Candlesticks extends StatefulWidget {
-  /// The arrangement of the array should be such that
-  /// the newest item is in position 0
+  /// Candle list; default expectation is **oldest → newest**.
+  ///
+  /// If your list is newest‑first, just set `reversed:true`.
   final List<Candle> candles;
 
-  /// This callback calls when the last candle gets visible
+  /// Flip the array once so the library sees “newest at 0”.
+  final bool reversed;
+
+  /// Called when the last candle becomes visible.
   final Future<void> Function()? onLoadMoreCandles;
 
-  /// List of buttons you what to add on top tool bar
+  /// Extra buttons for the top toolbar.
   final List<ToolBarAction> actions;
 
-  /// List of indicators to draw
+  /// Indicators to draw.
   final List<Indicator>? indicators;
 
-  /// This callback calls when ever user clicks a spcesific indicator close button (X)
+  /// Fires when user clicks the X on an indicator label.
   final void Function(String)? onRemoveIndicator;
 
-  /// How chart price range will be adjusted when moving chart
+  /// How price range is calculated while panning.
   final ChartAdjust chartAdjust;
 
-  /// Will zoom buttons be displayed in toolbar
+  /// Show ± zoom buttons in the toolbar.
   final bool displayZoomActions;
 
-  /// Custom loading widget
+  /// Replace the default loader.
   final Widget? loadingWidget;
 
+  /// Customise colours & fonts.
   final CandleSticksStyle? style;
 
   const Candlesticks({
     Key? key,
     required this.candles,
+    this.reversed = false,                        // ← NEW
     this.onLoadMoreCandles,
     this.actions = const [],
     this.chartAdjust = ChartAdjust.visibleRange,
@@ -57,7 +62,7 @@ class Candlesticks extends StatefulWidget {
     this.indicators,
     this.onRemoveIndicator,
     this.style,
-  })  : assert(candles.length == 0 || candles.length > 1,
+  })  : assert(candles.isEmpty || candles.length > 1,
             "Please provide at least 2 candles"),
         super(key: key);
 
@@ -66,78 +71,76 @@ class Candlesticks extends StatefulWidget {
 }
 
 class _CandlesticksState extends State<Candlesticks> {
-  /// index of the newest candle to be displayed
-  /// changes when user scrolls along the chart
-  int index = -10;
-  double lastX = 0;
+  // ───────── internal helpers ────────────────────────────────────────────────
+
+  /// Effective candle list in the order the library expects
+  /// (index 0 = newest). Flipped once if [widget.reversed] is true.
+  List<Candle> get _candles =>
+      widget.reversed ? widget.candles.reversed.toList() : widget.candles;
+
+  // ───────── mutable state ──────────────────────────────────────────────────
+  int index = -10;            // scroll offset (newest index displayed)
+  double lastX = 0;           // drag tracking
   int lastIndex = -10;
 
-  /// candleWidth controls the width of the single candles.
-  ///  range: [2...10]
-  double candleWidth = 6;
+  double candleWidth = 6;     // 2 … 20 px
 
-  /// true when widget.onLoadMoreCandles is fetching new candles.
   bool isCallingLoadMore = false;
 
   MainWindowDataContainer? mainWindowDataContainer;
 
+  // ───────── lifecycle ──────────────────────────────────────────────────────
   @override
   void initState() {
     super.initState();
-    if (widget.candles.length == 0) {
-      return;
-    }
-    if (mainWindowDataContainer == null) {
-      mainWindowDataContainer =
-          MainWindowDataContainer(widget.indicators ?? [], widget.candles);
-    }
+    if (_candles.isEmpty) return;
+
+    mainWindowDataContainer ??=
+        MainWindowDataContainer(widget.indicators ?? [], _candles);
   }
 
   @override
   void didUpdateWidget(covariant Candlesticks oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.candles.length == 0) {
-      return;
-    }
+    if (_candles.isEmpty) return;
+
     if (mainWindowDataContainer == null) {
       mainWindowDataContainer =
-          MainWindowDataContainer(widget.indicators ?? [], widget.candles);
-    } else {
-      final currentIndicators = widget.indicators ?? [];
-      final oldIndicators = oldWidget.indicators ?? [];
-      if (currentIndicators.length == oldIndicators.length) {
-        for (int i = 0; i < currentIndicators.length; i++) {
-          if (currentIndicators[i] == oldIndicators[i]) {
-            continue;
-          } else {
-            mainWindowDataContainer = MainWindowDataContainer(
-                widget.indicators ?? [], widget.candles);
-            return;
-          }
-        }
-      } else {
-        mainWindowDataContainer =
-            MainWindowDataContainer(widget.indicators ?? [], widget.candles);
-        return;
-      }
-      try {
-        mainWindowDataContainer!.tickUpdate(widget.candles);
-      } catch (_) {
-        mainWindowDataContainer =
-            MainWindowDataContainer(widget.indicators ?? [], widget.candles);
-      }
+          MainWindowDataContainer(widget.indicators ?? [], _candles);
+      return;
+    }
+
+    final currentIndicators = widget.indicators ?? [];
+    final oldIndicators = oldWidget.indicators ?? [];
+
+    // Re‑create container if indicator list changed
+    if (currentIndicators.length != oldIndicators.length ||
+        !ListEquality().equals(currentIndicators, oldIndicators)) {
+      mainWindowDataContainer =
+          MainWindowDataContainer(currentIndicators, _candles);
+      return;
+    }
+
+    // Otherwise just tick‑update
+    try {
+      mainWindowDataContainer!.tickUpdate(_candles);
+    } catch (_) {
+      mainWindowDataContainer =
+          MainWindowDataContainer(currentIndicators, _candles);
     }
   }
 
+  // ───────── UI ─────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final style = widget.style ??
         (Theme.of(context).brightness == Brightness.dark
-            ? CandleSticksStyle.dark()
-            : CandleSticksStyle.light());
+            ? const CandleSticksStyle.dark()
+            : const CandleSticksStyle.light());
+
     return Column(
       children: [
-        if (widget.displayZoomActions == true || widget.actions.isNotEmpty) ...[
+        if (widget.displayZoomActions || widget.actions.isNotEmpty) ...[
           ToolBar(
             color: style.toolBarColor,
             children: [
@@ -145,33 +148,27 @@ class _CandlesticksState extends State<Candlesticks> {
                 ToolBarAction(
                   onPressed: () {
                     setState(() {
-                      candleWidth -= 2;
-                      candleWidth = max(candleWidth, 2);
+                      candleWidth = max(candleWidth - 2, 2);
                     });
                   },
-                  child: Icon(
-                    Icons.remove,
-                    color: style.borderColor,
-                  ),
+                  child: Icon(Icons.remove, color: style.borderColor),
                 ),
                 ToolBarAction(
                   onPressed: () {
                     setState(() {
-                      candleWidth += 2;
-                      candleWidth = min(candleWidth, 20);
+                      candleWidth = min(candleWidth + 2, 20);
                     });
                   },
-                  child: Icon(
-                    Icons.add,
-                    color: style.borderColor,
-                  ),
+                  child: Icon(Icons.add, color: style.borderColor),
                 ),
               ],
-              ...widget.actions
+              ...widget.actions,
             ],
           ),
         ],
-        if (widget.candles.length == 0 || mainWindowDataContainer == null)
+
+        // ── chart or loader ────────────────────────────────────────────────
+        if (_candles.isEmpty || mainWindowDataContainer == null)
           Expanded(
             child: Center(
               child: widget.loadingWidget ??
@@ -181,103 +178,76 @@ class _CandlesticksState extends State<Candlesticks> {
         else
           Expanded(
             child: TweenAnimationBuilder(
-              tween: Tween(begin: 6.toDouble(), end: candleWidth),
-              duration: Duration(milliseconds: 120),
+              tween: Tween<double>(begin: 6, end: candleWidth),
+              duration: const Duration(milliseconds: 120),
               builder: (_, double width, __) {
-                if (kIsWeb ||
-                    Platform.isMacOS ||
-                    Platform.isWindows ||
-                    Platform.isLinux) {
-                  return DesktopChart(
-                    style: style,
-                    onRemoveIndicator: widget.onRemoveIndicator,
-                    mainWindowDataContainer: mainWindowDataContainer!,
-                    chartAdjust: widget.chartAdjust,
-                    onScaleUpdate: (double scale) {
-                      scale = max(0.90, scale);
-                      scale = min(1.1, scale);
-                      setState(() {
-                        candleWidth *= scale;
-                        candleWidth = min(candleWidth, 20);
-                        candleWidth = max(candleWidth, 2);
-                      });
-                    },
-                    onPanEnd: () {
-                      lastIndex = index;
-                    },
-                    onHorizontalDragUpdate: (double x) {
-                      setState(() {
-                        x = x - lastX;
-                        index = lastIndex + x ~/ candleWidth;
-                        index = max(index, -10);
-                        index = min(index, widget.candles.length - 1);
-                      });
-                    },
-                    onPanDown: (double value) {
-                      lastX = value;
-                      lastIndex = index;
-                    },
-                    onReachEnd: () {
-                      if (isCallingLoadMore == false &&
-                          widget.onLoadMoreCandles != null) {
-                        isCallingLoadMore = true;
-                        widget.onLoadMoreCandles!().then((_) {
-                          isCallingLoadMore = false;
-                        });
-                      }
-                    },
-                    candleWidth: width,
-                    candles: widget.candles,
-                    index: index,
-                  );
-                } else {
-                  return MobileChart(
-                    style: style,
-                    onRemoveIndicator: widget.onRemoveIndicator,
-                    mainWindowDataContainer: mainWindowDataContainer!,
-                    chartAdjust: widget.chartAdjust,
-                    onScaleUpdate: (double scale) {
-                      scale = max(0.90, scale);
-                      scale = min(1.1, scale);
-                      setState(() {
-                        candleWidth *= scale;
-                        candleWidth = min(candleWidth, 20);
-                        candleWidth = max(candleWidth, 2);
-                      });
-                    },
-                    onPanEnd: () {
-                      lastIndex = index;
-                    },
-                    onHorizontalDragUpdate: (double x) {
-                      setState(() {
-                        x = x - lastX;
-                        index = lastIndex + x ~/ candleWidth;
-                        index = max(index, -10);
-                        index = min(index, widget.candles.length - 1);
-                      });
-                    },
-                    onPanDown: (double value) {
-                      lastX = value;
-                      lastIndex = index;
-                    },
-                    onReachEnd: () {
-                      if (isCallingLoadMore == false &&
-                          widget.onLoadMoreCandles != null) {
-                        isCallingLoadMore = true;
-                        widget.onLoadMoreCandles!().then((_) {
-                          isCallingLoadMore = false;
-                        });
-                      }
-                    },
-                    candleWidth: width,
-                    candles: widget.candles,
-                    index: index,
-                  );
-                }
+                final chart = (kIsWeb ||
+                        Platform.isMacOS ||
+                        Platform.isWindows ||
+                        Platform.isLinux)
+                    ? DesktopChart(
+                        style: style,
+                        onRemoveIndicator: widget.onRemoveIndicator,
+                        mainWindowDataContainer: mainWindowDataContainer!,
+                        chartAdjust: widget.chartAdjust,
+                        onScaleUpdate: _handleScale,
+                        onPanEnd: () => lastIndex = index,
+                        onHorizontalDragUpdate: _handleHorizontalDrag,
+                        onPanDown: _handlePanDown,
+                        onReachEnd: _handleReachEnd,
+                        candleWidth: width,
+                        candles: _candles,
+                        index: index,
+                      )
+                    : MobileChart(
+                        style: style,
+                        onRemoveIndicator: widget.onRemoveIndicator,
+                        mainWindowDataContainer: mainWindowDataContainer!,
+                        chartAdjust: widget.chartAdjust,
+                        onScaleUpdate: _handleScale,
+                        onPanEnd: () => lastIndex = index,
+                        onHorizontalDragUpdate: _handleHorizontalDrag,
+                        onPanDown: _handlePanDown,
+                        onReachEnd: _handleReachEnd,
+                        candleWidth: width,
+                        candles: _candles,
+                        index: index,
+                      );
+                return chart;
               },
             ),
           ),
       ],
     );
+  }
+
+  // ───────── gesture helpers ───────────────────────────────────────────────
+  void _handleScale(double scale) {
+    scale = scale.clamp(0.90, 1.10);
+    setState(() {
+      candleWidth = (candleWidth * scale).clamp(2, 20);
+    });
+  }
+
+  void _handleHorizontalDrag(double x) {
+    setState(() {
+      final delta = x - lastX;
+      index = (lastIndex + delta ~/ candleWidth)
+          .clamp(-10, _candles.length - 1);
+    });
+  }
+
+  void _handlePanDown(double value) {
+    lastX = value;
+    lastIndex = index;
+  }
+
+  void _handleReachEnd() {
+    if (!isCallingLoadMore && widget.onLoadMoreCandles != null) {
+      isCallingLoadMore = true;
+      widget.onLoadMoreCandles!().whenComplete(() {
+        isCallingLoadMore = false;
+      });
+    }
   }
 }
