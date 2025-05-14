@@ -109,11 +109,11 @@ class _MobileChartState extends State<MobileChart> {
         return TweenAnimationBuilder<double>(
           tween   : Tween(begin: hi, end: hi),
           duration: Duration(milliseconds: _manualHigh == null ? 300 : 0),
-          builder : (_, _, __) {
+          builder : (_, __, ___) {                       // ← unique names
             return TweenAnimationBuilder<double>(
               tween   : Tween(begin: lo, end: lo),
               duration: Duration(milliseconds: _manualHigh == null ? 300 : 0),
-              builder : (_, _, __) {
+              builder : (_, __, ___) {                   // ← unique names
                 final current = (widget.showTooltip && _crossX != null)
                     ? widget.candles[min(
                         max((maxWidth - _crossX!) ~/ widget.candleWidth +
@@ -383,6 +383,7 @@ class _MobileChartState extends State<MobileChart> {
     );
   }
 }
+
 
 
 
