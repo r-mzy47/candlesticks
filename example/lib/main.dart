@@ -54,6 +54,7 @@ class _MyAppState extends State<MyApp> {
       length: 100,
       color: Colors.green.shade600,
     ),
+    MovingAverageIndicator(length: 100, color: Colors.pink),
   ];
 
   @override
@@ -177,90 +178,29 @@ class _MyAppState extends State<MyApp> {
             )
           ],
         ),
-        body: Center(
-          child: StreamBuilder(
-            stream: _channel == null ? null : _channel!.stream,
-            builder: (context, snapshot) {
-              updateCandlesFromSnapshot(snapshot);
-              return Candlesticks(
-                key: Key(currentSymbol + currentInterval),
-                indicators: indicators,
-                candles: candles,
-                onLoadMoreCandles: loadMoreCandles,
-                onRemoveIndicator: (String indicator) {
-                  setState(() {
-                    indicators = [...indicators];
-                    indicators
-                        .removeWhere((element) => element.name == indicator);
-                  });
-                },
-                actions: [
-                  ToolBarAction(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Center(
-                            child: Container(
-                              width: 200,
-                              color: Theme.of(context).backgroundColor,
-                              child: Wrap(
-                                children: intervals
-                                    .map((e) => Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: SizedBox(
-                                            width: 50,
-                                            height: 30,
-                                            child: RawMaterialButton(
-                                              elevation: 0,
-                                              fillColor:
-                                                  const Color(0xFF494537),
-                                              onPressed: () {
-                                                fetchCandles(currentSymbol, e);
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: Text(
-                                                e,
-                                                style: const TextStyle(
-                                                  color: Color(0xFFF0B90A),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ))
-                                    .toList(),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: Text(
-                      currentInterval,
-                    ),
-                  ),
-                  ToolBarAction(
-                    width: 100,
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return SymbolsSearchModal(
-                            symbols: symbols,
-                            onSelect: (value) {
-                              fetchCandles(value, currentInterval);
-                            },
-                          );
-                        },
-                      );
-                    },
-                    child: Text(
-                      currentSymbol,
-                    ),
-                  )
-                ],
-              );
-            },
+        body: Padding(
+          padding: const EdgeInsets.only(bottom: 50.0),
+          child: Center(
+            child: StreamBuilder(
+              stream: _channel == null ? null : _channel!.stream,
+              builder: (context, snapshot) {
+                updateCandlesFromSnapshot(snapshot);
+                return Candlesticks(
+                  displayZoomActions: false,
+                  key: Key(currentSymbol + currentInterval),
+                  indicators: indicators,
+                  candles: candles,
+                  onLoadMoreCandles: loadMoreCandles,
+                  onRemoveIndicator: (String indicator) {
+                    setState(() {
+                      indicators = [...indicators];
+                      indicators
+                          .removeWhere((element) => element.name == indicator);
+                    });
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -292,7 +232,7 @@ class _SymbolSearchModalState extends State<SymbolsSearchModal> {
         child: Container(
           width: 300,
           height: MediaQuery.of(context).size.height * 0.75,
-          color: Theme.of(context).backgroundColor.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: .5),
           child: Column(
             children: [
               Padding(

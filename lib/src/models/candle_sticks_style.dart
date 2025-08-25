@@ -66,7 +66,7 @@ class CandleSticksStyle {
       primaryTextColor: primaryTextColor ?? Color(0xFF848E9C),
       secondaryTextColor: secondaryTextColor ?? Color(0XFFFFFFFF),
       mobileCandleHoverColor:
-          mobileCandleHoverColor ?? Color(0xFFF0B90A).withOpacity(0.2),
+          mobileCandleHoverColor ?? Color(0xFFF0B90A).withValues(alpha: .2),
       loadingColor: loadingColor ?? Color(0xFFF0B90A),
       toolBarColor: toolBarColor ?? Color(0xFF191B20),
     );
@@ -98,7 +98,7 @@ class CandleSticksStyle {
       primaryTextColor: primaryTextColor ?? Color(0XFF000000),
       secondaryTextColor: secondaryTextColor ?? Color(0XFFFFFFFF),
       mobileCandleHoverColor:
-          mobileCandleHoverColor ?? Color(0xFFF0B90A).withOpacity(0.2),
+          mobileCandleHoverColor ?? Color(0xFFF0B90A).withValues(alpha: .2),
       loadingColor: loadingColor ?? Color(0xFFF0B90A),
       toolBarColor: toolBarColor ?? Color(0xFFFAFAFA),
     );

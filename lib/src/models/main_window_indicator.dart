@@ -142,7 +142,7 @@ class MainWindowDataContainer {
             .where((element) => element.parentIndicator == indicator)
             .toList();
 
-        // TODO
+        
         for (int i = firstCandleIndex - indicator.dependsOnNPrevCandles + 1;
             i < candles.length;
             i++) {

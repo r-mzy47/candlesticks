@@ -1,6 +1,5 @@
 import 'package:candlesticks/src/models/main_window_indicator.dart';
 import 'package:flutter/material.dart';
-import '../models/main_window_indicator.dart';
 
 class MainWindowIndicatorWidget extends LeafRenderObjectWidget {
   final List<IndicatorComponentData> indicatorDatas;
