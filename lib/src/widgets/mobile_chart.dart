@@ -449,7 +449,9 @@ class _MobileChartState extends State<MobileChart> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            primary: widget.style.hoverIndicatorBackgroundColor,
+                            backgroundColor:
+                                widget.style.hoverIndicatorBackgroundColor,
+                            foregroundColor: widget.style.secondaryTextColor,
                           ),
                           child: Text(
                             "Auto",

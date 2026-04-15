@@ -6,7 +6,11 @@ import 'package:candlesticks/src/widgets/desktop_chart.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'dart:io' show Platform;
+
+final isDesktopLike = kIsWeb ||
+    defaultTargetPlatform == TargetPlatform.macOS ||
+    defaultTargetPlatform == TargetPlatform.windows ||
+    defaultTargetPlatform == TargetPlatform.linux;
 
 enum ChartAdjust {
   /// Will adjust chart size by max and min value from visible area
@@ -140,6 +144,12 @@ class _CandlesticksState extends State<Candlesticks> {
         if (widget.displayZoomActions == true || widget.actions.isNotEmpty) ...[
           ToolBar(
             color: style.toolBarColor,
+            border: Border.symmetric(
+              horizontal: BorderSide(
+                color: style.borderColor,
+                width: 1,
+              ),
+            ),
             children: [
               if (widget.displayZoomActions) ...[
                 ToolBarAction(
@@ -184,10 +194,7 @@ class _CandlesticksState extends State<Candlesticks> {
               tween: Tween(begin: 6.toDouble(), end: candleWidth),
               duration: Duration(milliseconds: 120),
               builder: (_, double width, __) {
-                if (kIsWeb ||
-                    Platform.isMacOS ||
-                    Platform.isWindows ||
-                    Platform.isLinux) {
+                if (isDesktopLike) {
                   return DesktopChart(
                     style: style,
                     onRemoveIndicator: widget.onRemoveIndicator,

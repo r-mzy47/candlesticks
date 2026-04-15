@@ -13,16 +13,17 @@ class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  BinanceRepository repository = BinanceRepository();
+  final BinanceRepository repository = BinanceRepository();
 
   List<Candle> candles = [];
   WebSocketChannel? _channel;
   bool themeIsDark = false;
   String currentInterval = "1m";
+
   final intervals = [
     '1m',
     '3m',
@@ -40,8 +41,10 @@ class _MyAppState extends State<MyApp> {
     '1w',
     '1M',
   ];
+
   List<String> symbols = [];
   String currentSymbol = "";
+
   List<Indicator> indicators = [
     BollingerBandsIndicator(
       length: 20,
@@ -58,98 +61,107 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
-    fetchSymbols().then((value) {
-      symbols = value;
-      if (symbols.isNotEmpty) fetchCandles(symbols[0], currentInterval);
-    });
     super.initState();
+
+    fetchSymbols().then((value) {
+      if (!mounted) return;
+
+      setState(() {
+        symbols = value;
+      });
+
+      if (symbols.isNotEmpty) {
+        fetchCandles(symbols[0], currentInterval);
+      }
+    });
   }
 
   @override
   void dispose() {
-    if (_channel != null) _channel!.sink.close();
+    _channel?.sink.close();
     super.dispose();
   }
 
   Future<List<String>> fetchSymbols() async {
     try {
-      // load candles info
-      final data = await repository.fetchSymbols();
-      return data;
+      return await repository.fetchSymbols();
     } catch (e) {
-      // handle error
       return [];
     }
   }
 
   Future<void> fetchCandles(String symbol, String interval) async {
-    // close current channel if exists
-    if (_channel != null) {
-      _channel!.sink.close();
-      _channel = null;
-    }
-    // clear last candle list
+    _channel?.sink.close();
+    _channel = null;
+
     setState(() {
       candles = [];
       currentInterval = interval;
     });
 
     try {
-      // load candles info
       final data =
           await repository.fetchCandles(symbol: symbol, interval: interval);
-      // connect to binance stream
-      _channel =
-          repository.establishConnection(symbol.toLowerCase(), currentInterval);
-      // update candles
+
+      _channel = repository.establishConnection(symbol.toLowerCase(), interval);
+
+      if (!mounted) return;
+
       setState(() {
         candles = data;
         currentInterval = interval;
         currentSymbol = symbol;
       });
     } catch (e) {
-      // handle error
       return;
     }
   }
 
   void updateCandlesFromSnapshot(AsyncSnapshot<Object?> snapshot) {
-    if (candles.isEmpty) return;
-    if (snapshot.data != null) {
-      final map = jsonDecode(snapshot.data as String) as Map<String, dynamic>;
-      if (map.containsKey("k") == true) {
-        final candleTicker = CandleTickerModel.fromJson(map);
+    if (candles.isEmpty || snapshot.data == null) return;
 
-        // cehck if incoming candle is an update on current last candle, or a new one
-        if (candles[0].date == candleTicker.candle.date &&
-            candles[0].open == candleTicker.candle.open) {
-          // update last candle
-          candles[0] = candleTicker.candle;
-        }
-        // check if incoming new candle is next candle so the difrence
-        // between times must be the same as last existing 2 candles
-        else if (candleTicker.candle.date.difference(candles[0].date) ==
-            candles[0].date.difference(candles[1].date)) {
-          // add new candle to list
-          candles.insert(0, candleTicker.candle);
-        }
-      }
+    final map = jsonDecode(snapshot.data as String) as Map<String, dynamic>;
+    if (!map.containsKey("k")) return;
+
+    final candleTicker = CandleTickerModel.fromJson(map);
+
+    if (candles[0].date == candleTicker.candle.date &&
+        candles[0].open == candleTicker.candle.open) {
+      candles[0] = candleTicker.candle;
+      return;
+    }
+
+    if (candles.length < 2) {
+      candles.insert(0, candleTicker.candle);
+      return;
+    }
+
+    if (candleTicker.candle.date.difference(candles[0].date) ==
+        candles[0].date.difference(candles[1].date)) {
+      candles.insert(0, candleTicker.candle);
     }
   }
 
   Future<void> loadMoreCandles() async {
+    if (candles.isEmpty || currentSymbol.isEmpty) return;
+
     try {
-      // load candles info
       final data = await repository.fetchCandles(
-          symbol: currentSymbol,
-          interval: currentInterval,
-          endTime: candles.last.date.millisecondsSinceEpoch);
-      candles.removeLast();
+        symbol: currentSymbol,
+        interval: currentInterval,
+        endTime: candles.last.date.millisecondsSinceEpoch,
+      );
+
+      if (candles.isNotEmpty) {
+        candles.removeLast();
+      }
+
+      if (!mounted) return;
+
       setState(() {
         candles.addAll(data);
       });
     } catch (e) {
-      // handle error
       return;
     }
   }
@@ -174,14 +186,15 @@ class _MyAppState extends State<MyApp> {
                     ? Icons.wb_sunny_sharp
                     : Icons.nightlight_round_outlined,
               ),
-            )
+            ),
           ],
         ),
         body: Center(
           child: StreamBuilder(
-            stream: _channel == null ? null : _channel!.stream,
+            stream: _channel?.stream,
             builder: (context, snapshot) {
               updateCandlesFromSnapshot(snapshot);
+
               return Candlesticks(
                 key: Key(currentSymbol + currentInterval),
                 indicators: indicators,
@@ -203,31 +216,34 @@ class _MyAppState extends State<MyApp> {
                           return Center(
                             child: Container(
                               width: 200,
-                              color: Theme.of(context).backgroundColor,
+                              color: Theme.of(context).colorScheme.surface,
                               child: Wrap(
                                 children: intervals
-                                    .map((e) => Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: SizedBox(
-                                            width: 50,
-                                            height: 30,
-                                            child: RawMaterialButton(
-                                              elevation: 0,
-                                              fillColor:
-                                                  const Color(0xFF494537),
-                                              onPressed: () {
+                                    .map(
+                                      (e) => Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: SizedBox(
+                                          width: 50,
+                                          height: 30,
+                                          child: RawMaterialButton(
+                                            elevation: 0,
+                                            fillColor: const Color(0xFF494537),
+                                            onPressed: () {
+                                              if (currentSymbol.isNotEmpty) {
                                                 fetchCandles(currentSymbol, e);
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: Text(
-                                                e,
-                                                style: const TextStyle(
-                                                  color: Color(0xFFF0B90A),
-                                                ),
+                                              }
+                                              Navigator.of(context).pop();
+                                            },
+                                            child: Text(
+                                              e,
+                                              style: const TextStyle(
+                                                color: Color(0xFFF0B90A),
                                               ),
                                             ),
                                           ),
-                                        ))
+                                        ),
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             ),
@@ -235,9 +251,7 @@ class _MyAppState extends State<MyApp> {
                         },
                       );
                     },
-                    child: Text(
-                      currentInterval,
-                    ),
+                    child: Text(currentInterval),
                   ),
                   ToolBarAction(
                     width: 100,
@@ -254,10 +268,8 @@ class _MyAppState extends State<MyApp> {
                         },
                       );
                     },
-                    child: Text(
-                      currentSymbol,
-                    ),
-                  )
+                    child: Text(currentSymbol),
+                  ),
                 ],
               );
             },
@@ -284,6 +296,7 @@ class SymbolsSearchModal extends StatefulWidget {
 
 class _SymbolSearchModalState extends State<SymbolsSearchModal> {
   String symbolSearch = "";
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -292,7 +305,7 @@ class _SymbolSearchModalState extends State<SymbolsSearchModal> {
         child: Container(
           width: 300,
           height: MediaQuery.of(context).size.height * 0.75,
-          color: Theme.of(context).backgroundColor.withOpacity(0.5),
+          color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
           child: Column(
             children: [
               Padding(
@@ -311,27 +324,29 @@ class _SymbolSearchModalState extends State<SymbolsSearchModal> {
                       .where((element) => element
                           .toLowerCase()
                           .contains(symbolSearch.toLowerCase()))
-                      .map((e) => Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SizedBox(
-                              width: 50,
-                              height: 30,
-                              child: RawMaterialButton(
-                                elevation: 0,
-                                fillColor: const Color(0xFF494537),
-                                onPressed: () {
-                                  widget.onSelect(e);
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text(
-                                  e,
-                                  style: const TextStyle(
-                                    color: Color(0xFFF0B90A),
-                                  ),
+                      .map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            width: 50,
+                            height: 30,
+                            child: RawMaterialButton(
+                              elevation: 0,
+                              fillColor: const Color(0xFF494537),
+                              onPressed: () {
+                                widget.onSelect(e);
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                e,
+                                style: const TextStyle(
+                                  color: Color(0xFFF0B90A),
                                 ),
                               ),
                             ),
-                          ))
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
@@ -345,6 +360,7 @@ class _SymbolSearchModalState extends State<SymbolsSearchModal> {
 
 class CustomTextField extends StatelessWidget {
   const CustomTextField({Key? key, required this.onChanged}) : super(key: key);
+
   final void Function(String) onChanged;
 
   @override
@@ -358,16 +374,13 @@ class CustomTextField extends StatelessWidget {
           color: Color(0xFF494537),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide:
-              BorderSide(width: 3, color: Color(0xFF494537)), //<-- SEE HER
+          borderSide: BorderSide(width: 3, color: Color(0xFF494537)),
         ),
         border: OutlineInputBorder(
-          borderSide:
-              BorderSide(width: 3, color: Color(0xFF494537)), //<-- SEE HER
+          borderSide: BorderSide(width: 3, color: Color(0xFF494537)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide:
-              BorderSide(width: 3, color: Color(0xFF494537)), //<-- SEE HER
+          borderSide: BorderSide(width: 3, color: Color(0xFF494537)),
         ),
       ),
       onChanged: onChanged,
