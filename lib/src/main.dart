@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:candlesticks/candlesticks.dart';
-import 'package:candlesticks/src/models/main_window_indicator.dart';
 import 'package:candlesticks/src/widgets/mobile_chart.dart';
 import 'package:candlesticks/src/widgets/desktop_chart.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
@@ -33,9 +32,6 @@ class Candlesticks extends StatefulWidget {
   /// List of buttons you what to add on top tool bar
   final List<ToolBarAction> actions;
 
-  /// List of indicators to draw
-  final List<Indicator>? indicators;
-
   /// This callback calls when ever user clicks a spcesific indicator close button (X)
   final void Function(String)? onRemoveIndicator;
 
@@ -58,7 +54,6 @@ class Candlesticks extends StatefulWidget {
     this.chartAdjust = ChartAdjust.visibleRange,
     this.displayZoomActions = true,
     this.loadingWidget,
-    this.indicators,
     this.onRemoveIndicator,
     this.style,
   })  : assert(candles.length == 0 || candles.length > 1,
@@ -83,17 +78,11 @@ class _CandlesticksState extends State<Candlesticks> {
   /// true when widget.onLoadMoreCandles is fetching new candles.
   bool isCallingLoadMore = false;
 
-  MainWindowDataContainer? mainWindowDataContainer;
-
   @override
   void initState() {
     super.initState();
     if (widget.candles.length == 0) {
       return;
-    }
-    if (mainWindowDataContainer == null) {
-      mainWindowDataContainer =
-          MainWindowDataContainer(widget.indicators ?? [], widget.candles);
     }
   }
 
@@ -102,34 +91,6 @@ class _CandlesticksState extends State<Candlesticks> {
     super.didUpdateWidget(oldWidget);
     if (widget.candles.length == 0) {
       return;
-    }
-    if (mainWindowDataContainer == null) {
-      mainWindowDataContainer =
-          MainWindowDataContainer(widget.indicators ?? [], widget.candles);
-    } else {
-      final currentIndicators = widget.indicators ?? [];
-      final oldIndicators = oldWidget.indicators ?? [];
-      if (currentIndicators.length == oldIndicators.length) {
-        for (int i = 0; i < currentIndicators.length; i++) {
-          if (currentIndicators[i] == oldIndicators[i]) {
-            continue;
-          } else {
-            mainWindowDataContainer = MainWindowDataContainer(
-                widget.indicators ?? [], widget.candles);
-            return;
-          }
-        }
-      } else {
-        mainWindowDataContainer =
-            MainWindowDataContainer(widget.indicators ?? [], widget.candles);
-        return;
-      }
-      try {
-        mainWindowDataContainer!.tickUpdate(widget.candles);
-      } catch (_) {
-        mainWindowDataContainer =
-            MainWindowDataContainer(widget.indicators ?? [], widget.candles);
-      }
     }
   }
 
@@ -181,7 +142,7 @@ class _CandlesticksState extends State<Candlesticks> {
             ],
           ),
         ],
-        if (widget.candles.length == 0 || mainWindowDataContainer == null)
+        if (widget.candles.length == 0)
           Expanded(
             child: Center(
               child: widget.loadingWidget ??
@@ -198,7 +159,6 @@ class _CandlesticksState extends State<Candlesticks> {
                   return DesktopChart(
                     style: style,
                     onRemoveIndicator: widget.onRemoveIndicator,
-                    mainWindowDataContainer: mainWindowDataContainer!,
                     chartAdjust: widget.chartAdjust,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);
@@ -241,7 +201,6 @@ class _CandlesticksState extends State<Candlesticks> {
                   return MobileChart(
                     style: style,
                     onRemoveIndicator: widget.onRemoveIndicator,
-                    mainWindowDataContainer: mainWindowDataContainer!,
                     chartAdjust: widget.chartAdjust,
                     onScaleUpdate: (double scale) {
                       scale = max(0.90, scale);

@@ -2,10 +2,8 @@ import 'dart:math';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
-import 'package:candlesticks/src/models/main_window_indicator.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
-import 'package:candlesticks/src/widgets/mainwindow_indicator_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/top_panel.dart';
@@ -50,9 +48,6 @@ class DesktopChart extends StatefulWidget {
 
   final Function() onReachEnd;
 
-  /// holds main window indicators data and high and low prices.
-  final MainWindowDataContainer mainWindowDataContainer;
-
   final void Function(String)? onRemoveIndicator;
 
   DesktopChart({
@@ -65,7 +60,6 @@ class DesktopChart extends StatefulWidget {
     required this.onPanDown,
     required this.onPanEnd,
     required this.onReachEnd,
-    required this.mainWindowDataContainer,
     required this.onRemoveIndicator,
     required this.style,
   });
@@ -126,15 +120,11 @@ class _DesktopChartState extends State<DesktopChart> {
           candlesHighPrice = manualScaleHigh!;
           candlesLowPrice = manualScaleLow!;
         } else if (widget.chartAdjust == ChartAdjust.visibleRange) {
-          candlesHighPrice = widget.mainWindowDataContainer.highs
-              .getRange(candlesStartIndex, candlesEndIndex + 1)
-              .reduce(max);
-          candlesLowPrice = widget.mainWindowDataContainer.lows
-              .getRange(candlesStartIndex, candlesEndIndex + 1)
-              .reduce(min);
+          candlesHighPrice = inRangeCandles.map((c) => c.high).reduce(max);
+          candlesLowPrice = inRangeCandles.map((c) => c.low).reduce(min);
         } else if (widget.chartAdjust == ChartAdjust.fullRange) {
-          candlesHighPrice = widget.mainWindowDataContainer.highs.reduce(max);
-          candlesLowPrice = widget.mainWindowDataContainer.lows.reduce(min);
+          candlesHighPrice = widget.candles.map((c) => c.high).reduce(max);
+          candlesLowPrice = widget.candles.map((c) => c.low).reduce(min);
         }
 
         if (candlesHighPrice == candlesLowPrice) {
@@ -226,31 +216,16 @@ class _DesktopChartState extends State<DesktopChart> {
                                               vertical:
                                                   MAIN_CHART_VERTICAL_PADDING),
                                           child: RepaintBoundary(
-                                            child: Stack(
-                                              children: [
-                                                MainWindowIndicatorWidget(
-                                                  indicatorDatas: widget
-                                                      .mainWindowDataContainer
-                                                      .indicatorComponentData,
-                                                  index: widget.index,
-                                                  candleWidth:
-                                                      widget.candleWidth,
-                                                  low: low,
-                                                  high: high,
-                                                ),
-                                                CandleStickWidget(
-                                                  candles: widget.candles,
-                                                  candleWidth:
-                                                      widget.candleWidth,
-                                                  index: widget.index,
-                                                  high: high,
-                                                  low: low,
-                                                  bearColor:
-                                                      widget.style.primaryBear,
-                                                  bullColor:
-                                                      widget.style.primaryBull,
-                                                ),
-                                              ],
+                                            child: CandleStickWidget(
+                                              candles: widget.candles,
+                                              candleWidth: widget.candleWidth,
+                                              index: widget.index,
+                                              high: high,
+                                              low: low,
+                                              bearColor:
+                                                  widget.style.primaryBear,
+                                              bullColor:
+                                                  widget.style.primaryBull,
                                             ),
                                           ),
                                         ),
@@ -446,17 +421,7 @@ class _DesktopChartState extends State<DesktopChart> {
                             vertical: 4, horizontal: 12),
                         child: TopPanel(
                           style: widget.style,
-                          onRemoveIndicator: widget.onRemoveIndicator,
                           currentCandle: currentCandle,
-                          indicators: widget.mainWindowDataContainer.indicators,
-                          toggleIndicatorVisibility: (indicatorName) {
-                            setState(() {
-                              widget.mainWindowDataContainer
-                                  .toggleIndicatorVisibility(indicatorName);
-                            });
-                          },
-                          unvisibleIndicators: widget
-                              .mainWindowDataContainer.unvisibleIndicators,
                         ),
                       ),
                       Positioned(
@@ -470,6 +435,9 @@ class _DesktopChartState extends State<DesktopChart> {
                             backgroundColor:
                                 widget.style.hoverIndicatorBackgroundColor,
                             foregroundColor: widget.style.secondaryTextColor,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero,
+                            ),
                           ),
                           child: Text(
                             "Auto",

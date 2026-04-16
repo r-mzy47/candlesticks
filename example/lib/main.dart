@@ -45,20 +45,6 @@ class _MyAppState extends State<MyApp> {
   List<String> symbols = [];
   String currentSymbol = "";
 
-  List<Indicator> indicators = [
-    BollingerBandsIndicator(
-      length: 20,
-      stdDev: 2,
-      upperColor: const Color(0xFF2962FF),
-      basisColor: const Color(0xFFFF6D00),
-      lowerColor: const Color(0xFF2962FF),
-    ),
-    WeightedMovingAverageIndicator(
-      length: 100,
-      color: Colors.green.shade600,
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -197,16 +183,8 @@ class _MyAppState extends State<MyApp> {
 
               return Candlesticks(
                 key: Key(currentSymbol + currentInterval),
-                indicators: indicators,
                 candles: candles,
                 onLoadMoreCandles: loadMoreCandles,
-                onRemoveIndicator: (String indicator) {
-                  setState(() {
-                    indicators = [...indicators];
-                    indicators
-                        .removeWhere((element) => element.name == indicator);
-                  });
-                },
                 actions: [
                   ToolBarAction(
                     onPressed: () {
