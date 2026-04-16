@@ -8,7 +8,7 @@ import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/top_panel.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
-import 'dash_line.dart';
+import 'dash_line_painter.dart';
 
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
@@ -136,7 +136,7 @@ class _MobileChartState extends State<MobileChart> {
               duration:
                   Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
               builder: (context, double low, _) {
-                final currentCandle = longPressX == null
+                final hoveredCandle = longPressX == null
                     ? null
                     : widget.candles[min(
                         max(
@@ -150,10 +150,10 @@ class _MobileChartState extends State<MobileChart> {
                     children: [
                       TimeRow(
                         style: widget.style,
-                        indicatorX: longPressX,
+                        mouseHoverX: longPressX,
                         candles: widget.candles,
                         candleWidth: widget.candleWidth,
-                        indicatorTime: currentCandle?.date,
+                        indicatorTime: hoveredCandle?.date,
                         index: widget.index,
                       ),
                       Column(
@@ -166,6 +166,7 @@ class _MobileChartState extends State<MobileChart> {
                                   style: widget.style,
                                   low: candlesLowPrice,
                                   high: candlesHighPrice,
+                                  volumeHigh: volumeHigh,
                                   width: constraints.maxWidth,
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[
@@ -294,12 +295,12 @@ class _MobileChartState extends State<MobileChart> {
                               top: longPressY! - 10,
                               child: Row(
                                 children: [
-                                  DashLine(
-                                    length: maxWidth,
-                                    color: widget.style.borderColor,
-                                    direction: Axis.horizontal,
-                                    thickness: 0.5,
-                                  ),
+                                  // DashLine(
+                                  //   length: maxWidth,
+                                  //   color: widget.style.borderColor,
+                                  //   direction: Axis.horizontal,
+                                  //   thickness: 0.5,
+                                  // ),
                                   Container(
                                     color: widget
                                         .style.hoverIndicatorBackgroundColor,
@@ -404,7 +405,7 @@ class _MobileChartState extends State<MobileChart> {
                             vertical: 4, horizontal: 12),
                         child: TopPanel(
                           style: widget.style,
-                          currentCandle: currentCandle,
+                          currentCandle: hoveredCandle,
                         ),
                       ),
                       Positioned(
