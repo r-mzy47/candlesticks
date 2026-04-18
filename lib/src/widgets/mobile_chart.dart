@@ -8,7 +8,6 @@ import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/top_panel.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
-import 'dash_line_painter.dart';
 
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
@@ -148,14 +147,14 @@ class _MobileChartState extends State<MobileChart> {
                   color: widget.style.background,
                   child: Stack(
                     children: [
-                      TimeRow(
-                        style: widget.style,
-                        mouseHoverX: longPressX,
-                        candles: widget.candles,
-                        candleWidth: widget.candleWidth,
-                        indicatorTime: hoveredCandle?.date,
-                        index: widget.index,
-                      ),
+                      // TimeRow(
+                      //   style: widget.style,
+                      //   mouseHoverX: longPressX,
+                      //   candles: widget.candles,
+                      //   candleWidth: widget.candleWidth,
+                      //   indicatorTime: hoveredCandle?.date,
+                      //   index: widget.index,
+                      // ),
                       Column(
                         children: [
                           Expanded(

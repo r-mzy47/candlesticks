@@ -1,3 +1,4 @@
+import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/widgets/dash_line_painter.dart';
@@ -6,19 +7,17 @@ import 'dart:math' as math;
 
 class TimeRow extends StatefulWidget {
   final List<Candle> candles;
-  final double candleWidth;
   final double? mouseHoverX;
   final DateTime? indicatorTime;
-  final int index;
+  final CandlesticksViewport viewport;
   final CandleSticksStyle style;
 
   const TimeRow({
     Key? key,
     required this.candles,
-    required this.candleWidth,
+    required this.viewport,
     this.mouseHoverX,
     required this.indicatorTime,
-    required this.index,
     required this.style,
   }) : super(key: key);
 
@@ -31,11 +30,11 @@ class _TimeRowState extends State<TimeRow> {
 
   /// Calculates number of candles between two time indicator
   int _stepCalculator() {
-    if (widget.candleWidth < 3)
+    if (widget.viewport.candleWidth < 3)
       return 31;
-    else if (widget.candleWidth < 5)
+    else if (widget.viewport.candleWidth < 5)
       return 19;
-    else if (widget.candleWidth < 7)
+    else if (widget.viewport.candleWidth < 7)
       return 13;
     else
       return 9;
@@ -90,9 +89,9 @@ class _TimeRowState extends State<TimeRow> {
 
   @override
   void didUpdateWidget(TimeRow oldWidget) {
-    if (oldWidget.index != widget.index ||
-        oldWidget.candleWidth != widget.candleWidth)
-      _scrollController.jumpTo((widget.index + 10) * widget.candleWidth);
+    if (oldWidget.viewport != widget.viewport)
+      _scrollController.jumpTo(
+          (widget.viewport.scrollIndex + 10) * widget.viewport.candleWidth);
     super.didUpdateWidget(oldWidget);
   }
 
@@ -107,7 +106,7 @@ class _TimeRowState extends State<TimeRow> {
           physics: NeverScrollableScrollPhysics(),
           itemCount: math.max(widget.candles.length, 1000),
           scrollDirection: Axis.horizontal,
-          itemExtent: step * widget.candleWidth,
+          itemExtent: step * widget.viewport.candleWidth,
           controller: _scrollController,
           reverse: true,
           itemBuilder: (context, index) {
