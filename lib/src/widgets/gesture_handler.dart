@@ -68,9 +68,7 @@ class _GestureHandlerState extends State<GestureHandler> {
   }
 
   void onScaleUpdate(double scale) {
-    scale = max(0.90, scale);
-    scale = min(1.1, scale);
-    double newCandleWidth = widget.viewPort.candleWidth * scale;
+    double newCandleWidth = widget.viewPort.candleWidth + scale / 50;
     newCandleWidth = min(newCandleWidth, 20);
     newCandleWidth = max(newCandleWidth, 2);
     widget.controller.setZoom(newCandleWidth);
@@ -126,7 +124,18 @@ class _GestureHandlerState extends State<GestureHandler> {
           child: Listener(
             onPointerSignal: (pointerSignal) {
               if (pointerSignal is PointerScrollEvent) {
-                onScaleUpdate(pointerSignal.scrollDelta.direction * -1);
+                if (pointerSignal.scrollDelta.dy.abs() >
+                    pointerSignal.scrollDelta.dx.abs())
+                  onScaleUpdate(pointerSignal.scrollDelta.dy * -1);
+                else {
+                  int NewIndex = widget.viewPort.scrollIndex +
+                      -1 *
+                          pointerSignal.scrollDelta.dx ~/
+                          widget.viewPort.candleWidth;
+                  NewIndex = max(NewIndex, -10);
+                  NewIndex = min(NewIndex, widget.candlesCount - 1);
+                  widget.controller.jumpTo(NewIndex);
+                }
               }
             },
             child: MouseRegion(
