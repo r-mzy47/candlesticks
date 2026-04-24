@@ -139,6 +139,7 @@ class CandleStickRenderObject extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    context.canvas.clipRect(offset & size);
     double range = (_high - _low) / size.height;
     for (int i = 0; (i + 1) * _candleWidth < size.width; i++) {
       if (i + _index >= _candles.length || i + _index < 0) continue;
