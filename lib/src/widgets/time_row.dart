@@ -116,8 +116,8 @@ class _TimeRowState extends State<TimeRow> {
               children: [
                 Expanded(
                   child: Container(
-                    width: 0.05,
-                    color: widget.style.borderColor,
+                    width: 1,
+                    color: widget.style.gridColor,
                   ),
                 ),
                 dif.compareTo(Duration(days: 1)) > 0

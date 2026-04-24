@@ -93,8 +93,8 @@ class _PriceColumnState extends State<PriceColumn> {
                                   children: [
                                     Container(
                                       width: widget.width - PRICE_BAR_WIDTH,
-                                      height: 0.05,
-                                      color: widget.style.borderColor,
+                                      height: 1,
+                                      color: widget.style.gridColor,
                                     ),
                                     Expanded(
                                       child: Text(
@@ -180,11 +180,12 @@ class _PriceColumnState extends State<PriceColumn> {
                       child: Center(
                         child: Text(
                           calculateHoverdNumber(
-                              widget.mouseHoverY!,
-                              widget.low,
-                              widget.high,
-                              widget.chartHeight,
-                              widget.volumeHigh),
+                            widget.mouseHoverY!,
+                            widget.low,
+                            widget.high,
+                            widget.chartHeight,
+                            widget.volumeHigh,
+                          ),
                           style: TextStyle(
                             color: widget.style.secondaryTextColor,
                             fontSize: 12,
