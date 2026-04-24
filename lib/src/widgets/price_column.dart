@@ -15,7 +15,6 @@ class PriceColumn extends StatefulWidget {
     required this.lastCandle,
     required this.onScale,
     required this.style,
-    required this.volumeHigh,
     this.mouseHoverY,
   }) : super(key: key);
 
@@ -24,7 +23,6 @@ class PriceColumn extends StatefulWidget {
   final double width;
   final double chartHeight;
   final Candle lastCandle;
-  final double volumeHigh;
   final double? mouseHoverY;
   final void Function(double) onScale;
   final CandleSticksStyle style;
@@ -43,13 +41,10 @@ class _PriceColumnState extends State<PriceColumn> {
         10;
   }
 
-  String calculateHoverdNumber(double mouseHoverY, double low, double high,
-      double chartHeight, double volumeHigh) {
-    return mouseHoverY < chartHeight
-        ? HelperFunctions.priceToString(
-            high - (mouseHoverY) / chartHeight * (high - low))
-        : HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(volumeHigh) *
-            (1 - (mouseHoverY - chartHeight - 10) / (chartHeight * 0.33 - 10)));
+  String calculateHoverdNumber(
+      double mouseHoverY, double low, double high, double chartHeight) {
+    return HelperFunctions.priceToString(
+        high - (mouseHoverY) / chartHeight * (high - low));
   }
 
   @override
@@ -83,7 +78,9 @@ class _PriceColumnState extends State<PriceColumn> {
                         width: widget.width,
                         child: ListView(
                           controller: scrollController,
-                          children: List<Widget>.generate(20, (i) {
+                          children: List<Widget>.generate(
+                              widget.chartHeight ~/ MIN_PRICETILE_HEIGHT + 1,
+                              (i) {
                             return AnimatedContainer(
                               duration: Duration(milliseconds: 300),
                               height: priceTileHeight,
@@ -148,19 +145,6 @@ class _PriceColumnState extends State<PriceColumn> {
                 ),
               ),
             ),
-            Expanded(
-              flex: 1,
-              child: SizedBox(
-                width: PRICE_BAR_WIDTH,
-                child: Text(
-                  "-${HelperFunctions.addMetricPrefix(HelperFunctions.getRoof(widget.volumeHigh))}",
-                  style: TextStyle(
-                    color: widget.style.borderColor,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
         widget.mouseHoverY != null
@@ -184,7 +168,6 @@ class _PriceColumnState extends State<PriceColumn> {
                             widget.low,
                             widget.high,
                             widget.chartHeight,
-                            widget.volumeHigh,
                           ),
                           style: TextStyle(
                             color: widget.style.secondaryTextColor,

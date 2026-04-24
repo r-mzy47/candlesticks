@@ -4,7 +4,6 @@ import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
-import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:candlesticks/src/widgets/top_panel.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
@@ -165,7 +164,6 @@ class _MobileChartState extends State<MobileChart> {
                                   style: widget.style,
                                   low: candlesLowPrice,
                                   high: candlesHighPrice,
-                                  volumeHigh: volumeHigh,
                                   width: constraints.maxWidth,
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[

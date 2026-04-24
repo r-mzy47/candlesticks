@@ -3,7 +3,6 @@ import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
-import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/gesture_handler.dart';
 import 'package:candlesticks/src/widgets/high_low_animator.dart';
@@ -47,7 +46,8 @@ class DesktopChart extends StatelessWidget {
         // determine charts width and height
         final double maxWidth = constraints.maxWidth - PRICE_BAR_WIDTH;
         final double maxHeight = constraints.maxHeight - DATE_BAR_HEIGHT;
-        double chartHeight = maxHeight * 0.75;
+
+        final double volumeBarsHeight = maxHeight * 0.2;
 
         return ValueListenableBuilder(
           valueListenable: controller,
@@ -87,13 +87,13 @@ class DesktopChart extends StatelessWidget {
                       inRangeCandles.map((c) => c.low).reduce(min);
                   double diff = candlesHighPrice - candlesLowPrice;
                   candlesHighPrice += diff * 0.1;
-                  candlesLowPrice -= diff * 0.1;
+                  candlesLowPrice -= diff * 0.2;
                 } else if (chartAdjust == ChartAdjust.fullRange) {
                   candlesHighPrice = candles.map((c) => c.high).reduce(max);
                   candlesLowPrice = candles.map((c) => c.low).reduce(min);
                   double diff = candlesHighPrice - candlesLowPrice;
                   candlesHighPrice += diff * 0.1;
-                  candlesLowPrice -= diff * 0.1;
+                  candlesLowPrice -= diff * 0.2;
                 }
 
                 if (candlesHighPrice == candlesLowPrice) {
@@ -108,7 +108,7 @@ class DesktopChart extends StatelessWidget {
                 return GestureHandler(
                   style: style,
                   candlesCount: candles.length,
-                  chartHeight: chartHeight,
+                  chartHeight: maxHeight,
                   controller: controller,
                   candlesHighPrice: candlesHighPrice,
                   candlesLowPrice: candlesLowPrice,
@@ -161,8 +161,7 @@ class DesktopChart extends StatelessWidget {
                               width: constraints.maxWidth,
                               mouseHoverY:
                                   showHoverIndicator ? mouseHoverY : null,
-                              volumeHigh: volumeHigh,
-                              chartHeight: chartHeight,
+                              chartHeight: maxHeight,
                               lastCandle:
                                   candles[max(animatedViewport.scrollIndex, 0)],
                               onScale: (value) {
@@ -185,47 +184,40 @@ class DesktopChart extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              child: Column(
+                              child: Stack(
                                 children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child: HighLowAnimator(
-                                      candlesHighPrice: newHigh,
-                                      candlesLowPrice: newLow,
-                                      diableAnimation: isPriceScaled,
-                                      builder: (BuildContext context,
-                                          double high, double low) {
-                                        return RepaintBoundary(
-                                          child: CandleStickWidget(
-                                            candles: candles,
-                                            candleWidth:
-                                                animatedViewport.candleWidth,
-                                            index: animatedViewport.scrollIndex,
-                                            high: high,
-                                            low: low,
-                                            bearColor: style.primaryBear,
-                                            bullColor: style.primaryBull,
-                                          ),
-                                        );
-                                      },
+                                  Positioned(
+                                    bottom: 0,
+                                    height: volumeBarsHeight,
+                                    width: maxWidth,
+                                    child: VolumeWidget(
+                                      candles: candles,
+                                      barWidth: animatedViewport.candleWidth,
+                                      index: animatedViewport.scrollIndex,
+                                      high: volumeHigh,
+                                      bearColor: style.secondaryBear,
+                                      bullColor: style.secondaryBull,
                                     ),
                                   ),
-                                  Expanded(
-                                    flex: 1,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 10,
-                                      ), // todo: explain why
-                                      child: VolumeWidget(
-                                        candles: candles,
-                                        barWidth: animatedViewport.candleWidth,
-                                        index: animatedViewport.scrollIndex,
-                                        high:
-                                            HelperFunctions.getRoof(volumeHigh),
-                                        bearColor: style.secondaryBear,
-                                        bullColor: style.secondaryBull,
-                                      ),
-                                    ),
+                                  HighLowAnimator(
+                                    candlesHighPrice: newHigh,
+                                    candlesLowPrice: newLow,
+                                    diableAnimation: isPriceScaled,
+                                    builder: (BuildContext context, double high,
+                                        double low) {
+                                      return RepaintBoundary(
+                                        child: CandleStickWidget(
+                                          candles: candles,
+                                          candleWidth:
+                                              animatedViewport.candleWidth,
+                                          index: animatedViewport.scrollIndex,
+                                          high: high,
+                                          low: low,
+                                          bearColor: style.primaryBear,
+                                          bullColor: style.primaryBull,
+                                        ),
+                                      );
+                                    },
                                   ),
                                 ],
                               ),
