@@ -1,6 +1,6 @@
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
-import 'package:candlesticks/src/widgets/desktop_chart.dart';
+import 'package:candlesticks/src/widgets/chart_copmoser.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -127,7 +127,7 @@ class _CandlesticksState extends State<Candlesticks> {
           )
         else
           Expanded(
-            child: DesktopChart(
+            child: ChartComposer(
               controller: _controller,
               style: style,
               chartAdjust: widget.chartAdjust,

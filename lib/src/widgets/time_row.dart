@@ -7,8 +7,7 @@ import 'dart:math' as math;
 
 class TimeRow extends StatefulWidget {
   final List<Candle> candles;
-  final double? mouseHoverX;
-  final DateTime? indicatorTime;
+  final int? hoverdCandleIndex;
   final CandlesticksViewport viewport;
   final CandleSticksStyle style;
 
@@ -16,8 +15,7 @@ class TimeRow extends StatefulWidget {
     Key? key,
     required this.candles,
     required this.viewport,
-    this.mouseHoverX,
-    required this.indicatorTime,
+    this.hoverdCandleIndex,
     required this.style,
   }) : super(key: key);
 
@@ -100,6 +98,10 @@ class _TimeRowState extends State<TimeRow> {
     int step = _stepCalculator();
     final dif =
         widget.candles[0].date.difference(widget.candles[1].date) * step;
+    double? hoveredCandlePosition = widget.hoverdCandleIndex == null
+        ? null
+        : (widget.hoverdCandleIndex! - widget.viewport.scrollIndex + 0.5) *
+            widget.viewport.candleWidth;
     return Stack(
       children: [
         ListView.builder(
@@ -127,18 +129,18 @@ class _TimeRowState extends State<TimeRow> {
             );
           },
         ),
-        widget.mouseHoverX == null
+        hoveredCandlePosition == null
             ? Container()
             : Positioned(
                 bottom: 0,
-                left: math.max(widget.mouseHoverX! - 55, 0),
+                right: math.max(hoveredCandlePosition - 55, 0),
                 child: Column(
                   children: [
                     Padding(
                       padding: EdgeInsets.only(
-                        right: widget.mouseHoverX! > 55
+                        left: hoveredCandlePosition > 55
                             ? 0
-                            : (55 - widget.mouseHoverX!) * 2,
+                            : (55 - hoveredCandlePosition) * 2,
                       ),
                       child: CustomPaint(
                         size: Size(1, 1000),
@@ -152,7 +154,8 @@ class _TimeRowState extends State<TimeRow> {
                       color: widget.style.hoverIndicatorBackgroundColor,
                       child: Center(
                         child: Text(
-                          dateFormatter(widget.indicatorTime!),
+                          dateFormatter(
+                              widget.candles[widget.hoverdCandleIndex!].date),
                           style: TextStyle(
                             color: widget.style.secondaryTextColor,
                             fontSize: 12,
