@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-
-// Change these imports based on your project path.
 import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/data/minmax_cache.dart';
 
