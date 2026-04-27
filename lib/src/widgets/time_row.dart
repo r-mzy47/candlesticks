@@ -28,7 +28,13 @@ class _TimeRowState extends State<TimeRow> {
 
   /// Calculates number of candles between two time indicator
   int _stepCalculator() {
-    if (widget.viewport.candleWidth < 3)
+    if (widget.viewport.candleWidth < 0.5)
+      return 199;
+    else if (widget.viewport.candleWidth < 1)
+      return 121;
+    else if (widget.viewport.candleWidth < 2)
+      return 65;
+    else if (widget.viewport.candleWidth < 3)
       return 31;
     else if (widget.viewport.candleWidth < 5)
       return 19;

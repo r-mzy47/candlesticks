@@ -119,10 +119,8 @@ class _MobileChartState extends State<MobileChart> {
         double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
 
         if (longPressX != null && longPressY != null) {
-          longPressX = max(longPressX!, 0);
-          longPressX = min(longPressX!, maxWidth);
-          longPressY = max(longPressY!, 0);
-          longPressY = min(longPressY!, maxHeight);
+          longPressX = longPressX!.clamp(0, maxWidth);
+          longPressY = longPressY!.clamp(0, maxHeight);
         }
 
         return TweenAnimationBuilder(

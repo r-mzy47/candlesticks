@@ -35,13 +35,25 @@ class VolumeWidget extends LeafRenderObjectWidget {
       BuildContext context, covariant RenderObject renderObject) {
     VolumeRenderObject candlestickRenderObject =
         renderObject as VolumeRenderObject;
-    candlestickRenderObject._candles = candles;
-    candlestickRenderObject._index = index;
-    candlestickRenderObject._barWidth = barWidth;
-    candlestickRenderObject._high = high;
-    candlestickRenderObject._bearColor = bearColor;
-    candlestickRenderObject._bullColor = bullColor;
-    candlestickRenderObject.markNeedsPaint();
+    if (index <= 0 &&
+        candlestickRenderObject._latestVolume != candles[0].volume) {
+      candlestickRenderObject._candles = candles;
+      candlestickRenderObject._index = index;
+      candlestickRenderObject._barWidth = barWidth;
+      candlestickRenderObject._high = high;
+      candlestickRenderObject._bearColor = bearColor;
+      candlestickRenderObject._bullColor = bullColor;
+      candlestickRenderObject.markNeedsPaint();
+    } else if (candlestickRenderObject._index != index ||
+        candlestickRenderObject._barWidth != barWidth) {
+      candlestickRenderObject._candles = candles;
+      candlestickRenderObject._index = index;
+      candlestickRenderObject._barWidth = barWidth;
+      candlestickRenderObject._high = high;
+      candlestickRenderObject._bearColor = bearColor;
+      candlestickRenderObject._bullColor = bullColor;
+      candlestickRenderObject.markNeedsPaint();
+    }
     super.updateRenderObject(context, renderObject);
   }
 }
@@ -51,6 +63,7 @@ class VolumeRenderObject extends RenderBox {
   late int _index;
   late double _barWidth;
   late double _high;
+  late double _latestVolume;
   late Color _bearColor;
   late Color _bullColor;
 
@@ -69,6 +82,8 @@ class VolumeRenderObject extends RenderBox {
     _bearColor = bearColor;
     _bullColor = bullColor;
   }
+
+  bool get isRepaintBoundary => true;
 
   /// set size as large as possible
   @override
@@ -99,7 +114,6 @@ class VolumeRenderObject extends RenderBox {
       var candle = _candles[i + _index];
       paintBar(context, offset, i, candle, range);
     }
-    context.canvas.save();
-    context.canvas.restore();
+    _latestVolume = _candles[0].volume;
   }
 }

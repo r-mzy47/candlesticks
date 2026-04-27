@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
+import 'package:candlesticks/src/data/minmax_cache.dart';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
@@ -15,7 +16,7 @@ import 'package:flutter/material.dart';
 
 import '../models/candle.dart';
 
-class CandleSticksChart extends StatelessWidget {
+class CandleSticksChart extends StatefulWidget {
   const CandleSticksChart({
     super.key,
     required this.candles,
@@ -42,6 +43,25 @@ class CandleSticksChart extends StatelessWidget {
   final int? hoveredCandleIndex;
 
   @override
+  State<CandleSticksChart> createState() => _CandleSticksChartState();
+}
+
+class _CandleSticksChartState extends State<CandleSticksChart> {
+  final cache = MinMaxCache();
+
+  @override
+  void initState() {
+    cache.updateCandles(widget.candles);
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant CandleSticksChart oldWidget) {
+    cache.updateCandles(widget.candles);
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -50,30 +70,29 @@ class CandleSticksChart extends StatelessWidget {
 
         final double volumeBarsHeight = maxHeight * 0.2;
 
-        final int candlesStartIndex = max(viewPort.scrollIndex, 0);
+        final int candlesStartIndex = max(widget.viewPort.scrollIndex, 0);
         final int candlesEndIndex = min(
-          maxWidth ~/ viewPort.candleWidth + viewPort.scrollIndex,
-          candles.length - 1,
+          maxWidth ~/ widget.viewPort.candleWidth + widget.viewPort.scrollIndex,
+          widget.candles.length - 1,
         );
-        List<Candle> inRangeCandles =
-            candles.getRange(candlesStartIndex, candlesEndIndex + 1).toList();
+        List<Candle> inRangeCandles = widget.candles
+            .getRange(candlesStartIndex, candlesEndIndex + 1)
+            .toList();
 
-        double candlesHighPrice = 0;
-        double candlesLowPrice = 0;
-
-        if (chartAdjust == ChartAdjust.visibleRange) {
-          candlesHighPrice = inRangeCandles.map((c) => c.high).reduce(max);
-          candlesLowPrice = inRangeCandles.map((c) => c.low).reduce(min);
-          double diff = candlesHighPrice - candlesLowPrice;
-          candlesHighPrice += diff * 0.1;
-          candlesLowPrice -= diff * 0.2;
-        } else if (chartAdjust == ChartAdjust.fullRange) {
-          candlesHighPrice = candles.map((c) => c.high).reduce(max);
-          candlesLowPrice = candles.map((c) => c.low).reduce(min);
-          double diff = candlesHighPrice - candlesLowPrice;
-          candlesHighPrice += diff * 0.1;
-          candlesLowPrice -= diff * 0.2;
+        late RangeMinMax minMax;
+        if (widget.chartAdjust == ChartAdjust.visibleRange) {
+          minMax = cache.queryByTime(
+              inRangeCandles.first.date, inRangeCandles.last.date);
+        } else {
+          minMax = cache.queryByTime(
+              widget.candles.first.date, widget.candles.last.date);
         }
+
+        double candlesHighPrice = minMax.maxHigh;
+        double candlesLowPrice = minMax.minLow;
+        double diff = candlesHighPrice - candlesLowPrice;
+        candlesHighPrice += diff * 0.1;
+        candlesLowPrice -= diff * 0.2;
 
         if (candlesHighPrice == candlesLowPrice) {
           candlesHighPrice += 10;
@@ -84,15 +103,15 @@ class CandleSticksChart extends StatelessWidget {
         double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
 
         return GestureHandler(
-          style: style,
-          candlesCount: candles.length,
+          style: widget.style,
+          candlesCount: widget.candles.length,
           maxHeight: maxHeight,
           maxWidth: maxWidth,
-          controller: controller,
+          controller: widget.controller,
           candlesHighPrice: candlesHighPrice,
           candlesLowPrice: candlesLowPrice,
-          viewPort: viewPort,
-          onHoveredCandleIndexChange: onHoveredCandleIndexChange,
+          viewPort: widget.viewPort,
+          onHoveredCandleIndexChange: widget.onHoveredCandleIndexChange,
           builder: (
             BuildContext context,
             double newHigh,
@@ -103,25 +122,26 @@ class CandleSticksChart extends StatelessWidget {
             return Stack(
               children: [
                 PriceColumn(
-                  style: style,
+                  style: widget.style,
                   low: newLow,
                   high: newHigh,
                   width: maxWidth,
                   mouseHoverY: mouseHoverY,
                   chartHeight: maxHeight,
-                  lastCandle: candles[max(viewPort.scrollIndex, 0)],
+                  lastCandle:
+                      widget.candles[max(widget.viewPort.scrollIndex, 0)],
                 ),
                 Positioned(
                   bottom: 0,
                   height: volumeBarsHeight,
                   width: maxWidth - PRICE_BAR_WIDTH,
                   child: VolumeWidget(
-                    candles: candles,
-                    barWidth: viewPort.candleWidth,
-                    index: viewPort.scrollIndex,
+                    candles: widget.candles,
+                    barWidth: widget.viewPort.candleWidth,
+                    index: widget.viewPort.scrollIndex,
                     high: volumeHigh,
-                    bearColor: style.secondaryBear,
-                    bullColor: style.secondaryBull,
+                    bearColor: widget.style.secondaryBear,
+                    bullColor: widget.style.secondaryBull,
                   ),
                 ),
                 Positioned(
@@ -133,16 +153,14 @@ class CandleSticksChart extends StatelessWidget {
                     candlesLowPrice: newLow,
                     diableAnimation: isPriceScaled,
                     builder: (BuildContext context, double high, double low) {
-                      return RepaintBoundary(
-                        child: CandleStickWidget(
-                          candles: candles,
-                          candleWidth: viewPort.candleWidth,
-                          index: viewPort.scrollIndex,
-                          high: high,
-                          low: low,
-                          bearColor: style.primaryBear,
-                          bullColor: style.primaryBull,
-                        ),
+                      return CandleStickWidget(
+                        candles: widget.candles,
+                        candleWidth: widget.viewPort.candleWidth,
+                        index: widget.viewPort.scrollIndex,
+                        high: high,
+                        low: low,
+                        bearColor: widget.style.primaryBear,
+                        bullColor: widget.style.primaryBull,
                       );
                     },
                   ),
@@ -151,9 +169,9 @@ class CandleSticksChart extends StatelessWidget {
                   top: 4,
                   left: 12,
                   child: TopPanel(
-                    style: style,
-                    currentCandle: hoveredCandleIndex != null
-                        ? candles[hoveredCandleIndex!]
+                    style: widget.style,
+                    currentCandle: widget.hoveredCandleIndex != null
+                        ? widget.candles[widget.hoveredCandleIndex!]
                         : null,
                   ),
                 ),

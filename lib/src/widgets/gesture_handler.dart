@@ -65,8 +65,7 @@ class _GestureHandlerState extends State<GestureHandler> {
         ((widget.maxWidth - PRICE_BAR_WIDTH) - details.localPosition.dx) ~/
                 widget.viewPort.candleWidth +
             widget.viewPort.scrollIndex;
-    hoveredIndex = max(hoveredIndex, 0);
-    hoveredIndex = min(hoveredIndex, widget.candlesCount - 1);
+    hoveredIndex = hoveredIndex.clamp(0, widget.candlesCount - 1);
     widget.onHoveredCandleIndexChange(hoveredIndex);
     setState(() {
       mouseHoverY = details.localPosition.dy;
@@ -75,8 +74,6 @@ class _GestureHandlerState extends State<GestureHandler> {
 
   void onScaleUpdate(double scale) {
     double newCandleWidth = widget.viewPort.candleWidth + scale / 50;
-    newCandleWidth = min(newCandleWidth, 20);
-    newCandleWidth = max(newCandleWidth, 2);
     widget.controller.setZoom(newCandleWidth);
   }
 
@@ -133,8 +130,7 @@ class _GestureHandlerState extends State<GestureHandler> {
                       -1 *
                           pointerSignal.scrollDelta.dx ~/
                           widget.viewPort.candleWidth;
-                  NewIndex = max(NewIndex, -10);
-                  NewIndex = min(NewIndex, widget.candlesCount - 1);
+                  NewIndex = NewIndex.clamp(-10, widget.candlesCount - 1);
                   widget.controller.jumpTo(NewIndex);
                 }
               }

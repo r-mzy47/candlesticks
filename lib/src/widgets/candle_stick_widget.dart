@@ -75,6 +75,8 @@ class CandleStickRenderObject extends RenderBox {
   late Color _bullColor;
   late Color _bearColor;
 
+  bool get isRepaintBoundary => true;
+
   CandleStickRenderObject(
     List<Candle> candles,
     int index,
@@ -147,7 +149,5 @@ class CandleStickRenderObject extends RenderBox {
       paintCandle(context, offset, i, candle, range);
     }
     _close = _candles[0].close;
-    context.canvas.save();
-    context.canvas.restore();
   }
 }
