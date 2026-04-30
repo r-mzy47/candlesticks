@@ -7,6 +7,7 @@ import 'package:candlesticks/src/data/minmax_cache.dart';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
+import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/gesture_handler.dart';
 import 'package:candlesticks/src/widgets/high_low_animator.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
@@ -21,7 +22,6 @@ class CandleSticksChart extends StatefulWidget {
     super.key,
     required this.candles,
     required this.chartAdjust,
-    required this.style,
     required this.controller,
     required this.viewPort,
     required this.onHoveredCandleIndexChange,
@@ -31,8 +31,6 @@ class CandleSticksChart extends StatefulWidget {
   final List<Candle> candles;
 
   final ChartAdjust chartAdjust;
-
-  final CandleSticksStyle style;
 
   final CandlesticksController controller;
 
@@ -102,8 +100,9 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
         // calculate highest volume
         double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
 
+        CandleSticksStyle style = CandleSticksStyleProvider.of(context);
+
         return GestureHandler(
-          style: widget.style,
           candlesCount: widget.candles.length,
           maxHeight: maxHeight,
           maxWidth: maxWidth,
@@ -122,7 +121,6 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
             return Stack(
               children: [
                 PriceColumn(
-                  style: widget.style,
                   low: newLow,
                   high: newHigh,
                   width: maxWidth,
@@ -140,8 +138,8 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
                     barWidth: widget.viewPort.candleWidth,
                     index: widget.viewPort.scrollIndex,
                     high: volumeHigh,
-                    bearColor: widget.style.secondaryBear,
-                    bullColor: widget.style.secondaryBull,
+                    bearColor: style.secondaryBear,
+                    bullColor: style.secondaryBull,
                   ),
                 ),
                 Positioned(
@@ -159,8 +157,8 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
                         index: widget.viewPort.scrollIndex,
                         high: high,
                         low: low,
-                        bearColor: widget.style.primaryBear,
-                        bullColor: widget.style.primaryBull,
+                        bearColor: style.primaryBear,
+                        bullColor: style.primaryBull,
                       );
                     },
                   ),
@@ -169,7 +167,6 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
                   top: 4,
                   left: 12,
                   child: TopPanel(
-                    style: widget.style,
                     currentCandle: widget.hoveredCandleIndex != null
                         ? widget.candles[widget.hoveredCandleIndex!]
                         : null,

@@ -1,5 +1,6 @@
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
+import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/chart_copmoser.dart';
 import 'package:candlesticks/src/widgets/toolbar.dart';
 import 'package:flutter/foundation.dart';
@@ -82,68 +83,71 @@ class _CandlesticksState extends State<Candlesticks> {
         (Theme.of(context).brightness == Brightness.dark
             ? CandleSticksStyle.dark()
             : CandleSticksStyle.light());
-    return Column(
-      children: [
-        if (widget.displayZoomActions == true || widget.actions.isNotEmpty) ...[
-          ToolBar(
-            color: style.toolBarColor,
-            border: Border.symmetric(
-              horizontal: BorderSide(
-                color: style.borderColor,
-                width: 1,
+    return CandleSticksStyleProvider(
+      style: style,
+      child: Column(
+        children: [
+          if (widget.displayZoomActions == true ||
+              widget.actions.isNotEmpty) ...[
+            ToolBar(
+              color: style.toolBarColor,
+              border: Border.symmetric(
+                horizontal: BorderSide(
+                  color: style.borderColor,
+                  width: 1,
+                ),
+              ),
+              children: [
+                if (widget.displayZoomActions) ...[
+                  ToolBarAction(
+                    onPressed: () {
+                      _controller.zoomOut();
+                    },
+                    child: Icon(
+                      Icons.remove,
+                      color: style.borderColor,
+                    ),
+                  ),
+                  ToolBarAction(
+                    onPressed: () {
+                      _controller.zoomIn();
+                    },
+                    child: Icon(
+                      Icons.add,
+                      color: style.borderColor,
+                    ),
+                  ),
+                ],
+                ...widget.actions
+              ],
+            ),
+          ],
+          if (widget.candles.length == 0)
+            Expanded(
+              child: Center(
+                child: widget.loadingWidget ??
+                    CircularProgressIndicator(color: style.loadingColor),
+              ),
+            )
+          else
+            Expanded(
+              child: ChartComposer(
+                controller: _controller,
+                chartAdjust: widget.chartAdjust,
+                onReachEnd: () {
+                  if (isCallingLoadMore == false &&
+                      widget.onLoadMoreCandles != null) {
+                    isCallingLoadMore = true;
+                    widget.onLoadMoreCandles!().then((_) {
+                      isCallingLoadMore = false;
+                    });
+                  }
+                },
+                candles: widget.candles,
               ),
             ),
-            children: [
-              if (widget.displayZoomActions) ...[
-                ToolBarAction(
-                  onPressed: () {
-                    _controller.zoomOut();
-                  },
-                  child: Icon(
-                    Icons.remove,
-                    color: style.borderColor,
-                  ),
-                ),
-                ToolBarAction(
-                  onPressed: () {
-                    _controller.zoomIn();
-                  },
-                  child: Icon(
-                    Icons.add,
-                    color: style.borderColor,
-                  ),
-                ),
-              ],
-              ...widget.actions
-            ],
-          ),
         ],
-        if (widget.candles.length == 0)
-          Expanded(
-            child: Center(
-              child: widget.loadingWidget ??
-                  CircularProgressIndicator(color: style.loadingColor),
-            ),
-          )
-        else
-          Expanded(
-            child: ChartComposer(
-              controller: _controller,
-              style: style,
-              chartAdjust: widget.chartAdjust,
-              onReachEnd: () {
-                if (isCallingLoadMore == false &&
-                    widget.onLoadMoreCandles != null) {
-                  isCallingLoadMore = true;
-                  widget.onLoadMoreCandles!().then((_) {
-                    isCallingLoadMore = false;
-                  });
-                }
-              },
-              candles: widget.candles,
-            ),
-          ),
-      ],
+      ),
     );
   }
 }

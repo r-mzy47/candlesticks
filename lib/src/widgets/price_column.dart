@@ -2,6 +2,7 @@ import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
+import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/dash_line_painter.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,6 @@ class PriceColumn extends StatefulWidget {
     required this.width,
     required this.chartHeight,
     required this.lastCandle,
-    required this.style,
     this.mouseHoverY,
   }) : super(key: key);
 
@@ -23,7 +23,6 @@ class PriceColumn extends StatefulWidget {
   final double chartHeight;
   final Candle lastCandle;
   final double? mouseHoverY;
-  final CandleSticksStyle style;
 
   @override
   State<PriceColumn> createState() => _PriceColumnState();
@@ -55,6 +54,8 @@ class _PriceColumnState extends State<PriceColumn> {
     final double top = -priceTileHeight / priceScale * (newHigh - widget.high) -
         priceTileHeight / 2;
 
+    CandleSticksStyle style = CandleSticksStyleProvider.of(context);
+
     return Stack(
       children: [
         Column(
@@ -85,14 +86,14 @@ class _PriceColumnState extends State<PriceColumn> {
                                   Container(
                                     width: widget.width - PRICE_BAR_WIDTH,
                                     height: 1,
-                                    color: widget.style.gridColor,
+                                    color: style.gridColor,
                                   ),
                                   Expanded(
                                     child: Text(
                                       "${HelperFunctions.priceToString(newHigh - priceScale * i)}",
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        color: widget.style.primaryTextColor,
+                                        color: style.primaryTextColor,
                                         fontSize: 11,
                                       ),
                                     ),
@@ -116,14 +117,14 @@ class _PriceColumnState extends State<PriceColumn> {
                         children: [
                           Container(
                             color: widget.lastCandle.isBull
-                                ? widget.style.primaryBull
-                                : widget.style.primaryBear,
+                                ? style.primaryBull
+                                : style.primaryBear,
                             child: Center(
                               child: Text(
                                 HelperFunctions.priceToString(
                                     widget.lastCandle.close),
                                 style: TextStyle(
-                                  color: widget.style.secondaryTextColor,
+                                  color: style.secondaryTextColor,
                                   fontSize: 11,
                                 ),
                               ),
@@ -149,11 +150,11 @@ class _PriceColumnState extends State<PriceColumn> {
                       size: Size(widget.width - PRICE_BAR_WIDTH, 1),
                       painter: DashLinePainter(
                         direction: Axis.horizontal,
-                        color: widget.style.borderColor,
+                        color: style.borderColor,
                       ),
                     ),
                     Container(
-                      color: widget.style.hoverIndicatorBackgroundColor,
+                      color: style.hoverIndicatorBackgroundColor,
                       child: Center(
                         child: Text(
                           calculateHoverdNumber(
@@ -163,7 +164,7 @@ class _PriceColumnState extends State<PriceColumn> {
                             widget.chartHeight,
                           ),
                           style: TextStyle(
-                            color: widget.style.secondaryTextColor,
+                            color: style.secondaryTextColor,
                             fontSize: 12,
                           ),
                         ),

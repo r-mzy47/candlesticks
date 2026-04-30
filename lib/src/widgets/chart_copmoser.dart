@@ -2,9 +2,9 @@ import 'dart:math';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
-import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_chart.dart';
+import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
@@ -21,8 +21,6 @@ class ChartComposer extends StatefulWidget {
   /// or by the whole dataset
   final ChartAdjust chartAdjust;
 
-  final CandleSticksStyle style;
-
   final Function() onReachEnd;
 
   final CandlesticksController controller;
@@ -31,7 +29,6 @@ class ChartComposer extends StatefulWidget {
     required this.candles,
     required this.chartAdjust,
     required this.onReachEnd,
-    required this.style,
     required this.controller,
   });
 
@@ -54,6 +51,7 @@ class _ChartComposerState extends State<ChartComposer> {
       builder: (context, constraints) {
         // determine chart width
         final double maxWidth = constraints.maxWidth;
+        final double maxHeight = constraints.maxHeight;
         final double chartsWidth = maxWidth - PRICE_BAR_WIDTH;
 
         return ValueListenableBuilder(
@@ -78,7 +76,7 @@ class _ChartComposerState extends State<ChartComposer> {
                 }
 
                 return Container(
-                  color: widget.style.background,
+                  color: CandleSticksStyleProvider.of(context).background,
                   child: Stack(
                     children: [
                       Padding(
@@ -86,10 +84,10 @@ class _ChartComposerState extends State<ChartComposer> {
                           right: PRICE_BAR_WIDTH,
                         ), // padding rigth PRICE_BAR_WIDTH
                         child: TimeRow(
-                          style: widget.style,
                           hoverdCandleIndex: hoveredCandleIndex,
                           candles: widget.candles,
                           viewport: animatedViewport,
+                          maxHeight: maxHeight,
                         ),
                       ),
                       Padding(
@@ -102,7 +100,6 @@ class _ChartComposerState extends State<ChartComposer> {
                               child: CandleSticksChart(
                                 candles: widget.candles,
                                 chartAdjust: widget.chartAdjust,
-                                style: widget.style,
                                 controller: widget.controller,
                                 viewPort: animatedViewport,
                                 onHoveredCandleIndexChange:

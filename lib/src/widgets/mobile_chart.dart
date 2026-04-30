@@ -159,7 +159,6 @@ class _MobileChartState extends State<MobileChart> {
                             child: Stack(
                               children: [
                                 PriceColumn(
-                                  style: widget.style,
                                   low: candlesLowPrice,
                                   high: candlesHighPrice,
                                   width: constraints.maxWidth,
@@ -384,7 +383,6 @@ class _MobileChartState extends State<MobileChart> {
                         padding: const EdgeInsets.symmetric(
                             vertical: 4, horizontal: 12),
                         child: TopPanel(
-                          style: widget.style,
                           currentCandle: hoveredCandle,
                         ),
                       ),

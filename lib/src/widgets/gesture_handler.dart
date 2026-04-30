@@ -4,13 +4,13 @@ import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
+import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class GestureHandler extends StatefulWidget {
   final double maxHeight;
   final double maxWidth;
-  final CandleSticksStyle style;
   final int candlesCount;
   final double candlesHighPrice;
   final double candlesLowPrice;
@@ -28,7 +28,6 @@ class GestureHandler extends StatefulWidget {
 
   const GestureHandler({
     super.key,
-    required this.style,
     required this.maxHeight,
     required this.maxWidth,
     required this.candlesCount,
@@ -107,6 +106,7 @@ class _GestureHandlerState extends State<GestureHandler> {
 
   @override
   Widget build(BuildContext context) {
+    CandleSticksStyle style = CandleSticksStyleProvider.of(context);
     return Stack(
       children: [
         widget.builder(
@@ -191,8 +191,8 @@ class _GestureHandlerState extends State<GestureHandler> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.zero,
-                    backgroundColor: widget.style.hoverIndicatorBackgroundColor,
-                    foregroundColor: widget.style.secondaryTextColor,
+                    backgroundColor: style.hoverIndicatorBackgroundColor,
+                    foregroundColor: style.secondaryTextColor,
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                     ),
@@ -200,7 +200,7 @@ class _GestureHandlerState extends State<GestureHandler> {
                   child: Text(
                     "Auto",
                     style: TextStyle(
-                      color: widget.style.secondaryTextColor,
+                      color: style.secondaryTextColor,
                       fontSize: 12,
                     ),
                   ),

@@ -1,6 +1,7 @@
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
+import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/dash_line_painter.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -9,14 +10,14 @@ class TimeRow extends StatefulWidget {
   final List<Candle> candles;
   final int? hoverdCandleIndex;
   final CandlesticksViewport viewport;
-  final CandleSticksStyle style;
+  final double maxHeight;
 
   const TimeRow({
     Key? key,
     required this.candles,
     required this.viewport,
     this.hoverdCandleIndex,
-    required this.style,
+    required this.maxHeight,
   }) : super(key: key);
 
   @override
@@ -101,13 +102,18 @@ class _TimeRowState extends State<TimeRow> {
 
   @override
   Widget build(BuildContext context) {
+    CandleSticksStyle style = CandleSticksStyleProvider.of(context);
+
     int step = _stepCalculator();
+
     final dif =
         widget.candles[0].date.difference(widget.candles[1].date) * step;
+
     double? hoveredCandlePosition = widget.hoverdCandleIndex == null
         ? null
         : (widget.hoverdCandleIndex! - widget.viewport.scrollIndex + 0.5) *
             widget.viewport.candleWidth;
+
     return Stack(
       children: [
         ListView.builder(
@@ -125,12 +131,12 @@ class _TimeRowState extends State<TimeRow> {
                 Expanded(
                   child: Container(
                     width: 1,
-                    color: widget.style.gridColor,
+                    color: style.gridColor,
                   ),
                 ),
                 dif.compareTo(Duration(days: 1)) > 0
-                    ? _monthDayText(_time, widget.style.primaryTextColor)
-                    : _hourMinuteText(_time, widget.style.primaryTextColor),
+                    ? _monthDayText(_time, style.primaryTextColor)
+                    : _hourMinuteText(_time, style.primaryTextColor),
               ],
             );
           },
@@ -149,21 +155,21 @@ class _TimeRowState extends State<TimeRow> {
                             : (55 - hoveredCandlePosition) * 2,
                       ),
                       child: CustomPaint(
-                        size: Size(1, 1000),
+                        size: Size(1, widget.maxHeight),
                         painter: DashLinePainter(
                           direction: Axis.vertical,
-                          color: widget.style.borderColor,
+                          color: style.borderColor,
                         ),
                       ),
                     ),
                     Container(
-                      color: widget.style.hoverIndicatorBackgroundColor,
+                      color: style.hoverIndicatorBackgroundColor,
                       child: Center(
                         child: Text(
                           dateFormatter(
                               widget.candles[widget.hoverdCandleIndex!].date),
                           style: TextStyle(
-                            color: widget.style.secondaryTextColor,
+                            color: style.secondaryTextColor,
                             fontSize: 12,
                           ),
                         ),
