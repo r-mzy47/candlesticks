@@ -37,11 +37,11 @@ class ChartComposer extends StatefulWidget {
 }
 
 class _ChartComposerState extends State<ChartComposer> {
-  int? hoveredCandleIndex;
+  double? mouseHoverX;
 
-  void onHoveredCandleIndexChange(int? index) {
+  void onMouseHoverXChange(double? value) {
     setState(() {
-      hoveredCandleIndex = index;
+      mouseHoverX = value;
     });
   }
 
@@ -75,6 +75,17 @@ class _ChartComposerState extends State<ChartComposer> {
                   });
                 }
 
+                int? hoveredCandleIndex;
+
+                if (mouseHoverX != null) {
+                  hoveredCandleIndex =
+                      ((maxWidth - PRICE_BAR_WIDTH) - mouseHoverX!) ~/
+                              animatedViewport.candleWidth +
+                          animatedViewport.scrollIndex;
+                  hoveredCandleIndex =
+                      hoveredCandleIndex.clamp(0, widget.candles.length - 1);
+                }
+
                 return Container(
                   color: CandleSticksStyleProvider.of(context).background,
                   child: Stack(
@@ -102,8 +113,7 @@ class _ChartComposerState extends State<ChartComposer> {
                                 chartAdjust: widget.chartAdjust,
                                 controller: widget.controller,
                                 viewPort: animatedViewport,
-                                onHoveredCandleIndexChange:
-                                    onHoveredCandleIndexChange,
+                                onMouseHoverXChange: onMouseHoverXChange,
                                 hoveredCandleIndex: hoveredCandleIndex,
                               ),
                             ),

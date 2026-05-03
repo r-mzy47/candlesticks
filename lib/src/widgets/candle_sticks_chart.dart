@@ -25,7 +25,7 @@ class CandleSticksChart extends StatefulWidget {
     required this.chartAdjust,
     required this.controller,
     required this.viewPort,
-    required this.onHoveredCandleIndexChange,
+    required this.onMouseHoverXChange,
     this.hoveredCandleIndex,
   });
 
@@ -37,7 +37,7 @@ class CandleSticksChart extends StatefulWidget {
 
   final CandlesticksViewport viewPort;
 
-  final Function(int?) onHoveredCandleIndexChange;
+  final Function(double?) onMouseHoverXChange;
 
   final int? hoveredCandleIndex;
 
@@ -123,7 +123,7 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
           candlesHighPrice: candlesHighPrice,
           candlesLowPrice: candlesLowPrice,
           viewPort: widget.viewPort,
-          onHoveredCandleIndexChange: widget.onHoveredCandleIndexChange,
+          onMouseHoverXChange: widget.onMouseHoverXChange,
           priceScale: priceScale,
           onPriceScaleToggle: onPriceScaleToggle,
           builder: (

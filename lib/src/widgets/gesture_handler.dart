@@ -17,7 +17,7 @@ class GestureHandler extends StatefulWidget {
   final double candlesLowPrice;
   final CandlesticksController controller;
   final CandlesticksViewport viewPort;
-  final void Function(int?) onHoveredCandleIndexChange;
+  final void Function(double?) onMouseHoverXChange;
   final PriceScale priceScale;
   final void Function() onPriceScaleToggle;
 
@@ -39,7 +39,7 @@ class GestureHandler extends StatefulWidget {
     required this.candlesLowPrice,
     required this.controller,
     required this.viewPort,
-    required this.onHoveredCandleIndexChange,
+    required this.onMouseHoverXChange,
     required this.priceScale,
     required this.onPriceScaleToggle,
   });
@@ -58,30 +58,26 @@ class _GestureHandlerState extends State<GestureHandler> {
   double mouseXpositionWhenUserStartsDragging = 0;
 
   void _onMouseExit(PointerEvent details) {
-    widget.onHoveredCandleIndexChange(null);
+    widget.onMouseHoverXChange(null);
     setState(() {
       mouseHoverY = null;
     });
   }
 
   void _onMouseHover(PointerEvent details) {
-    int hoveredIndex =
-        ((widget.maxWidth - PRICE_BAR_WIDTH) - details.localPosition.dx) ~/
-                widget.viewPort.candleWidth +
-            widget.viewPort.scrollIndex;
-    hoveredIndex = hoveredIndex.clamp(0, widget.candlesCount - 1);
-    widget.onHoveredCandleIndexChange(hoveredIndex);
+    widget.onMouseHoverXChange(details.localPosition.dx);
     setState(() {
       mouseHoverY = details.localPosition.dy;
     });
   }
 
   void onScaleUpdate(double scale) {
-    double newCandleWidth = widget.viewPort.candleWidth + scale / 50;
+    double newCandleWidth = widget.viewPort.candleWidth * (1 + scale / 100);
     widget.controller.setZoom(newCandleWidth);
   }
 
-  void onHorizontalDragUpdate(double x) {
+  void onHorizontalDragUpdate(DragUpdateDetails update) {
+    double x = update.localPosition.dx;
     x = x - mouseXpositionWhenUserStartsDragging;
     int NewIndex =
         scrollIndexWhenUserStartsDragging + x ~/ widget.viewPort.candleWidth;
@@ -89,6 +85,7 @@ class _GestureHandlerState extends State<GestureHandler> {
     NewIndex = min(NewIndex, widget.candlesCount - 1);
 
     widget.controller.jumpTo(NewIndex);
+    widget.onMouseHoverXChange(update.localPosition.dx);
   }
 
   void onPanDown(double value) {
@@ -125,8 +122,11 @@ class _GestureHandlerState extends State<GestureHandler> {
     });
   }
 
-  void onVerticalDragUpdate(double deltaY) {
+  void onVerticalDragUpdate(DragUpdateDetails update) {
+    double deltaY = update.delta.dy;
     setState(() {
+      mouseHoverY = update.localPosition.dy;
+
       if (manualScaleHigh == null || manualScaleLow == null) return;
 
       if (!widget.priceScale.isValid(manualScaleHigh!) ||
@@ -167,7 +167,6 @@ class _GestureHandlerState extends State<GestureHandler> {
           padding: const EdgeInsets.only(right: 50),
           child: Listener(
             onPointerSignal: (pointerSignal) {
-              _onMouseHover(pointerSignal);
               if (pointerSignal is PointerScrollEvent) {
                 if (pointerSignal.scrollDelta.dy.abs() >
                     pointerSignal.scrollDelta.dx.abs())
@@ -181,6 +180,7 @@ class _GestureHandlerState extends State<GestureHandler> {
                   widget.controller.jumpTo(NewIndex);
                 }
               }
+              _onMouseHover(pointerSignal);
             },
             child: MouseRegion(
               cursor: isDragging
@@ -191,9 +191,8 @@ class _GestureHandlerState extends State<GestureHandler> {
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onPanUpdate: (update) {
-                  mouseHoverY = update.localPosition.dy;
-                  onHorizontalDragUpdate(update.localPosition.dx);
-                  onVerticalDragUpdate(update.delta.dy);
+                  onHorizontalDragUpdate(update);
+                  onVerticalDragUpdate(update);
                 },
                 onPanEnd: (update) {
                   setState(() {
@@ -236,10 +235,10 @@ class _GestureHandlerState extends State<GestureHandler> {
                   height: 22,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: manualScaleHigh != null
+                      backgroundColor: manualScaleHigh == null
                           ? style.hoverIndicatorBackgroundColor
                           : style.secondaryTextColor,
-                      foregroundColor: manualScaleHigh != null
+                      foregroundColor: manualScaleHigh == null
                           ? style.secondaryTextColor
                           : style.hoverIndicatorBackgroundColor,
                       padding: EdgeInsets.zero,
@@ -263,10 +262,10 @@ class _GestureHandlerState extends State<GestureHandler> {
                   height: 22,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: widget.priceScale != log10PriceScale
+                      backgroundColor: widget.priceScale == log10PriceScale
                           ? style.hoverIndicatorBackgroundColor
                           : style.secondaryTextColor,
-                      foregroundColor: widget.priceScale != log10PriceScale
+                      foregroundColor: widget.priceScale == log10PriceScale
                           ? style.secondaryTextColor
                           : style.hoverIndicatorBackgroundColor,
                       padding: EdgeInsets.zero,
