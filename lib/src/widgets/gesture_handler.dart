@@ -72,8 +72,7 @@ class _GestureHandlerState extends State<GestureHandler> {
   }
 
   void onScaleUpdate(double scale) {
-    double newCandleWidth = widget.viewPort.candleWidth * (1 + scale / 100);
-    widget.controller.setZoom(newCandleWidth);
+    widget.controller.zoomBy((1 + scale / 100));
   }
 
   void onHorizontalDragUpdate(DragUpdateDetails update) {

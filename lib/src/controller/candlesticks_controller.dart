@@ -17,11 +17,17 @@ class CandlesticksController extends ValueNotifier<CandlesticksViewport> {
         candleWidth: width.clamp(MIN_CANDLE_WIDTH, MAX_CANDLE_WIDTH));
   }
 
+  void zoomBy(double factor) {
+    value = value.copyWith(
+        candleWidth: (value.candleWidth * factor)
+            .clamp(MIN_CANDLE_WIDTH, MAX_CANDLE_WIDTH));
+  }
+
   void zoomIn() {
-    setZoom(value.candleWidth * 1.33);
+    zoomBy(1.33);
   }
 
   void zoomOut() {
-    setZoom(value.candleWidth * 0.75);
+    zoomBy(0.75);
   }
 }
