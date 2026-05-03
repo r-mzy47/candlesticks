@@ -1,30 +1,34 @@
 import 'dart:convert';
+
+import 'package:candlesticks/candlesticks.dart';
+import 'package:example/symbol_search_modal.dart';
+import 'package:example/toolbar.dart';
+import 'package:example/toolbar_action.dart';
+import 'package:flutter/material.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+
 import './candle_ticker_model.dart';
 import './repository.dart';
-import 'package:flutter/material.dart';
-import 'package:candlesticks/candlesticks.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  final BinanceRepository repository = BinanceRepository();
+  static const String _defaultSymbol = 'BTCUSDT';
+  static const String _defaultInterval = '4h';
 
-  List<Candle> candles = [];
-  WebSocketChannel? _channel;
-  bool themeIsDark = false;
-  String currentInterval = "1m";
+  final BinanceRepository _repository = BinanceRepository();
+  final CandlesticksController _controller = CandlesticksController();
 
-  final intervals = [
+  final List<String> _intervals = const [
     '1m',
     '3m',
     '5m',
@@ -42,326 +46,302 @@ class _MyAppState extends State<MyApp> {
     '1M',
   ];
 
-  List<String> symbols = [];
-  String currentSymbol = "";
+  WebSocketChannel? _channel;
+
+  List<Candle> _candles = [];
+  List<String> _symbols = [];
+
+  bool _themeIsDark = false;
+  String _currentSymbol = '';
+  String _currentInterval = _defaultInterval;
 
   @override
   void initState() {
     super.initState();
-
-    fetchSymbols().then((value) {
-      if (!mounted) return;
-
-      setState(() {
-        symbols = value;
-      });
-
-      if (symbols.isNotEmpty) {
-        fetchCandles(symbols[0], currentInterval);
-      }
-    });
+    _loadSymbols();
   }
 
   @override
   void dispose() {
-    _channel?.sink.close();
+    _closeChannel();
     super.dispose();
   }
 
-  Future<List<String>> fetchSymbols() async {
+  Future<void> _loadSymbols() async {
     try {
-      return await repository.fetchSymbols();
-    } catch (e) {
-      return [];
+      final symbols = await _repository.fetchSymbols();
+
+      if (!mounted) return;
+
+      setState(() {
+        _symbols = symbols;
+      });
+
+      if (symbols.isNotEmpty) {
+        await _loadCandles(_defaultSymbol, _currentInterval);
+      }
+    } catch (_) {
+      // You can show an error message here if needed.
     }
   }
 
-  Future<void> fetchCandles(String symbol, String interval) async {
-    _channel?.sink.close();
-    _channel = null;
+  Future<void> _loadCandles(String symbol, String interval) async {
+    _closeChannel();
 
     setState(() {
-      candles = [];
-      currentInterval = interval;
+      _candles = [];
+      _currentInterval = interval;
     });
 
     try {
-      final data =
-          await repository.fetchCandles(symbol: symbol, interval: interval);
-
-      _channel = repository.establishConnection(symbol.toLowerCase(), interval);
-
-      if (!mounted) return;
-
-      setState(() {
-        candles = data;
-        currentInterval = interval;
-        currentSymbol = symbol;
-      });
-    } catch (e) {
-      return;
-    }
-  }
-
-  void updateCandlesFromSnapshot(AsyncSnapshot<Object?> snapshot) {
-    if (candles.isEmpty || snapshot.data == null) return;
-
-    final map = jsonDecode(snapshot.data as String) as Map<String, dynamic>;
-    if (!map.containsKey("k")) return;
-
-    final candleTicker = CandleTickerModel.fromJson(map);
-
-    if (candles[0].date == candleTicker.candle.date &&
-        candles[0].open == candleTicker.candle.open) {
-      candles[0] = candleTicker.candle;
-      return;
-    }
-
-    if (candles.length < 2) {
-      candles.insert(0, candleTicker.candle);
-      return;
-    }
-
-    if (candleTicker.candle.date.difference(candles[0].date) ==
-        candles[0].date.difference(candles[1].date)) {
-      candles.insert(0, candleTicker.candle);
-    }
-  }
-
-  Future<void> loadMoreCandles() async {
-    if (candles.isEmpty || currentSymbol.isEmpty) return;
-
-    try {
-      final data = await repository.fetchCandles(
-        symbol: currentSymbol,
-        interval: currentInterval,
-        endTime: candles.last.date.millisecondsSinceEpoch,
+      final candles = await _repository.fetchCandles(
+        symbol: symbol,
+        interval: interval,
       );
 
-      if (candles.isNotEmpty) {
-        candles.removeLast();
+      final channel = _repository.establishConnection(
+        symbol.toLowerCase(),
+        interval,
+      );
+
+      if (!mounted) {
+        channel.sink.close();
+        return;
       }
+
+      setState(() {
+        _candles = candles;
+        _channel = channel;
+        _currentSymbol = symbol;
+        _currentInterval = interval;
+      });
+    } catch (_) {
+      // You can show an error message here if needed.
+    }
+  }
+
+  Future<void> _loadMoreCandles() async {
+    if (_candles.isEmpty || _currentSymbol.isEmpty) return;
+
+    try {
+      final candles = await _repository.fetchCandles(
+        symbol: _currentSymbol,
+        interval: _currentInterval,
+        endTime: _candles.last.date.millisecondsSinceEpoch,
+      );
 
       if (!mounted) return;
 
       setState(() {
-        candles.addAll(data);
+        if (_candles.isNotEmpty) {
+          _candles.removeLast();
+        }
+
+        _candles.addAll(candles);
       });
-    } catch (e) {
+    } catch (_) {
+      // You can show an error message here if needed.
+    }
+  }
+
+  void _closeChannel() {
+    _channel?.sink.close();
+    _channel = null;
+  }
+
+  void _toggleTheme() {
+    setState(() {
+      _themeIsDark = !_themeIsDark;
+    });
+  }
+
+  void _handleSocketSnapshot(AsyncSnapshot<Object?> snapshot) {
+    final data = snapshot.data;
+
+    if (_candles.isEmpty || data == null || data is! String) return;
+
+    final candle = _parseCandleFromSocketData(data);
+    if (candle == null) return;
+
+    setState(() {
+      _upsertLiveCandle(candle);
+    });
+  }
+
+  Candle? _parseCandleFromSocketData(String data) {
+    try {
+      final json = jsonDecode(data) as Map<String, dynamic>;
+
+      if (!json.containsKey('k')) return null;
+
+      return CandleTickerModel.fromJson(json).candle;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _upsertLiveCandle(Candle candle) {
+    if (_candles.isEmpty) return;
+
+    final latestCandle = _candles.first;
+
+    final isLatestCandleUpdate =
+        latestCandle.date == candle.date && latestCandle.open == candle.open;
+
+    if (isLatestCandleUpdate) {
+      _candles[0] = candle;
       return;
     }
+
+    if (_candles.length < 2) {
+      _candles.insert(0, candle);
+      return;
+    }
+
+    final latestInterval = _candles[0].date.difference(_candles[1].date);
+    final incomingInterval = candle.date.difference(_candles[0].date);
+
+    if (incomingInterval == latestInterval) {
+      _candles.insert(0, candle);
+    }
+  }
+
+  void _showIntervalDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: Material(
+            child: Container(
+              width: 200,
+              color: Theme.of(context).colorScheme.surface,
+              child: Wrap(
+                children: _intervals.map(_buildIntervalButton).toList(),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildIntervalButton(String interval) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: SizedBox(
+        width: 50,
+        height: 30,
+        child: RawMaterialButton(
+          elevation: 0,
+          fillColor: const Color(0xFF494537),
+          onPressed: () {
+            if (_currentSymbol.isNotEmpty) {
+              _loadCandles(_currentSymbol, interval);
+            }
+
+            Navigator.of(context).pop();
+          },
+          child: Text(
+            interval,
+            style: const TextStyle(
+              color: Color(0xFFF0B90A),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSymbolSearchDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return SymbolsSearchModal(
+          symbols: _symbols,
+          onSelect: (symbol) {
+            _loadCandles(symbol, _currentInterval);
+          },
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: themeIsDark ? ThemeData.dark() : ThemeData.light(),
+      theme: ThemeData.light().copyWith(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: const Color(0xFF54C5F8),
+          foregroundColor: const Color(0xFF01579B),
+        ),
+      ),
+      darkTheme: ThemeData.dark().copyWith(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: const Color(0xFF01579B),
+          foregroundColor: const Color(0xFF54C5F8),
+        ),
+      ),
+      themeMode: _themeIsDark ? ThemeMode.dark : ThemeMode.light,
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text("Binance Candles"),
+          title: const Text('Binance Candles'),
           actions: [
             IconButton(
-              onPressed: () {
-                setState(() {
-                  themeIsDark = !themeIsDark;
-                });
-              },
+              onPressed: _toggleTheme,
               icon: Icon(
-                themeIsDark
+                _themeIsDark
                     ? Icons.wb_sunny_sharp
                     : Icons.nightlight_round_outlined,
               ),
             ),
           ],
         ),
-        body: Center(
-          child: StreamBuilder(
-            stream: _channel?.stream,
-            builder: (context, snapshot) {
-              updateCandlesFromSnapshot(snapshot);
+        body: StreamBuilder<Object?>(
+          stream: _channel?.stream,
+          builder: (context, snapshot) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                _handleSocketSnapshot(snapshot);
+              }
+            });
 
-              return Candlesticks(
-                key: Key(currentSymbol + currentInterval),
-                candles: candles,
-                onLoadMoreCandles: loadMoreCandles,
-                actions: [
-                  ToolBarAction(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return Center(
-                            child: Container(
-                              width: 200,
-                              color: Theme.of(context).colorScheme.surface,
-                              child: Wrap(
-                                children: intervals
-                                    .map(
-                                      (e) => Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: SizedBox(
-                                          width: 50,
-                                          height: 30,
-                                          child: RawMaterialButton(
-                                            elevation: 0,
-                                            fillColor: const Color(0xFF494537),
-                                            onPressed: () {
-                                              if (currentSymbol.isNotEmpty) {
-                                                fetchCandles(currentSymbol, e);
-                                              }
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: Text(
-                                              e,
-                                              style: const TextStyle(
-                                                color: Color(0xFFF0B90A),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: Text(currentInterval),
-                  ),
-                  ToolBarAction(
-                    width: 100,
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) {
-                          return SymbolsSearchModal(
-                            symbols: symbols,
-                            onSelect: (value) {
-                              fetchCandles(value, currentInterval);
-                            },
-                          );
-                        },
-                      );
-                    },
-                    child: Text(currentSymbol),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SymbolsSearchModal extends StatefulWidget {
-  const SymbolsSearchModal({
-    Key? key,
-    required this.onSelect,
-    required this.symbols,
-  }) : super(key: key);
-
-  final Function(String symbol) onSelect;
-  final List<String> symbols;
-
-  @override
-  State<SymbolsSearchModal> createState() => _SymbolSearchModalState();
-}
-
-class _SymbolSearchModalState extends State<SymbolsSearchModal> {
-  String symbolSearch = "";
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-          width: 300,
-          height: MediaQuery.of(context).size.height * 0.75,
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: CustomTextField(
-                  onChanged: (value) {
-                    setState(() {
-                      symbolSearch = value;
-                    });
-                  },
+            return Column(
+              children: [
+                ToolBar(
+                  children: [
+                    ToolBarAction(
+                      onPressed: _controller.zoomOut,
+                      child: const Icon(Icons.remove),
+                    ),
+                    ToolBarAction(
+                      onPressed: _controller.zoomIn,
+                      child: const Icon(Icons.add),
+                    ),
+                    ToolBarAction(
+                      onPressed: _showIntervalDialog,
+                      child: Text(_currentInterval),
+                    ),
+                    ToolBarAction(
+                      width: 100,
+                      onPressed: _showSymbolSearchDialog,
+                      child: Text(_currentSymbol),
+                    ),
+                  ],
                 ),
-              ),
-              Expanded(
-                child: ListView(
-                  children: widget.symbols
-                      .where((element) => element
-                          .toLowerCase()
-                          .contains(symbolSearch.toLowerCase()))
-                      .map(
-                        (e) => Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            width: 50,
-                            height: 30,
-                            child: RawMaterialButton(
-                              elevation: 0,
-                              fillColor: const Color(0xFF494537),
-                              onPressed: () {
-                                widget.onSelect(e);
-                                Navigator.of(context).pop();
-                              },
-                              child: Text(
-                                e,
-                                style: const TextStyle(
-                                  color: Color(0xFFF0B90A),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
+                Expanded(
+                  child: Candlesticks(
+                    key: Key('$_currentSymbol-$_currentInterval'),
+                    candles: _candles,
+                    onLoadMoreCandles: _loadMoreCandles,
+                    controller: _controller,
+                  ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            );
+          },
         ),
       ),
-    );
-  }
-}
-
-class CustomTextField extends StatelessWidget {
-  const CustomTextField({Key? key, required this.onChanged}) : super(key: key);
-
-  final void Function(String) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      autofocus: true,
-      cursorColor: const Color(0xFF494537),
-      decoration: const InputDecoration(
-        prefixIcon: Icon(
-          Icons.search,
-          color: Color(0xFF494537),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(width: 3, color: Color(0xFF494537)),
-        ),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(width: 3, color: Color(0xFF494537)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(width: 3, color: Color(0xFF494537)),
-        ),
-      ),
-      onChanged: onChanged,
     );
   }
 }

@@ -12,7 +12,7 @@ import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/gesture_handler.dart';
 import 'package:candlesticks/src/widgets/high_low_animator.dart';
 import 'package:candlesticks/src/widgets/price_column.dart' hide PriceScale;
-import 'package:candlesticks/src/widgets/top_panel.dart';
+import 'package:candlesticks/src/widgets/hovered_candle_info_bar.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -183,7 +183,7 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
                 Positioned(
                   top: 4,
                   left: 12,
-                  child: TopPanel(
+                  child: HoveredCandleInfoBar(
                     currentCandle: widget.hoveredCandleIndex != null
                         ? widget.candles[widget.hoveredCandleIndex!]
                         : null,
