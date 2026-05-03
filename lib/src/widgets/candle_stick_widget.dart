@@ -1,4 +1,5 @@
 import 'package:candlesticks/src/models/candle.dart';
+import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:flutter/material.dart';
 
 class CandleStickWidget extends LeafRenderObjectWidget {
@@ -9,6 +10,7 @@ class CandleStickWidget extends LeafRenderObjectWidget {
   final double low;
   final Color bullColor;
   final Color bearColor;
+  final PriceScale priceScale;
 
   const CandleStickWidget({
     super.key,
@@ -19,6 +21,7 @@ class CandleStickWidget extends LeafRenderObjectWidget {
     required this.high,
     required this.bearColor,
     required this.bullColor,
+    required this.priceScale,
   });
 
   @override
@@ -31,6 +34,7 @@ class CandleStickWidget extends LeafRenderObjectWidget {
       high: high,
       bullColor: bullColor,
       bearColor: bearColor,
+      priceScale: priceScale,
     );
   }
 
@@ -46,7 +50,8 @@ class CandleStickWidget extends LeafRenderObjectWidget {
       ..low = low
       ..high = high
       ..bullColor = bullColor
-      ..bearColor = bearColor;
+      ..bearColor = bearColor
+      ..priceScale = priceScale;
   }
 }
 
@@ -59,6 +64,7 @@ class CandleStickRenderObject extends RenderBox {
     required double high,
     required Color bullColor,
     required Color bearColor,
+    required PriceScale priceScale,
   })  : _candles = candles,
         _index = index,
         _candleWidth = candleWidth,
@@ -66,6 +72,7 @@ class CandleStickRenderObject extends RenderBox {
         _high = high,
         _bullColor = bullColor,
         _bearColor = bearColor,
+        _priceScale = priceScale,
         _latestClose = candles.isEmpty ? null : candles.first.close,
         _candlesLength = candles.length;
 
@@ -76,6 +83,7 @@ class CandleStickRenderObject extends RenderBox {
   double _high;
   Color _bullColor;
   Color _bearColor;
+  PriceScale _priceScale;
 
   double? _latestClose;
   int _candlesLength;
@@ -144,10 +152,34 @@ class CandleStickRenderObject extends RenderBox {
     markNeedsPaint();
   }
 
-  /// set size as large as possible
+  set priceScale(PriceScale value) {
+    if (identical(_priceScale, value)) return;
+
+    _priceScale = value;
+    markNeedsPaint();
+  }
+
   @override
   void performLayout() {
     size = constraints.biggest;
+  }
+
+  bool _isValidCandle(Candle candle) {
+    return _priceScale.isValid(candle.high) &&
+        _priceScale.isValid(candle.low) &&
+        _priceScale.isValid(candle.open) &&
+        _priceScale.isValid(candle.close);
+  }
+
+  double _priceToY({
+    required double price,
+    required Offset offset,
+    required double transformedHigh,
+    required double transformedValuePerPixel,
+  }) {
+    return offset.dy +
+        (transformedHigh - _priceScale.transform(price)) /
+            transformedValuePerPixel;
   }
 
   void _paintCandle(
@@ -157,7 +189,8 @@ class CandleStickRenderObject extends RenderBox {
     Candle candle,
     Paint wickPaint,
     Paint bodyPaint,
-    double pricePerPixel,
+    double transformedHigh,
+    double transformedValuePerPixel,
   ) {
     final color = candle.isBull ? _bullColor : _bearColor;
 
@@ -166,10 +199,40 @@ class CandleStickRenderObject extends RenderBox {
 
     final x = size.width + offset.dx - (visibleIndex + 0.5) * _candleWidth;
 
-    final highY = offset.dy + (_high - candle.high) / pricePerPixel;
-    final lowY = offset.dy + (_high - candle.low) / pricePerPixel;
-    final openY = offset.dy + (_high - candle.open) / pricePerPixel;
-    final closeY = offset.dy + (_high - candle.close) / pricePerPixel;
+    final highY = _priceToY(
+      price: candle.high,
+      offset: offset,
+      transformedHigh: transformedHigh,
+      transformedValuePerPixel: transformedValuePerPixel,
+    );
+
+    final lowY = _priceToY(
+      price: candle.low,
+      offset: offset,
+      transformedHigh: transformedHigh,
+      transformedValuePerPixel: transformedValuePerPixel,
+    );
+
+    final openY = _priceToY(
+      price: candle.open,
+      offset: offset,
+      transformedHigh: transformedHigh,
+      transformedValuePerPixel: transformedValuePerPixel,
+    );
+
+    final closeY = _priceToY(
+      price: candle.close,
+      offset: offset,
+      transformedHigh: transformedHigh,
+      transformedValuePerPixel: transformedValuePerPixel,
+    );
+
+    if (!highY.isFinite ||
+        !lowY.isFinite ||
+        !openY.isFinite ||
+        !closeY.isFinite) {
+      return;
+    }
 
     canvas.drawLine(
       Offset(x, highY),
@@ -177,9 +240,7 @@ class CandleStickRenderObject extends RenderBox {
       wickPaint,
     );
 
-    if (_candleWidth <= 1) {
-      return;
-    }
+    if (_candleWidth <= 1) return;
 
     if ((openY - closeY).abs() > 1) {
       canvas.drawLine(
@@ -200,7 +261,32 @@ class CandleStickRenderObject extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_candles.isEmpty || size.isEmpty || _high == _low) return;
+    if (_candles.isEmpty ||
+        size.isEmpty ||
+        _candleWidth <= 0 ||
+        !_high.isFinite ||
+        !_low.isFinite ||
+        _high <= _low ||
+        !_priceScale.isValid(_high) ||
+        !_priceScale.isValid(_low)) {
+      return;
+    }
+
+    final transformedHigh = _priceScale.transform(_high);
+    final transformedLow = _priceScale.transform(_low);
+
+    if (!transformedHigh.isFinite ||
+        !transformedLow.isFinite ||
+        transformedHigh <= transformedLow) {
+      return;
+    }
+
+    final transformedValuePerPixel =
+        (transformedHigh - transformedLow) / size.height;
+
+    if (!transformedValuePerPixel.isFinite || transformedValuePerPixel <= 0) {
+      return;
+    }
 
     final canvas = context.canvas;
 
@@ -215,7 +301,6 @@ class CandleStickRenderObject extends RenderBox {
       ..style = PaintingStyle.stroke
       ..strokeWidth = _candleWidth * 0.8;
 
-    final pricePerPixel = (_high - _low) / size.height;
     final maxVisible = (size.width / _candleWidth).ceil();
 
     for (int i = 0; i < maxVisible; i++) {
@@ -223,16 +308,22 @@ class CandleStickRenderObject extends RenderBox {
 
       if (candleIndex < 0 || candleIndex >= _candles.length) continue;
 
+      final candle = _candles[candleIndex];
+
+      if (!_isValidCandle(candle)) continue;
+
       _paintCandle(
         canvas,
         offset,
         i,
-        _candles[candleIndex],
+        candle,
         wickPaint,
         bodyPaint,
-        pricePerPixel,
+        transformedHigh,
+        transformedValuePerPixel,
       );
     }
+
     canvas.restore();
   }
 }

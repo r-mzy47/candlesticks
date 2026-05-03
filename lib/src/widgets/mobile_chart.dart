@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
+import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
@@ -165,6 +166,7 @@ class _MobileChartState extends State<MobileChart> {
                                   chartHeight: chartHeight,
                                   lastCandle: widget.candles[
                                       widget.index < 0 ? 0 : widget.index],
+                                  priceScale: log10PriceScale,
                                 ),
                                 Row(
                                   children: [
@@ -194,6 +196,7 @@ class _MobileChartState extends State<MobileChart> {
                                                   widget.style.primaryBear,
                                               bullColor:
                                                   widget.style.primaryBull,
+                                              priceScale: logPriceScale,
                                             ),
                                           ),
                                         ),

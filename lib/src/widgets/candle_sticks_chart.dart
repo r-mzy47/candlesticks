@@ -6,11 +6,12 @@ import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/data/minmax_cache.dart';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
+import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/gesture_handler.dart';
 import 'package:candlesticks/src/widgets/high_low_animator.dart';
-import 'package:candlesticks/src/widgets/price_column.dart';
+import 'package:candlesticks/src/widgets/price_column.dart' hide PriceScale;
 import 'package:candlesticks/src/widgets/top_panel.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
@@ -46,11 +47,22 @@ class CandleSticksChart extends StatefulWidget {
 
 class _CandleSticksChartState extends State<CandleSticksChart> {
   final cache = MinMaxCache();
+  PriceScale priceScale = log10PriceScale;
 
   @override
   void initState() {
     cache.updateCandles(widget.candles);
     super.initState();
+  }
+
+  void onPriceScaleToggle() {
+    setState(() {
+      if (priceScale == log10PriceScale) {
+        priceScale = linearPriceScale;
+      } else {
+        priceScale = log10PriceScale;
+      }
+    });
   }
 
   @override
@@ -88,16 +100,17 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
 
         double candlesHighPrice = minMax.maxHigh;
         double candlesLowPrice = minMax.minLow;
-        double diff = candlesHighPrice - candlesLowPrice;
-        candlesHighPrice += diff * 0.1;
-        candlesLowPrice -= diff * 0.2;
+        final paddedPrice = priceScale.addPadding(
+            low: candlesLowPrice, high: candlesHighPrice); // todo: refactor it
+        candlesHighPrice = paddedPrice.high;
+        candlesLowPrice = paddedPrice.low;
 
         if (candlesHighPrice == candlesLowPrice) {
           candlesHighPrice += 10;
           candlesLowPrice -= 10;
         }
 
-        // calculate highest volume
+        // calculate highest volume. todo: move this to MinMaxCache
         double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
 
         CandleSticksStyle style = CandleSticksStyleProvider.of(context);
@@ -111,6 +124,8 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
           candlesLowPrice: candlesLowPrice,
           viewPort: widget.viewPort,
           onHoveredCandleIndexChange: widget.onHoveredCandleIndexChange,
+          priceScale: priceScale,
+          onPriceScaleToggle: onPriceScaleToggle,
           builder: (
             BuildContext context,
             double newHigh,
@@ -128,6 +143,7 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
                   chartHeight: maxHeight,
                   lastCandle:
                       widget.candles[max(widget.viewPort.scrollIndex, 0)],
+                  priceScale: priceScale,
                 ),
                 Positioned(
                   bottom: 0,
@@ -159,6 +175,7 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
                         low: low,
                         bearColor: style.primaryBear,
                         bullColor: style.primaryBull,
+                        priceScale: priceScale,
                       );
                     },
                   ),

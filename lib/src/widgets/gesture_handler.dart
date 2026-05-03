@@ -4,6 +4,7 @@ import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
+import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,8 @@ class GestureHandler extends StatefulWidget {
   final CandlesticksController controller;
   final CandlesticksViewport viewPort;
   final void Function(int?) onHoveredCandleIndexChange;
+  final PriceScale priceScale;
+  final void Function() onPriceScaleToggle;
 
   final Widget Function(
     BuildContext context,
@@ -37,6 +40,8 @@ class GestureHandler extends StatefulWidget {
     required this.controller,
     required this.viewPort,
     required this.onHoveredCandleIndexChange,
+    required this.priceScale,
+    required this.onPriceScaleToggle,
   });
 
   @override
@@ -91,16 +96,58 @@ class _GestureHandlerState extends State<GestureHandler> {
     scrollIndexWhenUserStartsDragging = widget.viewPort.scrollIndex;
   }
 
-  void onPriceBarScale(delta) {
+  void onPriceBarScale(double delta) {
     if (manualScaleHigh == null) {
       manualScaleHigh = widget.candlesHighPrice;
       manualScaleLow = widget.candlesLowPrice;
     }
+
+    if (!widget.priceScale.isValid(manualScaleHigh!) ||
+        !widget.priceScale.isValid(manualScaleLow!) ||
+        manualScaleHigh! <= manualScaleLow!) {
+      return;
+    }
+
     setState(() {
-      double deltaPrice =
-          delta / widget.maxHeight * (manualScaleHigh! - manualScaleLow!);
-      manualScaleHigh = manualScaleHigh! + deltaPrice;
-      manualScaleLow = manualScaleLow! - deltaPrice;
+      final transformedHigh = widget.priceScale.transform(manualScaleHigh!);
+      final transformedLow = widget.priceScale.transform(manualScaleLow!);
+
+      final transformedDelta =
+          delta / widget.maxHeight * (transformedHigh - transformedLow);
+
+      manualScaleHigh = widget.priceScale.inverse(
+        transformedHigh + transformedDelta,
+      );
+
+      manualScaleLow = widget.priceScale.inverse(
+        transformedLow - transformedDelta,
+      );
+    });
+  }
+
+  void onVerticalDragUpdate(double deltaY) {
+    setState(() {
+      if (manualScaleHigh == null || manualScaleLow == null) return;
+
+      if (!widget.priceScale.isValid(manualScaleHigh!) ||
+          !widget.priceScale.isValid(manualScaleLow!) ||
+          manualScaleHigh! <= manualScaleLow!) {
+        return;
+      }
+
+      final transformedHigh = widget.priceScale.transform(manualScaleHigh!);
+      final transformedLow = widget.priceScale.transform(manualScaleLow!);
+
+      final transformedDelta =
+          deltaY / widget.maxHeight * (transformedHigh - transformedLow);
+
+      manualScaleHigh = widget.priceScale.inverse(
+        transformedHigh + transformedDelta,
+      );
+
+      manualScaleLow = widget.priceScale.inverse(
+        transformedLow + transformedDelta,
+      );
     });
   }
 
@@ -146,15 +193,7 @@ class _GestureHandlerState extends State<GestureHandler> {
                 onPanUpdate: (update) {
                   mouseHoverY = update.localPosition.dy;
                   onHorizontalDragUpdate(update.localPosition.dx);
-                  setState(() {
-                    if (manualScaleHigh != null) {
-                      double deltaPrice = update.delta.dy /
-                          widget.maxHeight *
-                          (manualScaleHigh! - manualScaleLow!);
-                      manualScaleHigh = manualScaleHigh! + deltaPrice;
-                      manualScaleLow = manualScaleLow! + deltaPrice;
-                    }
-                  });
+                  onVerticalDragUpdate(update.delta.dy);
                 },
                 onPanEnd: (update) {
                   setState(() {
@@ -182,39 +221,75 @@ class _GestureHandlerState extends State<GestureHandler> {
             },
           ),
         ),
-        manualScaleHigh != null
-            ? Positioned(
-                right: 0,
-                bottom: 0,
-                width: PRICE_BAR_WIDTH,
-                height: 20,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    backgroundColor: style.hoverIndicatorBackgroundColor,
-                    foregroundColor: style.secondaryTextColor,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
+        Positioned(
+          right: 0,
+          bottom: 0,
+          width: PRICE_BAR_WIDTH,
+          height: 20,
+          child: Container(
+            color: style.background,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: manualScaleHigh != null
+                          ? style.hoverIndicatorBackgroundColor
+                          : style.secondaryTextColor,
+                      foregroundColor: manualScaleHigh != null
+                          ? style.secondaryTextColor
+                          : style.hoverIndicatorBackgroundColor,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(3),
+                      ),
                     ),
+                    onPressed: () {
+                      setState(
+                        () {
+                          manualScaleHigh = null;
+                          manualScaleLow = null;
+                        },
+                      );
+                    },
+                    child: const Text('A'),
                   ),
-                  child: Text(
-                    "Auto",
-                    style: TextStyle(
-                      color: style.secondaryTextColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                  onPressed: () {
-                    setState(
-                      () {
-                        manualScaleHigh = null;
-                        manualScaleLow = null;
-                      },
-                    );
-                  },
                 ),
-              )
-            : Container(),
+                Container(
+                  width: 22,
+                  height: 22,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: widget.priceScale != log10PriceScale
+                          ? style.hoverIndicatorBackgroundColor
+                          : style.secondaryTextColor,
+                      foregroundColor: widget.priceScale != log10PriceScale
+                          ? style.secondaryTextColor
+                          : style.hoverIndicatorBackgroundColor,
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(3),
+                      ),
+                    ),
+                    onPressed: () {
+                      widget.onPriceScaleToggle();
+                      setState(
+                        () {
+                          manualScaleHigh = null;
+                          manualScaleLow = null;
+                        },
+                      );
+                    },
+                    child: const Text('L'),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
