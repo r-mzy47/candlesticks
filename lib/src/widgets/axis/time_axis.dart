@@ -6,13 +6,13 @@ import 'package:candlesticks/src/widgets/dash_line_painter.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-class TimeRow extends StatefulWidget {
+class TimeAxis extends StatefulWidget {
   final List<Candle> candles;
   final int? hoverdCandleIndex;
   final CandlesticksViewport viewport;
   final double maxHeight;
 
-  const TimeRow({
+  const TimeAxis({
     Key? key,
     required this.candles,
     required this.viewport,
@@ -21,10 +21,10 @@ class TimeRow extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<TimeRow> createState() => _TimeRowState();
+  State<TimeAxis> createState() => _TimeRowState();
 }
 
-class _TimeRowState extends State<TimeRow> {
+class _TimeRowState extends State<TimeAxis> {
   final ScrollController _scrollController = new ScrollController();
 
   /// Calculates number of candles between two time indicator
@@ -66,15 +66,46 @@ class _TimeRowState extends State<TimeRow> {
     return "${value < 10 ? 0 : ""}$value";
   }
 
-  /// Day/month text widget
-  Text _monthDayText(DateTime _time, Color color) {
+  /// Month/day text widget
+  Text _monthDayText({
+    required DateTime time,
+    required Duration dif,
+    required Color color,
+  }) {
+    final DateTime previousTime = time.subtract(dif);
+    final bool isFirstLabelOfYear = previousTime.year != time.year;
+
+    final String text = isFirstLabelOfYear
+        ? time.year.toString()
+        : '${_monthName(time.month)} ${time.day}';
+
     return Text(
-      numberFormat(_time.month) + "/" + numberFormat(_time.day),
+      text,
       style: TextStyle(
         color: color,
         fontSize: 12,
+        fontWeight: isFirstLabelOfYear ? FontWeight.bold : FontWeight.normal,
       ),
     );
+  }
+
+  String _monthName(int month) {
+    const List<String> months = <String>[
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return months[month - 1];
   }
 
   /// Hour/minute text widget
@@ -88,12 +119,29 @@ class _TimeRowState extends State<TimeRow> {
     );
   }
 
+  /// Time axis label widget
+  Text _timeLabelText({
+    required DateTime time,
+    required Duration dif,
+    required Color color,
+  }) {
+    if (dif.compareTo(const Duration(days: 1)) > 0) {
+      return _monthDayText(
+        time: time,
+        dif: dif,
+        color: color,
+      );
+    }
+
+    return _hourMinuteText(time, color);
+  }
+
   String dateFormatter(DateTime date) {
     return "${date.year}-${numberFormat(date.month)}-${numberFormat(date.day)} ${numberFormat(date.hour)}:${numberFormat(date.minute)}";
   }
 
   @override
-  void didUpdateWidget(TimeRow oldWidget) {
+  void didUpdateWidget(TimeAxis oldWidget) {
     if (oldWidget.viewport != widget.viewport)
       _scrollController.jumpTo(
           (widget.viewport.scrollIndex + 10) * widget.viewport.candleWidth);
@@ -134,9 +182,11 @@ class _TimeRowState extends State<TimeRow> {
                     color: style.gridColor,
                   ),
                 ),
-                dif.compareTo(Duration(days: 1)) > 0
-                    ? _monthDayText(_time, style.primaryTextColor)
-                    : _hourMinuteText(_time, style.primaryTextColor),
+                _timeLabelText(
+                  time: _time,
+                  dif: dif,
+                  color: style.primaryTextColor,
+                ),
               ],
             );
           },

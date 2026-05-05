@@ -6,8 +6,8 @@ import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/dash_line_painter.dart';
 import 'package:flutter/material.dart';
 
-class PriceColumn extends StatefulWidget {
-  const PriceColumn({
+class ValueAxis extends StatefulWidget {
+  const ValueAxis({
     super.key,
     required this.low,
     required this.high,
@@ -27,10 +27,10 @@ class PriceColumn extends StatefulWidget {
   final PriceScale priceScale;
 
   @override
-  State<PriceColumn> createState() => _PriceColumnState();
+  State<ValueAxis> createState() => _PriceColumnState();
 }
 
-class _PriceColumnState extends State<PriceColumn> {
+class _PriceColumnState extends State<ValueAxis> {
   final ScrollController scrollController = ScrollController();
 
   double _priceToY(double price) {

@@ -4,13 +4,12 @@ import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport_tween.dart';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
+import 'package:candlesticks/src/widgets/axis/time_axis.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_chart.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
-import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
-import 'dart:ui' show lerpDouble;
 
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
@@ -110,7 +109,7 @@ class _ChartComposerState extends State<ChartComposer> {
                         padding: const EdgeInsets.only(
                           right: PRICE_BAR_WIDTH,
                         ), // padding rigth PRICE_BAR_WIDTH
-                        child: TimeRow(
+                        child: TimeAxis(
                           hoverdCandleIndex: hoveredCandleIndex,
                           candles: widget.candles,
                           viewport: animatedViewport,

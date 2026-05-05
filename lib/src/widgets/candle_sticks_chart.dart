@@ -7,11 +7,11 @@ import 'package:candlesticks/src/data/minmax_cache.dart';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/models/price_scale.dart';
+import 'package:candlesticks/src/widgets/axis/value_axis.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/gesture_handler.dart';
 import 'package:candlesticks/src/widgets/high_low_animator.dart';
-import 'package:candlesticks/src/widgets/price_column.dart';
 import 'package:candlesticks/src/widgets/hovered_candle_info_bar.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
@@ -138,7 +138,7 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
           ) {
             return Stack(
               children: [
-                PriceColumn(
+                ValueAxis(
                   low: newLow,
                   high: newHigh,
                   width: maxWidth,
