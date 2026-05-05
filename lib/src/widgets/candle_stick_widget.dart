@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class CandleStickWidget extends LeafRenderObjectWidget {
   final List<Candle> candles;
-  final int index;
+  final double index;
   final double candleWidth;
   final double high;
   final double low;
@@ -58,7 +58,7 @@ class CandleStickWidget extends LeafRenderObjectWidget {
 class CandleStickRenderObject extends RenderBox {
   CandleStickRenderObject({
     required List<Candle> candles,
-    required int index,
+    required double index,
     required double candleWidth,
     required double low,
     required double high,
@@ -77,7 +77,7 @@ class CandleStickRenderObject extends RenderBox {
         _candlesLength = candles.length;
 
   List<Candle> _candles;
-  int _index;
+  double _index;
   double _candleWidth;
   double _low;
   double _high;
@@ -110,7 +110,7 @@ class CandleStickRenderObject extends RenderBox {
     }
   }
 
-  set index(int value) {
+  set index(double value) {
     if (_index == value) return;
 
     _index = value;
@@ -185,7 +185,7 @@ class CandleStickRenderObject extends RenderBox {
   void _paintCandle(
     Canvas canvas,
     Offset offset,
-    int visibleIndex,
+    double visibleIndex,
     Candle candle,
     Paint wickPaint,
     Paint bodyPaint,
@@ -303,8 +303,11 @@ class CandleStickRenderObject extends RenderBox {
 
     final maxVisible = (size.width / _candleWidth).ceil();
 
+    final firstVisibleIndex = _index.floor();
+    final fractionalOffset = _index - firstVisibleIndex;
+
     for (int i = 0; i < maxVisible; i++) {
-      final candleIndex = i + _index;
+      final candleIndex = i + firstVisibleIndex;
 
       if (candleIndex < 0 || candleIndex >= _candles.length) continue;
 
@@ -315,7 +318,7 @@ class CandleStickRenderObject extends RenderBox {
       _paintCandle(
         canvas,
         offset,
-        i,
+        i - fractionalOffset,
         candle,
         wickPaint,
         bodyPaint,

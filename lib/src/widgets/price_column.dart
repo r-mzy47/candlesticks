@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/models/candle.dart';
 import 'package:candlesticks/src/models/price_scale.dart';

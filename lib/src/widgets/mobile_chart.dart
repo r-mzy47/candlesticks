@@ -5,7 +5,6 @@ import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/utils/helper_functions.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/price_column.dart';
-import 'package:candlesticks/src/widgets/hovered_candle_info_bar.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -133,14 +132,6 @@ class _MobileChartState extends State<MobileChart> {
               duration:
                   Duration(milliseconds: manualScaleHigh == null ? 300 : 0),
               builder: (context, double low, _) {
-                final hoveredCandle = longPressX == null
-                    ? null
-                    : widget.candles[min(
-                        max(
-                            (maxWidth - longPressX!) ~/ widget.candleWidth +
-                                widget.index,
-                            0),
-                        widget.candles.length - 1)];
                 return Container(
                   color: widget.style.background,
                   child: Stack(
@@ -189,7 +180,7 @@ class _MobileChartState extends State<MobileChart> {
                                             child: CandleStickWidget(
                                               candles: widget.candles,
                                               candleWidth: widget.candleWidth,
-                                              index: widget.index,
+                                              index: widget.index.toDouble(),
                                               high: high,
                                               low: low,
                                               bearColor:
@@ -229,7 +220,7 @@ class _MobileChartState extends State<MobileChart> {
                                       child: VolumeWidget(
                                         candles: widget.candles,
                                         barWidth: widget.candleWidth,
-                                        index: widget.index,
+                                        index: widget.index.toDouble(),
                                         high:
                                             HelperFunctions.getRoof(volumeHigh),
                                         bearColor: widget.style.secondaryBear,

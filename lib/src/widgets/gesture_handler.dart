@@ -1,5 +1,4 @@
-import 'dart:math';
-
+import 'package:flutter/services.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
@@ -54,7 +53,7 @@ class _GestureHandlerState extends State<GestureHandler> {
   double? manualScaleHigh;
   double? manualScaleLow;
 
-  int scrollIndexWhenUserStartsDragging = -10;
+  double scrollIndexWhenUserStartsDragging = -10;
   double mouseXpositionWhenUserStartsDragging = 0;
 
   void _onMouseExit(PointerEvent details) {
@@ -72,18 +71,39 @@ class _GestureHandlerState extends State<GestureHandler> {
   }
 
   void onScaleUpdate(double scale) {
-    widget.controller.zoomBy((1 + scale / 100));
+    widget.controller.zoomBy((1 + scale / 200));
+  }
+
+  void onAnchoredZoomScroll(PointerScrollEvent details) {
+    final scrollDelta = details.scrollDelta.dy * -1;
+
+    final chartWidth = widget.maxWidth - PRICE_BAR_WIDTH;
+    if (chartWidth <= 0) return;
+
+    final pointerX = details.localPosition.dx;
+
+    if (pointerX < 0 || pointerX > chartWidth) return;
+
+    final mouseXFromRight = chartWidth - pointerX;
+
+    final zoomFactor = (1 + scrollDelta / 200);
+
+    widget.controller.zoomAround(
+      zoomFactor: zoomFactor,
+      anchorDistanceFromRight: mouseXFromRight,
+      candlesCount: widget.candlesCount,
+    );
   }
 
   void onHorizontalDragUpdate(DragUpdateDetails update) {
     double x = update.localPosition.dx;
     x = x - mouseXpositionWhenUserStartsDragging;
-    int NewIndex =
-        scrollIndexWhenUserStartsDragging + x ~/ widget.viewPort.candleWidth;
-    NewIndex = max(NewIndex, -10);
-    NewIndex = min(NewIndex, widget.candlesCount - 1);
+    double newIndex =
+        scrollIndexWhenUserStartsDragging + x / widget.viewPort.candleWidth;
 
-    widget.controller.jumpTo(NewIndex);
+    newIndex = newIndex.clamp(-10.0, widget.candlesCount - 1.0);
+
+    widget.controller.jumpTo(newIndex);
     widget.onMouseHoverXChange(update.localPosition.dx);
   }
 
@@ -167,16 +187,28 @@ class _GestureHandlerState extends State<GestureHandler> {
           child: Listener(
             onPointerSignal: (pointerSignal) {
               if (pointerSignal is PointerScrollEvent) {
+                final isAnchoredZoomModifierPressed =
+                    HardwareKeyboard.instance.isMetaPressed || // macOS Command
+                        HardwareKeyboard
+                            .instance.isControlPressed; // Windows/Linux Ctrl
+
+                if (isAnchoredZoomModifierPressed) {
+                  onAnchoredZoomScroll(pointerSignal);
+                  return;
+                }
+
                 if (pointerSignal.scrollDelta.dy.abs() >
                     pointerSignal.scrollDelta.dx.abs())
                   onScaleUpdate(pointerSignal.scrollDelta.dy * -1);
                 else {
-                  int NewIndex = widget.viewPort.scrollIndex +
+                  double newIndex = widget.viewPort.scrollIndex +
                       -1 *
-                          pointerSignal.scrollDelta.dx ~/
+                          pointerSignal.scrollDelta.dx /
                           widget.viewPort.candleWidth;
-                  NewIndex = NewIndex.clamp(-10, widget.candlesCount - 1);
-                  widget.controller.jumpTo(NewIndex);
+
+                  newIndex = newIndex.clamp(-10.0, widget.candlesCount - 1.0);
+
+                  widget.controller.jumpTo(newIndex);
                 }
               }
               _onMouseHover(pointerSignal);
@@ -223,7 +255,7 @@ class _GestureHandlerState extends State<GestureHandler> {
           right: 0,
           bottom: 0,
           width: PRICE_BAR_WIDTH,
-          height: 20,
+          height: 22,
           child: Container(
             color: style.background,
             child: Row(
@@ -288,6 +320,17 @@ class _GestureHandlerState extends State<GestureHandler> {
             ),
           ),
         ),
+        if (widget.viewPort.scrollIndex > 10)
+          Positioned(
+            bottom: 150,
+            right: 150,
+            child: IconButton(
+              onPressed: () {
+                widget.controller.animateTo(-10);
+              },
+              icon: Icon(Icons.keyboard_double_arrow_right),
+            ),
+          ),
       ],
     );
   }

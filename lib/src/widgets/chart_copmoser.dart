@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
+import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
+import 'package:candlesticks/src/controller/candlesticks_viewport_tween.dart';
 import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
@@ -8,6 +10,7 @@ import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/time_row.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
+import 'dart:ui' show lerpDouble;
 
 /// This widget manages gestures
 /// Calculates the highest and lowest price of visible candles.
@@ -57,17 +60,26 @@ class _ChartComposerState extends State<ChartComposer> {
         return ValueListenableBuilder(
           valueListenable: widget.controller,
           builder: (context, viewPort, child) {
-            return TweenAnimationBuilder<double>(
-              tween: Tween(end: viewPort.candleWidth),
-              duration: const Duration(milliseconds: 120),
-              builder: (context, animatedWidth, _) {
-                final animatedViewport =
-                    viewPort.copyWith(candleWidth: animatedWidth);
+            return TweenAnimationBuilder<CandlesticksViewport>(
+              tween: CandlesticksViewportTween(
+                end: viewPort,
+              ),
+              duration: Duration(
+                milliseconds: max(
+                  120,
+                  viewPort.scrollIndexAnimationDurationMs,
+                ),
+              ),
+              curve: Curves.linear,
+              builder: (context, animatedViewport, _) {
+                final int candlesStartIndex =
+                    animatedViewport.firstVisibleCandleIndex;
 
                 final int candlesEndIndex = min(
-                    chartsWidth ~/ animatedViewport.candleWidth +
-                        animatedViewport.scrollIndex,
-                    widget.candles.length - 1);
+                  candlesStartIndex +
+                      chartsWidth ~/ animatedViewport.candleWidth,
+                  widget.candles.length - 1,
+                );
 
                 if (candlesEndIndex == widget.candles.length - 1) {
                   Future(() {
@@ -79,11 +91,15 @@ class _ChartComposerState extends State<ChartComposer> {
 
                 if (mouseHoverX != null) {
                   hoveredCandleIndex =
-                      ((maxWidth - PRICE_BAR_WIDTH) - mouseHoverX!) ~/
-                              animatedViewport.candleWidth +
-                          animatedViewport.scrollIndex;
-                  hoveredCandleIndex =
-                      hoveredCandleIndex.clamp(0, widget.candles.length - 1);
+                      (((maxWidth - PRICE_BAR_WIDTH) - mouseHoverX!) /
+                                  animatedViewport.candleWidth +
+                              animatedViewport.scrollIndex)
+                          .floor();
+
+                  hoveredCandleIndex = hoveredCandleIndex.clamp(
+                    0,
+                    widget.candles.length - 1,
+                  );
                 }
 
                 return Container(

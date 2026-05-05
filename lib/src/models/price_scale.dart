@@ -12,7 +12,7 @@ abstract class PriceScale {
   ({double low, double high}) addPadding({
     required double low,
     required double high,
-    double topPaddingFactor = 0.1,
+    double topPaddingFactor = 0.05,
     double bottomPaddingFactor = 0.2,
   }) {
     if (high <= low || !isValid(low) || !isValid(high)) {

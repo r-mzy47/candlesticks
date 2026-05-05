@@ -269,34 +269,9 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData.light().copyWith(
-        appBarTheme: const AppBarTheme(
-          backgroundColor: const Color(0xFF54C5F8),
-          foregroundColor: const Color(0xFF01579B),
-        ),
-      ),
-      darkTheme: ThemeData.dark().copyWith(
-        appBarTheme: const AppBarTheme(
-          backgroundColor: const Color(0xFF01579B),
-          foregroundColor: const Color(0xFF54C5F8),
-        ),
-      ),
-      themeMode: _themeIsDark ? ThemeMode.dark : ThemeMode.light,
+      theme: _themeIsDark ? ThemeData.dark() : ThemeData.light(),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Binance Candles'),
-          actions: [
-            IconButton(
-              onPressed: _toggleTheme,
-              icon: Icon(
-                _themeIsDark
-                    ? Icons.wb_sunny_sharp
-                    : Icons.nightlight_round_outlined,
-              ),
-            ),
-          ],
-        ),
         body: StreamBuilder<Object?>(
           stream: _channel?.stream,
           builder: (context, snapshot) {
@@ -309,7 +284,7 @@ class _MyAppState extends State<MyApp> {
             return Column(
               children: [
                 ToolBar(
-                  children: [
+                  leftChildren: [
                     ToolBarAction(
                       onPressed: _controller.zoomOut,
                       child: const Icon(Icons.remove),
@@ -327,6 +302,17 @@ class _MyAppState extends State<MyApp> {
                       onPressed: _showSymbolSearchDialog,
                       child: Text(_currentSymbol),
                     ),
+                  ],
+                  rightChildren: [
+                    ToolBarAction(
+                      width: 50,
+                      onPressed: _toggleTheme,
+                      child: Icon(
+                        _themeIsDark
+                            ? Icons.wb_sunny_sharp
+                            : Icons.nightlight_round_outlined,
+                      ),
+                    )
                   ],
                 ),
                 Expanded(

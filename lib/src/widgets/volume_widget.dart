@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class VolumeWidget extends LeafRenderObjectWidget {
   final List<Candle> candles;
-  final int index;
+  final double index;
   final double barWidth;
   final double high;
   final Color bullColor;
@@ -49,7 +49,7 @@ class VolumeWidget extends LeafRenderObjectWidget {
 class VolumeRenderObject extends RenderBox {
   VolumeRenderObject({
     required List<Candle> candles,
-    required int index,
+    required double index,
     required double barWidth,
     required double high,
     required Color bearColor,
@@ -64,7 +64,7 @@ class VolumeRenderObject extends RenderBox {
         _candlesLength = candles.length;
 
   List<Candle> _candles;
-  int _index;
+  double _index;
   double _barWidth;
   double _high;
   Color _bearColor;
@@ -95,7 +95,7 @@ class VolumeRenderObject extends RenderBox {
     }
   }
 
-  set index(int value) {
+  set index(double value) {
     if (_index == value) return;
 
     _index = value;
@@ -138,7 +138,7 @@ class VolumeRenderObject extends RenderBox {
   void _paintBar(
     Canvas canvas,
     Offset offset,
-    int visibleIndex,
+    double visibleIndex,
     Candle candle,
     Paint paint,
     double volumePerPixel,
@@ -175,15 +175,18 @@ class VolumeRenderObject extends RenderBox {
     final volumePerPixel = _high / size.height;
     final maxVisible = (size.width / _barWidth).ceil();
 
+    final firstVisibleIndex = _index.floor();
+    final fractionalOffset = _index - firstVisibleIndex;
+
     for (int i = 0; i < maxVisible; i++) {
-      final candleIndex = i + _index;
+      final candleIndex = i + firstVisibleIndex;
 
       if (candleIndex < 0 || candleIndex >= _candles.length) continue;
 
       _paintBar(
         canvas,
         offset,
-        i,
+        i - fractionalOffset,
         _candles[candleIndex],
         paint,
         volumePerPixel,
