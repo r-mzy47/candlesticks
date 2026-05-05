@@ -1,6 +1,6 @@
 import 'package:candlesticks/candlesticks.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
-import 'package:candlesticks/src/widgets/chart_copmoser.dart';
+import 'package:candlesticks/src/widgets/chart_composer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
