@@ -6,7 +6,7 @@ import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/widgets/axis/time_axis.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
-import 'package:candlesticks/src/widgets/candle_sticks_chart.dart';
+import 'package:candlesticks/src/widgets/main_chart_pane.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:flutter/material.dart';
 import '../models/candle.dart';
@@ -123,7 +123,7 @@ class _ChartComposerState extends State<ChartComposer> {
                         child: Column(
                           children: [
                             Expanded(
-                              child: CandleSticksChart(
+                              child: MainChartPane(
                                 candles: widget.candles,
                                 chartAdjust: widget.chartAdjust,
                                 controller: widget.controller,

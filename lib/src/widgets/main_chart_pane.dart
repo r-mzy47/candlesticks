@@ -18,8 +18,8 @@ import 'package:flutter/material.dart';
 
 import '../models/candle.dart';
 
-class CandleSticksChart extends StatefulWidget {
-  const CandleSticksChart({
+class MainChartPane extends StatefulWidget {
+  const MainChartPane({
     super.key,
     required this.candles,
     required this.chartAdjust,
@@ -42,10 +42,10 @@ class CandleSticksChart extends StatefulWidget {
   final int? hoveredCandleIndex;
 
   @override
-  State<CandleSticksChart> createState() => _CandleSticksChartState();
+  State<MainChartPane> createState() => _CandleSticksChartState();
 }
 
-class _CandleSticksChartState extends State<CandleSticksChart> {
+class _CandleSticksChartState extends State<MainChartPane> {
   final cache = MinMaxCache();
   PriceScale priceScale = log10PriceScale;
 
@@ -66,7 +66,7 @@ class _CandleSticksChartState extends State<CandleSticksChart> {
   }
 
   @override
-  void didUpdateWidget(covariant CandleSticksChart oldWidget) {
+  void didUpdateWidget(covariant MainChartPane oldWidget) {
     cache.updateCandles(widget.candles);
     super.didUpdateWidget(oldWidget);
   }
