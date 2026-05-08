@@ -206,7 +206,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  void _showIntervalDialog() {
+  void _showIntervalDialog(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (context) {
@@ -252,7 +252,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  void _showSymbolSearchDialog() {
+  void _showSymbolSearchDialog(BuildContext context) {
     showDialog<void>(
       context: context,
       builder: (context) {
@@ -294,12 +294,12 @@ class _MyAppState extends State<MyApp> {
                       child: const Icon(Icons.add),
                     ),
                     ToolBarAction(
-                      onPressed: _showIntervalDialog,
+                      onPressed: () => _showIntervalDialog(context),
                       child: Text(_currentInterval),
                     ),
                     ToolBarAction(
                       width: 100,
-                      onPressed: _showSymbolSearchDialog,
+                      onPressed: () => _showSymbolSearchDialog(context),
                       child: Text(_currentSymbol),
                     ),
                   ],

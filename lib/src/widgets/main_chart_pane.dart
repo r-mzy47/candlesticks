@@ -26,7 +26,7 @@ class MainChartPane extends StatefulWidget {
     required this.controller,
     required this.viewPort,
     required this.onMouseHoverXChange,
-    this.hoveredCandleIndex,
+    this.crosshairXFromRight,
   });
 
   final List<Candle> candles;
@@ -39,7 +39,7 @@ class MainChartPane extends StatefulWidget {
 
   final Function(double?) onMouseHoverXChange;
 
-  final int? hoveredCandleIndex;
+  final double? crosshairXFromRight;
 
   @override
   State<MainChartPane> createState() => _CandleSticksChartState();
@@ -69,6 +69,14 @@ class _CandleSticksChartState extends State<MainChartPane> {
   void didUpdateWidget(covariant MainChartPane oldWidget) {
     cache.updateCandles(widget.candles);
     super.didUpdateWidget(oldWidget);
+  }
+
+  int _nearestCandleIndexAtX(double xFromRight) {
+    return (widget.viewPort.scrollIndex +
+            xFromRight / widget.viewPort.candleWidth -
+            0.5)
+        .round()
+        .clamp(0, widget.candles.length - 1);
   }
 
   @override
@@ -187,9 +195,10 @@ class _CandleSticksChartState extends State<MainChartPane> {
                   top: 4,
                   left: 12,
                   child: HoveredCandleInfoBar(
-                    currentCandle: widget.hoveredCandleIndex != null
-                        ? widget.candles[widget.hoveredCandleIndex!]
-                        : null,
+                    currentCandle: widget.crosshairXFromRight == null
+                        ? null
+                        : widget.candles[_nearestCandleIndexAtX(
+                            widget.crosshairXFromRight!)],
                   ),
                 ),
               ],

@@ -39,11 +39,11 @@ class ChartComposer extends StatefulWidget {
 }
 
 class _ChartComposerState extends State<ChartComposer> {
-  double? mouseHoverX;
+  double? crosshairX;
 
   void onMouseHoverXChange(double? value) {
     setState(() {
-      mouseHoverX = value;
+      crosshairX = value;
     });
   }
 
@@ -53,7 +53,6 @@ class _ChartComposerState extends State<ChartComposer> {
       builder: (context, constraints) {
         // determine chart width
         final double maxWidth = constraints.maxWidth;
-        final double maxHeight = constraints.maxHeight;
         final double chartsWidth = maxWidth - PRICE_BAR_WIDTH;
 
         return ValueListenableBuilder(
@@ -86,20 +85,8 @@ class _ChartComposerState extends State<ChartComposer> {
                   });
                 }
 
-                int? hoveredCandleIndex;
-
-                if (mouseHoverX != null) {
-                  hoveredCandleIndex =
-                      (((maxWidth - PRICE_BAR_WIDTH) - mouseHoverX!) /
-                                  animatedViewport.candleWidth +
-                              animatedViewport.scrollIndex)
-                          .floor();
-
-                  hoveredCandleIndex = hoveredCandleIndex.clamp(
-                    0,
-                    widget.candles.length - 1,
-                  );
-                }
+                final double? crosshairXFromRight =
+                    crosshairX == null ? null : chartsWidth - crosshairX!;
 
                 return Container(
                   color: CandleSticksStyleProvider.of(context).background,
@@ -110,10 +97,9 @@ class _ChartComposerState extends State<ChartComposer> {
                           right: PRICE_BAR_WIDTH,
                         ), // padding rigth PRICE_BAR_WIDTH
                         child: TimeAxis(
-                          hoverdCandleIndex: hoveredCandleIndex,
+                          crosshairXFromRight: crosshairXFromRight,
                           candles: widget.candles,
                           viewport: animatedViewport,
-                          maxHeight: maxHeight,
                         ),
                       ),
                       Padding(
@@ -129,7 +115,7 @@ class _ChartComposerState extends State<ChartComposer> {
                                 controller: widget.controller,
                                 viewPort: animatedViewport,
                                 onMouseHoverXChange: onMouseHoverXChange,
-                                hoveredCandleIndex: hoveredCandleIndex,
+                                crosshairXFromRight: crosshairXFromRight,
                               ),
                             ),
                           ],

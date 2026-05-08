@@ -20,6 +20,23 @@ class CandlesticksController extends ValueNotifier<CandlesticksViewport> {
     );
   }
 
+  void scrollByPixels({
+    required double deltaX,
+    required int candlesCount,
+  }) {
+    final double newScrollIndex =
+        value.scrollIndex - deltaX / value.candleWidth;
+
+    final double maxScrollIndex = candlesCount - 1;
+
+    if (newScrollIndex > maxScrollIndex) return;
+
+    value = value.copyWith(
+      scrollIndex: newScrollIndex,
+      scrollIndexAnimationDurationMs: 0,
+    );
+  }
+
   void jumpTo(double index) {
     value = value.copyWith(scrollIndex: index);
   }
@@ -69,10 +86,9 @@ class CandlesticksController extends ValueNotifier<CandlesticksViewport> {
     final newScrollIndex =
         hoveredIndex - anchorDistanceFromRight / newCandleWidth;
 
-    const minScrollIndex = -10.0;
     final maxScrollIndex = candlesCount - 1.0;
 
-    if (newScrollIndex < minScrollIndex || newScrollIndex > maxScrollIndex) {
+    if (newScrollIndex > maxScrollIndex) {
       return;
     }
 

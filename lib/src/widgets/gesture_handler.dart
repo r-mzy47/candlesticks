@@ -7,6 +7,7 @@ import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class GestureHandler extends StatefulWidget {
   final double maxHeight;
@@ -101,7 +102,7 @@ class _GestureHandlerState extends State<GestureHandler> {
     double newIndex =
         scrollIndexWhenUserStartsDragging + x / widget.viewPort.candleWidth;
 
-    newIndex = newIndex.clamp(-10.0, widget.candlesCount - 1.0);
+    newIndex = min(newIndex, widget.candlesCount - 1);
 
     widget.controller.jumpTo(newIndex);
     widget.onMouseHoverXChange(update.localPosition.dx);
@@ -201,14 +202,10 @@ class _GestureHandlerState extends State<GestureHandler> {
                     pointerSignal.scrollDelta.dx.abs())
                   onScaleUpdate(pointerSignal.scrollDelta.dy * -1);
                 else {
-                  double newIndex = widget.viewPort.scrollIndex +
-                      -1 *
-                          pointerSignal.scrollDelta.dx /
-                          widget.viewPort.candleWidth;
-
-                  newIndex = newIndex.clamp(-10.0, widget.candlesCount - 1.0);
-
-                  widget.controller.jumpTo(newIndex);
+                  widget.controller.scrollByPixels(
+                    deltaX: pointerSignal.scrollDelta.dx,
+                    candlesCount: widget.candlesCount,
+                  );
                 }
               }
               _onMouseHover(pointerSignal);
