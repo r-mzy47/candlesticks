@@ -1,15 +1,14 @@
-import 'package:flutter/services.dart';
+import 'dart:math';
+
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
-class GestureHandler extends StatefulWidget {
+class MobileGestureHandler extends StatefulWidget {
   final double maxHeight;
   final double maxWidth;
   final int candlesCount;
@@ -17,7 +16,7 @@ class GestureHandler extends StatefulWidget {
   final double candlesLowPrice;
   final CandlesticksController controller;
   final CandlesticksViewport viewPort;
-  final void Function(double?) onMouseHoverXChange;
+  final void Function(double?) onCrosshairXChange;
   final PriceScale priceScale;
   final void Function() onPriceScaleToggle;
 
@@ -25,11 +24,11 @@ class GestureHandler extends StatefulWidget {
     BuildContext context,
     double newHigh,
     double newLow,
-    double? mouseHoverY,
+    double? crosshairY,
     bool isPriceScaled,
   ) builder;
 
-  const GestureHandler({
+  const MobileGestureHandler({
     super.key,
     required this.maxHeight,
     required this.maxWidth,
@@ -39,78 +38,107 @@ class GestureHandler extends StatefulWidget {
     required this.candlesLowPrice,
     required this.controller,
     required this.viewPort,
-    required this.onMouseHoverXChange,
+    required this.onCrosshairXChange,
     required this.priceScale,
     required this.onPriceScaleToggle,
   });
 
   @override
-  State<GestureHandler> createState() => _GestureHandlerState();
+  State<MobileGestureHandler> createState() => _MobileGestureHandlerState();
 }
 
-class _GestureHandlerState extends State<GestureHandler> {
-  double? mouseHoverY;
-  bool isDragging = false;
+class _MobileGestureHandlerState extends State<MobileGestureHandler> {
+  double? crosshairY;
+
   double? manualScaleHigh;
   double? manualScaleLow;
 
-  double scrollIndexWhenUserStartsDragging = -10;
-  double mouseXpositionWhenUserStartsDragging = 0;
+  bool isTouchHoverActive = false;
 
-  void _onMouseExit(PointerEvent details) {
-    widget.onMouseHoverXChange(null);
-    setState(() {
-      mouseHoverY = null;
-    });
+  double scrollIndexWhenScaleStarted = -10;
+  double focalPointXWhenScaleStarted = 0;
+  double lastPinchScale = 1;
+
+  double get chartWidth => widget.maxWidth - PRICE_BAR_WIDTH;
+
+  void onScaleStart(ScaleStartDetails details) {
+    scrollIndexWhenScaleStarted = widget.viewPort.scrollIndex;
+    focalPointXWhenScaleStarted = details.localFocalPoint.dx;
+    lastPinchScale = 1;
   }
 
-  void _onMouseHover(PointerEvent details) {
-    widget.onMouseHoverXChange(details.localPosition.dx);
-    setState(() {
-      mouseHoverY = details.localPosition.dy;
-    });
+  void onScaleUpdate(ScaleUpdateDetails details) {
+    if (isTouchHoverActive) return;
+
+    if (details.pointerCount >= 2) {
+      onPinchZoom(details);
+      return;
+    }
+
+    onHorizontalDragUpdate(details);
+    onManualPriceScalePan(details.focalPointDelta.dy);
   }
 
-  void onScaleUpdate(double scale) {
-    widget.controller.zoomBy((1 + scale / 200));
+  void onScaleEnd(ScaleEndDetails details) {
+    lastPinchScale = 1;
   }
 
-  void onAnchoredZoomScroll(PointerScrollEvent details) {
-    final scrollDelta = details.scrollDelta.dy * -1;
-
-    final chartWidth = widget.maxWidth - PRICE_BAR_WIDTH;
+  void onPinchZoom(ScaleUpdateDetails details) {
     if (chartWidth <= 0) return;
 
-    final pointerX = details.localPosition.dx;
+    final pointerX = details.localFocalPoint.dx;
 
     if (pointerX < 0 || pointerX > chartWidth) return;
 
-    final mouseXFromRight = chartWidth - pointerX;
+    final anchorDistanceFromRight = chartWidth - pointerX;
 
-    final zoomFactor = (1 + scrollDelta / 200);
+    final zoomFactor = details.scale / lastPinchScale;
+    lastPinchScale = details.scale;
+
+    if (zoomFactor <= 0) return;
 
     widget.controller.zoomAround(
       zoomFactor: zoomFactor,
-      anchorDistanceFromRight: mouseXFromRight,
+      anchorDistanceFromRight: anchorDistanceFromRight,
       candlesCount: widget.candlesCount,
     );
   }
 
-  void onHorizontalDragUpdate(DragUpdateDetails update) {
-    double x = update.localPosition.dx;
-    x = x - mouseXpositionWhenUserStartsDragging;
+  void onHorizontalDragUpdate(ScaleUpdateDetails details) {
+    final deltaX = details.localFocalPoint.dx - focalPointXWhenScaleStarted;
+
     double newIndex =
-        scrollIndexWhenUserStartsDragging + x / widget.viewPort.candleWidth;
+        scrollIndexWhenScaleStarted + deltaX / widget.viewPort.candleWidth;
 
     newIndex = min(newIndex, widget.candlesCount - 1);
 
     widget.controller.jumpTo(newIndex);
-    widget.onMouseHoverXChange(update.localPosition.dx);
   }
 
-  void onPanDown(double value) {
-    mouseXpositionWhenUserStartsDragging = value;
-    scrollIndexWhenUserStartsDragging = widget.viewPort.scrollIndex;
+  void onManualPriceScalePan(double deltaY) {
+    if (manualScaleHigh == null || manualScaleLow == null) return;
+
+    if (!widget.priceScale.isValid(manualScaleHigh!) ||
+        !widget.priceScale.isValid(manualScaleLow!) ||
+        manualScaleHigh! <= manualScaleLow!) {
+      return;
+    }
+
+    setState(() {
+      final transformedHigh = widget.priceScale.transform(manualScaleHigh!);
+      final transformedLow = widget.priceScale.transform(manualScaleLow!);
+
+      final transformedDelta =
+          deltaY / widget.maxHeight * (transformedHigh - transformedLow);
+
+      manualScaleHigh = widget.priceScale.inverse(
+        transformedHigh + transformedDelta,
+      );
+
+      manualScaleLow = widget.priceScale.inverse(
+        transformedLow + transformedDelta,
+      );
+    });
   }
 
   void onPriceBarScale(double delta) {
@@ -142,112 +170,96 @@ class _GestureHandlerState extends State<GestureHandler> {
     });
   }
 
-  void onVerticalDragUpdate(DragUpdateDetails update) {
-    double deltaY = update.delta.dy;
+  void showTouchHover(Offset localPosition) {
+    widget.onCrosshairXChange(localPosition.dx);
+
     setState(() {
-      mouseHoverY = update.localPosition.dy;
-
-      if (manualScaleHigh == null || manualScaleLow == null) return;
-
-      if (!widget.priceScale.isValid(manualScaleHigh!) ||
-          !widget.priceScale.isValid(manualScaleLow!) ||
-          manualScaleHigh! <= manualScaleLow!) {
-        return;
-      }
-
-      final transformedHigh = widget.priceScale.transform(manualScaleHigh!);
-      final transformedLow = widget.priceScale.transform(manualScaleLow!);
-
-      final transformedDelta =
-          deltaY / widget.maxHeight * (transformedHigh - transformedLow);
-
-      manualScaleHigh = widget.priceScale.inverse(
-        transformedHigh + transformedDelta,
-      );
-
-      manualScaleLow = widget.priceScale.inverse(
-        transformedLow + transformedDelta,
-      );
+      isTouchHoverActive = true;
+      crosshairY = localPosition.dy;
     });
+  }
+
+  void hideTouchHover() {
+    widget.onCrosshairXChange(null);
+
+    setState(() {
+      isTouchHoverActive = false;
+      crosshairY = null;
+    });
+  }
+
+  void onLongPressStart(LongPressStartDetails details) {
+    showTouchHover(details.localPosition);
+  }
+
+  void onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    showTouchHover(details.localPosition);
+  }
+
+  void onLongPressEnd(LongPressEndDetails details) {
+    hideTouchHover();
+  }
+
+  void onLongPressCancel() {
+    hideTouchHover();
+  }
+
+  void resetManualScale() {
+    setState(() {
+      manualScaleHigh = null;
+      manualScaleLow = null;
+    });
+  }
+
+  void togglePriceScale() {
+    widget.onPriceScaleToggle();
+    resetManualScale();
   }
 
   @override
   Widget build(BuildContext context) {
-    CandleSticksStyle style = CandleSticksStyleProvider.of(context);
+    final CandleSticksStyle style = CandleSticksStyleProvider.of(context);
+
     return Stack(
       children: [
         widget.builder(
           context,
           manualScaleHigh ?? widget.candlesHighPrice,
           manualScaleLow ?? widget.candlesLowPrice,
-          mouseHoverY,
+          crosshairY,
           manualScaleHigh != null,
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 50),
-          child: Listener(
-            onPointerSignal: (pointerSignal) {
-              if (pointerSignal is PointerScrollEvent) {
-                final isAnchoredZoomModifierPressed =
-                    HardwareKeyboard.instance.isMetaPressed || // macOS Command
-                        HardwareKeyboard
-                            .instance.isControlPressed; // Windows/Linux Ctrl
 
-                if (isAnchoredZoomModifierPressed) {
-                  onAnchoredZoomScroll(pointerSignal);
-                  return;
-                }
-
-                if (pointerSignal.scrollDelta.dy.abs() >
-                    pointerSignal.scrollDelta.dx.abs())
-                  onScaleUpdate(pointerSignal.scrollDelta.dy * -1);
-                else {
-                  widget.controller.scrollByPixels(
-                    deltaX: pointerSignal.scrollDelta.dx,
-                    candlesCount: widget.candlesCount,
-                  );
-                }
-              }
-              _onMouseHover(pointerSignal);
-            },
-            child: MouseRegion(
-              cursor: isDragging
-                  ? SystemMouseCursors.grabbing
-                  : SystemMouseCursors.precise,
-              onHover: _onMouseHover,
-              onExit: _onMouseExit,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onPanUpdate: (update) {
-                  onHorizontalDragUpdate(update);
-                  onVerticalDragUpdate(update);
-                },
-                onPanEnd: (update) {
-                  setState(() {
-                    isDragging = false;
-                  });
-                },
-                onPanDown: (update) {
-                  onPanDown(update.localPosition.dx);
-                  setState(() {
-                    isDragging = true;
-                  });
-                },
-              ),
-            ),
+        // Main chart touch area.
+        Positioned.fill(
+          right: PRICE_BAR_WIDTH,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onScaleStart: onScaleStart,
+            onScaleUpdate: onScaleUpdate,
+            onScaleEnd: onScaleEnd,
+            onLongPressStart: onLongPressStart,
+            onLongPressMoveUpdate: onLongPressMoveUpdate,
+            onLongPressEnd: onLongPressEnd,
+            onLongPressCancel: onLongPressCancel,
           ),
         ),
+
+        // Price bar drag area.
         Positioned(
           height: widget.maxHeight,
           bottom: 0,
           right: 0,
           width: PRICE_BAR_WIDTH,
           child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
             onVerticalDragUpdate: (details) {
               onPriceBarScale(details.delta.dy);
             },
           ),
         ),
+
+        // Auto-scale and log-scale buttons.
         Positioned(
           right: 0,
           bottom: 0,
@@ -258,7 +270,7 @@ class _GestureHandlerState extends State<GestureHandler> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
+                SizedBox(
                   width: 22,
                   height: 22,
                   child: ElevatedButton(
@@ -274,18 +286,11 @@ class _GestureHandlerState extends State<GestureHandler> {
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
-                    onPressed: () {
-                      setState(
-                        () {
-                          manualScaleHigh = null;
-                          manualScaleLow = null;
-                        },
-                      );
-                    },
+                    onPressed: resetManualScale,
                     child: const Text('A'),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 22,
                   height: 22,
                   child: ElevatedButton(
@@ -301,22 +306,15 @@ class _GestureHandlerState extends State<GestureHandler> {
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
-                    onPressed: () {
-                      widget.onPriceScaleToggle();
-                      setState(
-                        () {
-                          manualScaleHigh = null;
-                          manualScaleLow = null;
-                        },
-                      );
-                    },
+                    onPressed: togglePriceScale,
                     child: const Text('L'),
                   ),
-                )
+                ),
               ],
             ),
           ),
         ),
+
         if (widget.viewPort.scrollIndex > 10)
           Positioned(
             bottom: 150,
@@ -325,7 +323,7 @@ class _GestureHandlerState extends State<GestureHandler> {
               onPressed: () {
                 widget.controller.animateTo(-10);
               },
-              icon: Icon(Icons.keyboard_double_arrow_right),
+              icon: const Icon(Icons.keyboard_double_arrow_right),
             ),
           ),
       ],

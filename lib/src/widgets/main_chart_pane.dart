@@ -10,7 +10,7 @@ import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/widgets/axis/value_axis.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
-import 'package:candlesticks/src/widgets/gesture_handler.dart';
+import 'package:candlesticks/src/widgets/gesture_handler/gesture_handler.dart';
 import 'package:candlesticks/src/widgets/high_low_animator.dart';
 import 'package:candlesticks/src/widgets/hovered_candle_info_bar.dart';
 import 'package:candlesticks/src/widgets/volume_widget.dart';
@@ -25,7 +25,7 @@ class MainChartPane extends StatefulWidget {
     required this.chartAdjust,
     required this.controller,
     required this.viewPort,
-    required this.onMouseHoverXChange,
+    required this.onCrosshairXChange,
     this.crosshairXFromRight,
   });
 
@@ -37,7 +37,7 @@ class MainChartPane extends StatefulWidget {
 
   final CandlesticksViewport viewPort;
 
-  final Function(double?) onMouseHoverXChange;
+  final Function(double?) onCrosshairXChange;
 
   final double? crosshairXFromRight;
 
@@ -134,14 +134,14 @@ class _CandleSticksChartState extends State<MainChartPane> {
           candlesHighPrice: candlesHighPrice,
           candlesLowPrice: candlesLowPrice,
           viewPort: widget.viewPort,
-          onMouseHoverXChange: widget.onMouseHoverXChange,
+          onCrosshairXChange: widget.onCrosshairXChange,
           priceScale: priceScale,
           onPriceScaleToggle: onPriceScaleToggle,
           builder: (
             BuildContext context,
             double newHigh,
             double newLow,
-            double? mouseHoverY,
+            double? crosshairY,
             bool isPriceScaled,
           ) {
             return Stack(
@@ -150,7 +150,7 @@ class _CandleSticksChartState extends State<MainChartPane> {
                   low: newLow,
                   high: newHigh,
                   width: maxWidth,
-                  mouseHoverY: mouseHoverY,
+                  crosshairY: crosshairY,
                   chartHeight: maxHeight,
                   lastCandle:
                       widget.candles[widget.viewPort.firstVisibleCandleIndex],

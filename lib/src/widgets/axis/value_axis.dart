@@ -14,7 +14,7 @@ class ValueAxis extends StatefulWidget {
     required this.width,
     required this.chartHeight,
     required this.lastCandle,
-    this.mouseHoverY,
+    this.crosshairY,
     required this.priceScale,
   });
 
@@ -23,7 +23,7 @@ class ValueAxis extends StatefulWidget {
   final double width;
   final double chartHeight;
   final Candle lastCandle;
-  final double? mouseHoverY;
+  final double? crosshairY;
   final PriceScale priceScale;
 
   @override
@@ -58,8 +58,8 @@ class _PriceColumnState extends State<ValueAxis> {
     return _priceToY(widget.lastCandle.close) - 10;
   }
 
-  String calculateHoveredNumber(double mouseHoverY) {
-    return HelperFunctions.priceToString(_yToPrice(mouseHoverY));
+  String calculateHoveredNumber(double crosshairY) {
+    return HelperFunctions.priceToString(_yToPrice(crosshairY));
   }
 
   @override
@@ -178,9 +178,9 @@ class _PriceColumnState extends State<ValueAxis> {
             ),
           ],
         ),
-        if (widget.mouseHoverY != null)
+        if (widget.crosshairY != null)
           Positioned(
-            top: widget.mouseHoverY! - 10,
+            top: widget.crosshairY! - 10,
             child: Row(
               children: [
                 CustomPaint(
@@ -196,7 +196,7 @@ class _PriceColumnState extends State<ValueAxis> {
                   height: 20,
                   child: Center(
                     child: Text(
-                      calculateHoveredNumber(widget.mouseHoverY!),
+                      calculateHoveredNumber(widget.crosshairY!),
                       style: TextStyle(
                         color: style.secondaryTextColor,
                         fontSize: 12,

@@ -41,7 +41,7 @@ class ChartComposer extends StatefulWidget {
 class _ChartComposerState extends State<ChartComposer> {
   double? crosshairX;
 
-  void onMouseHoverXChange(double? value) {
+  void onCrosshairXChange(double? value) {
     setState(() {
       crosshairX = value;
     });
@@ -114,7 +114,7 @@ class _ChartComposerState extends State<ChartComposer> {
                                 chartAdjust: widget.chartAdjust,
                                 controller: widget.controller,
                                 viewPort: animatedViewport,
-                                onMouseHoverXChange: onMouseHoverXChange,
+                                onCrosshairXChange: onCrosshairXChange,
                                 crosshairXFromRight: crosshairXFromRight,
                               ),
                             ),
