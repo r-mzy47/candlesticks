@@ -317,8 +317,8 @@ class _MobileGestureHandlerState extends State<MobileGestureHandler> {
 
         if (widget.viewPort.scrollIndex > 10)
           Positioned(
-            bottom: 150,
-            right: 150,
+            bottom: 100,
+            right: 100,
             child: IconButton(
               onPressed: () {
                 widget.controller.animateTo(-10);

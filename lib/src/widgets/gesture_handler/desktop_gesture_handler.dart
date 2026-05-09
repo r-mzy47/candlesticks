@@ -182,8 +182,10 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
           crosshairY,
           manualScaleHigh != null,
         ),
-        Padding(
-          padding: const EdgeInsets.only(right: 50),
+
+        // Main chart touch area.
+        Positioned.fill(
+          right: PRICE_BAR_WIDTH,
           child: Listener(
             onPointerSignal: (pointerSignal) {
               if (pointerSignal is PointerScrollEvent) {
@@ -236,6 +238,8 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
             ),
           ),
         ),
+
+        // Price bar drag area.
         Positioned(
           height: widget.maxHeight,
           bottom: 0,
@@ -247,6 +251,8 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
             },
           ),
         ),
+
+        // Auto-scale and log-scale buttons.
         Positioned(
           right: 0,
           bottom: 0,
