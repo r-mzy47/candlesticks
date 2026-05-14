@@ -45,14 +45,15 @@ jobs:
       - name: Analyze package
         run: flutter analyze
 
-      - name: Update goldens on Linux
-        run: flutter test --update-goldens
+      - name: Run tests
+        run: flutter test
 
-      - name: Upload updated goldens
+      - name: Upload golden failures
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: updated-goldens
-          path: test/goldens/
+          name: golden-failures
+          path: test/failures/
 
       - name: Build example web
         working-directory: example
