@@ -272,60 +272,62 @@ class _MyAppState extends State<MyApp> {
       theme: _themeIsDark ? ThemeData.dark() : ThemeData.light(),
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: StreamBuilder<Object?>(
-          stream: _channel?.stream,
-          builder: (context, snapshot) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                _handleSocketSnapshot(snapshot);
-              }
-            });
+        body: SafeArea(
+          child: StreamBuilder<Object?>(
+            stream: _channel?.stream,
+            builder: (context, snapshot) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  _handleSocketSnapshot(snapshot);
+                }
+              });
 
-            return Column(
-              children: [
-                ToolBar(
-                  leftChildren: [
-                    ToolBarAction(
-                      onPressed: _controller.zoomOut,
-                      child: const Icon(Icons.remove),
-                    ),
-                    ToolBarAction(
-                      onPressed: _controller.zoomIn,
-                      child: const Icon(Icons.add),
-                    ),
-                    ToolBarAction(
-                      onPressed: () => _showIntervalDialog(context),
-                      child: Text(_currentInterval),
-                    ),
-                    ToolBarAction(
-                      width: 100,
-                      onPressed: () => _showSymbolSearchDialog(context),
-                      child: Text(_currentSymbol),
-                    ),
-                  ],
-                  rightChildren: [
-                    ToolBarAction(
-                      width: 50,
-                      onPressed: _toggleTheme,
-                      child: Icon(
-                        _themeIsDark
-                            ? Icons.wb_sunny_sharp
-                            : Icons.nightlight_round_outlined,
+              return Column(
+                children: [
+                  ToolBar(
+                    leftChildren: [
+                      ToolBarAction(
+                        onPressed: _controller.zoomOut,
+                        child: const Icon(Icons.remove),
                       ),
-                    )
-                  ],
-                ),
-                Expanded(
-                  child: Candlesticks(
-                    key: Key('$_currentSymbol-$_currentInterval'),
-                    candles: _candles,
-                    onLoadMoreCandles: _loadMoreCandles,
-                    controller: _controller,
+                      ToolBarAction(
+                        onPressed: _controller.zoomIn,
+                        child: const Icon(Icons.add),
+                      ),
+                      ToolBarAction(
+                        onPressed: () => _showIntervalDialog(context),
+                        child: Text(_currentInterval),
+                      ),
+                      ToolBarAction(
+                        width: 100,
+                        onPressed: () => _showSymbolSearchDialog(context),
+                        child: Text(_currentSymbol),
+                      ),
+                    ],
+                    rightChildren: [
+                      ToolBarAction(
+                        width: 50,
+                        onPressed: _toggleTheme,
+                        child: Icon(
+                          _themeIsDark
+                              ? Icons.wb_sunny_sharp
+                              : Icons.nightlight_round_outlined,
+                        ),
+                      )
+                    ],
                   ),
-                ),
-              ],
-            );
-          },
+                  Expanded(
+                    child: Candlesticks(
+                      key: Key('$_currentSymbol-$_currentInterval'),
+                      candles: _candles,
+                      onLoadMoreCandles: _loadMoreCandles,
+                      controller: _controller,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
