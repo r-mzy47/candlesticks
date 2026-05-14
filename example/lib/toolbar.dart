@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class ToolBar extends StatelessWidget {
   const ToolBar({
-    Key? key,
+    super.key,
     required this.rightChildren,
     required this.leftChildren,
     this.border,
-  }) : super(key: key);
+  });
 
   final List<Widget> rightChildren;
   final List<Widget> leftChildren;

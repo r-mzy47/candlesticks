@@ -8,12 +8,12 @@ class ToolBarAction extends StatelessWidget {
   final Color? color;
 
   const ToolBarAction({
-    Key? key,
+    super.key,
     required this.child,
     required this.onPressed,
     this.width = 30,
     this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

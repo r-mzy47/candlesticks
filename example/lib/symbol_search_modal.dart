@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 
 class SymbolsSearchModal extends StatefulWidget {
   const SymbolsSearchModal({
-    Key? key,
+    super.key,
     required this.onSelect,
     required this.symbols,
-  }) : super(key: key);
+  });
 
   final Function(String symbol) onSelect;
   final List<String> symbols;

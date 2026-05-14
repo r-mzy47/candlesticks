@@ -16,12 +16,23 @@ class BinanceRepository {
     );
   }
 
-  Future<List<Candle>> fetchCandles(
-      {required String symbol, required String interval, int? endTime}) async {
-    final uri = Uri.parse(
-        "https://api.binance.com/api/v3/klines?symbol=$symbol&interval=$interval" +
-            (endTime != null ? "&endTime=$endTime" : ""));
+  Future<List<Candle>> fetchCandles({
+    required String symbol,
+    required String interval,
+    int? endTime,
+  }) async {
+    final uri = Uri.https(
+      'api.binance.com',
+      '/api/v3/klines',
+      {
+        'symbol': symbol,
+        'interval': interval,
+        if (endTime != null) 'endTime': endTime.toString(),
+      },
+    );
+
     final res = await http.get(uri);
+
     return (jsonDecode(res.body) as List<dynamic>)
         .map((e) => candleFromBinanceKline(e))
         .toList()
@@ -45,7 +56,7 @@ class BinanceRepository {
       jsonEncode(
         {
           "method": "SUBSCRIBE",
-          "params": [symbol + "@kline_" + interval],
+          'params': ['$symbol@kline_$interval'],
           "id": 1
         },
       ),
