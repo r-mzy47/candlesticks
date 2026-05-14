@@ -38,15 +38,15 @@ jobs:
       - name: Install package dependencies
         run: flutter pub get
 
+      - name: Install example dependencies
+        working-directory: example
+        run: flutter pub get
+
       - name: Analyze package
         run: flutter analyze
 
       - name: Run tests
         run: flutter test
-
-      - name: Install example dependencies
-        working-directory: example
-        run: flutter pub get
 
       - name: Build example web
         working-directory: example
