@@ -125,26 +125,35 @@ class _PriceColumnState extends State<ValueAxis> {
                               height: priceTileHeight,
                               width: double.infinity,
                               child: Center(
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: widget.width - PRICE_BAR_WIDTH,
+                                  child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
                                       height: 1,
                                       color: style.gridColor,
                                     ),
-                                    Expanded(
-                                      child: Text(
-                                        HelperFunctions.priceToString(price),
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          color: style.primaryTextColor,
-                                          fontSize: 11,
+                                  ),
+                                  SizedBox(
+                                    width: PRICE_BAR_WIDTH,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 4),
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          HelperFunctions.priceToString(price),
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: TextStyle(
+                                            color: style.primaryTextColor,
+                                            fontSize: 11,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  ),
+                                ],
+                              )),
                             );
                           },
                         ),

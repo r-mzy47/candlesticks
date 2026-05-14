@@ -23,14 +23,11 @@ class ChartComposer extends StatefulWidget {
   /// or by the whole dataset
   final ChartAdjust chartAdjust;
 
-  final Function() onReachEnd;
-
   final CandlesticksController controller;
 
   ChartComposer({
     required this.candles,
     required this.chartAdjust,
-    required this.onReachEnd,
     required this.controller,
   });
 
@@ -55,6 +52,19 @@ class _ChartComposerState extends State<ChartComposer> {
         final double maxWidth = constraints.maxWidth;
         final double chartsWidth = maxWidth - PRICE_BAR_WIDTH;
 
+        final metricsChanged = widget.controller.updateChartMetrics(
+          candlesCount: widget.candles.length,
+          chartWidth: chartsWidth,
+        );
+
+        if (metricsChanged) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+
+            widget.controller.syncViewportWithMetrics();
+          });
+        }
+
         return ValueListenableBuilder(
           valueListenable: widget.controller,
           builder: (context, viewPort, child) {
@@ -70,21 +80,6 @@ class _ChartComposerState extends State<ChartComposer> {
               ),
               curve: Curves.linear,
               builder: (context, animatedViewport, _) {
-                final int candlesStartIndex =
-                    animatedViewport.firstVisibleCandleIndex;
-
-                final int candlesEndIndex = min(
-                  candlesStartIndex +
-                      chartsWidth ~/ animatedViewport.candleWidth,
-                  widget.candles.length - 1,
-                );
-
-                if (candlesEndIndex == widget.candles.length - 1) {
-                  Future(() {
-                    widget.onReachEnd();
-                  });
-                }
-
                 final double? crosshairXFromRight =
                     crosshairX == null ? null : chartsWidth - crosshairX!;
 

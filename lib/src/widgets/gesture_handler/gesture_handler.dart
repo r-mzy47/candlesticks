@@ -11,7 +11,6 @@ class GestureHandler extends StatelessWidget {
     super.key,
     required this.maxHeight,
     required this.maxWidth,
-    required this.candlesCount,
     required this.candlesHighPrice,
     required this.candlesLowPrice,
     required this.controller,
@@ -24,7 +23,6 @@ class GestureHandler extends StatelessWidget {
 
   final double maxHeight;
   final double maxWidth;
-  final int candlesCount;
   final double candlesHighPrice;
   final double candlesLowPrice;
   final CandlesticksController controller;
@@ -52,7 +50,6 @@ class GestureHandler extends StatelessWidget {
       return MobileGestureHandler(
         maxHeight: maxHeight,
         maxWidth: maxWidth,
-        candlesCount: candlesCount,
         candlesHighPrice: candlesHighPrice,
         candlesLowPrice: candlesLowPrice,
         controller: controller,
@@ -67,7 +64,6 @@ class GestureHandler extends StatelessWidget {
     return DesktopGestureHandler(
       maxHeight: maxHeight,
       maxWidth: maxWidth,
-      candlesCount: candlesCount,
       candlesHighPrice: candlesHighPrice,
       candlesLowPrice: candlesLowPrice,
       controller: controller,

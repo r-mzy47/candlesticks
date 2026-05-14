@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
@@ -51,8 +49,15 @@ class _CandleSticksChartState extends State<MainChartPane> {
 
   @override
   void initState() {
-    cache.updateCandles(widget.candles);
     super.initState();
+    cache.updateCandles(widget.candles);
+  }
+
+  @override
+  void didUpdateWidget(covariant MainChartPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    cache.updateCandles(widget.candles);
   }
 
   void onPriceScaleToggle() {
@@ -65,54 +70,63 @@ class _CandleSticksChartState extends State<MainChartPane> {
     });
   }
 
-  @override
-  void didUpdateWidget(covariant MainChartPane oldWidget) {
-    cache.updateCandles(widget.candles);
-    super.didUpdateWidget(oldWidget);
-  }
-
   int _nearestCandleIndexAtX(double xFromRight) {
+    if (widget.candles.isEmpty) return 0;
+
     return (widget.viewPort.scrollIndex +
             xFromRight / widget.viewPort.candleWidth -
             0.5)
         .round()
-        .clamp(0, widget.candles.length - 1);
+        .clamp(0, widget.candles.length - 1)
+        .toInt();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.candles.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final double maxWidth = constraints.maxWidth;
         final double maxHeight = constraints.maxHeight;
 
+        final double chartWidth = maxWidth - PRICE_BAR_WIDTH;
         final double volumeBarsHeight = maxHeight * 0.2;
 
-        final int candlesStartIndex = widget.viewPort.firstVisibleCandleIndex;
+        final int candlesStartIndex =
+            widget.controller.firstVisibleCandleIndexFor(widget.viewPort);
 
-        final int candlesEndIndex = min(
-          candlesStartIndex +
-              (maxWidth - PRICE_BAR_WIDTH) ~/ widget.viewPort.candleWidth,
-          widget.candles.length - 1,
-        );
+        final int candlesEndIndex =
+            widget.controller.lastVisibleCandleIndexFor(widget.viewPort);
 
-        List<Candle> inRangeCandles = widget.candles
+        final List<Candle> inRangeCandles = widget.candles
             .getRange(candlesStartIndex, candlesEndIndex + 1)
             .toList();
 
         late RangeMinMax minMax;
+
         if (widget.chartAdjust == ChartAdjust.visibleRange) {
           minMax = cache.queryByTime(
-              inRangeCandles.first.date, inRangeCandles.last.date);
+            inRangeCandles.first.date,
+            inRangeCandles.last.date,
+          );
         } else {
           minMax = cache.queryByTime(
-              widget.candles.first.date, widget.candles.last.date);
+            widget.candles.first.date,
+            widget.candles.last.date,
+          );
         }
 
         double candlesHighPrice = minMax.maxHigh;
         double candlesLowPrice = minMax.minLow;
+
         final paddedPrice = priceScale.addPadding(
-            low: candlesLowPrice, high: candlesHighPrice); // todo: refactor it
+          low: candlesLowPrice,
+          high: candlesHighPrice,
+        );
+
         candlesHighPrice = paddedPrice.high;
         candlesLowPrice = paddedPrice.low;
 
@@ -121,13 +135,9 @@ class _CandleSticksChartState extends State<MainChartPane> {
           candlesLowPrice -= 10;
         }
 
-        // calculate highest volume. todo: move this to MinMaxCache
-        double volumeHigh = inRangeCandles.map((e) => e.volume).reduce(max);
-
-        CandleSticksStyle style = CandleSticksStyleProvider.of(context);
+        final CandleSticksStyle style = CandleSticksStyleProvider.of(context);
 
         return GestureHandler(
-          candlesCount: widget.candles.length,
           maxHeight: maxHeight,
           maxWidth: maxWidth,
           controller: widget.controller,
@@ -152,19 +162,18 @@ class _CandleSticksChartState extends State<MainChartPane> {
                   width: maxWidth,
                   crosshairY: crosshairY,
                   chartHeight: maxHeight,
-                  lastCandle:
-                      widget.candles[widget.viewPort.firstVisibleCandleIndex],
+                  lastCandle: widget.candles[candlesStartIndex],
                   priceScale: priceScale,
                 ),
                 Positioned(
                   bottom: 0,
                   height: volumeBarsHeight,
-                  width: maxWidth - PRICE_BAR_WIDTH,
+                  width: chartWidth,
                   child: VolumeWidget(
                     candles: widget.candles,
                     barWidth: widget.viewPort.candleWidth,
                     index: widget.viewPort.scrollIndex,
-                    high: volumeHigh,
+                    high: minMax.maxVolume,
                     bearColor: style.secondaryBear,
                     bullColor: style.secondaryBull,
                   ),
@@ -172,7 +181,7 @@ class _CandleSticksChartState extends State<MainChartPane> {
                 Positioned(
                   bottom: 0,
                   height: maxHeight,
-                  width: maxWidth - PRICE_BAR_WIDTH,
+                  width: chartWidth,
                   child: HighLowAnimator(
                     candlesHighPrice: newHigh,
                     candlesLowPrice: newLow,
@@ -198,7 +207,8 @@ class _CandleSticksChartState extends State<MainChartPane> {
                     currentCandle: widget.crosshairXFromRight == null
                         ? null
                         : widget.candles[_nearestCandleIndexAtX(
-                            widget.crosshairXFromRight!)],
+                            widget.crosshairXFromRight!,
+                          )],
                   ),
                 ),
               ],

@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import '../models/candle.dart';
 
 class RangeMinMax {
@@ -6,12 +7,14 @@ class RangeMinMax {
   final DateTime endTime;
   final double minLow;
   final double maxHigh;
+  final double maxVolume;
 
   const RangeMinMax({
     required this.startTime,
     required this.endTime,
     required this.minLow,
     required this.maxHigh,
+    required this.maxVolume,
   });
 
   bool isOutside(DateTime from, DateTime to) {
@@ -32,6 +35,7 @@ class CandleRange extends RangeMinMax {
     required super.endTime,
     required super.minLow,
     required super.maxHigh,
+    required super.maxVolume,
   });
 }
 
@@ -144,11 +148,13 @@ class MinMaxCache {
   RangeMinMax queryByIndex(int left, int right) {
     if (_candles.isEmpty) {
       final zero = DateTime.fromMillisecondsSinceEpoch(0);
+
       return RangeMinMax(
         startTime: zero,
         endTime: zero,
         minLow: 0,
         maxHigh: 0,
+        maxVolume: 0,
       );
     }
 
@@ -177,6 +183,7 @@ class MinMaxCache {
 
     double minLow = double.infinity;
     double maxHigh = -double.infinity;
+    double maxVolume = -double.infinity;
 
     for (final range in _ranges) {
       if (range.isOutside(from, to)) {
@@ -186,12 +193,14 @@ class MinMaxCache {
       if (range.isInside(from, to)) {
         minLow = min(minLow, range.minLow);
         maxHigh = max(maxHigh, range.maxHigh);
+        maxVolume = max(maxVolume, range.maxVolume);
       } else {
         for (final candle in range.candles) {
           if (!_isInside(candle.date, from, to)) continue;
 
           minLow = min(minLow, candle.low);
           maxHigh = max(maxHigh, candle.high);
+          maxVolume = max(maxVolume, candle.volume);
         }
       }
     }
@@ -202,6 +211,7 @@ class MinMaxCache {
         endTime: to,
         minLow: 0,
         maxHigh: 0,
+        maxVolume: 0,
       );
     }
 
@@ -210,6 +220,7 @@ class MinMaxCache {
       endTime: to,
       minLow: minLow,
       maxHigh: maxHigh,
+      maxVolume: maxVolume,
     );
   }
 
@@ -221,6 +232,7 @@ class MinMaxCache {
     for (int i = 0; i < _candles.length; i += rangeSize) {
       final end = min(i + rangeSize, _candles.length);
       final chunk = _candles.sublist(i, end);
+
       _ranges.add(_calculateRange(chunk));
     }
   }
@@ -355,6 +367,7 @@ class MinMaxCache {
 
     double minLow = double.infinity;
     double maxHigh = -double.infinity;
+    double maxVolume = -double.infinity;
 
     for (final candle in candles) {
       if (candle.date.isBefore(startTime)) {
@@ -367,6 +380,7 @@ class MinMaxCache {
 
       minLow = min(minLow, candle.low);
       maxHigh = max(maxHigh, candle.high);
+      maxVolume = max(maxVolume, candle.volume);
     }
 
     return CandleRange(
@@ -375,6 +389,7 @@ class MinMaxCache {
       endTime: endTime,
       minLow: minLow,
       maxHigh: maxHigh,
+      maxVolume: maxVolume,
     );
   }
 

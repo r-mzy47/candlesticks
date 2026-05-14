@@ -10,27 +10,26 @@ final isDesktopLike = kIsWeb ||
     defaultTargetPlatform == TargetPlatform.linux;
 
 enum ChartAdjust {
-  /// Will adjust chart size by max and min value from visible area
+  /// Will adjust chart size by max and min value from visible area.
   visibleRange,
 
-  /// Will adjust chart size by max and min value from the whole data
+  /// Will adjust chart size by max and min value from the whole data.
   fullRange
 }
 
-/// StatefulWidget that holds Chart's State (index of
-/// current position and candles width).
+/// StatefulWidget that holds chart state.
 class Candlesticks extends StatefulWidget {
   /// The arrangement of the array should be such that
-  /// the newest item is in position 0
+  /// the newest item is in position 0.
   final List<Candle> candles;
 
-  /// This callback calls when the last candle gets visible
+  /// Called when the chart is close to the oldest loaded candle.
   final Future<void> Function()? onLoadMoreCandles;
 
-  /// How chart price range will be adjusted when moving chart
+  /// How chart price range will be adjusted when moving chart.
   final ChartAdjust chartAdjust;
 
-  /// Custom loading widget
+  /// Custom loading widget.
   final Widget? loadingWidget;
 
   final CandleSticksStyle? style;
@@ -38,33 +37,79 @@ class Candlesticks extends StatefulWidget {
   final CandlesticksController? controller;
 
   const Candlesticks({
-    Key? key,
+    super.key,
     required this.candles,
     this.onLoadMoreCandles,
     this.chartAdjust = ChartAdjust.visibleRange,
     this.loadingWidget,
     this.controller,
     this.style,
-  })  : assert(candles.length == 0 || candles.length > 1,
-            "Please provide at least 2 candles"),
-        super(key: key);
+  }) : assert(
+          candles.length == 0 || candles.length > 1,
+          'Please provide at least 2 candles',
+        );
 
   @override
-  _CandlesticksState createState() => _CandlesticksState();
+  State<Candlesticks> createState() => _CandlesticksState();
 }
 
 class _CandlesticksState extends State<Candlesticks> {
   late final CandlesticksController _internalController;
 
-  /// true when widget.onLoadMoreCandles is fetching new candles.
-  bool isCallingLoadMore = false;
-  CandlesticksController get _controller =>
-      widget.controller ?? _internalController;
+  bool _isLoadingMoreCandles = false;
+
+  CandlesticksController get _controller {
+    return widget.controller ?? _internalController;
+  }
 
   @override
   void initState() {
     super.initState();
+
     _internalController = CandlesticksController();
+    _controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant Candlesticks oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final oldController = oldWidget.controller ?? _internalController;
+    final newController = widget.controller ?? _internalController;
+
+    if (!identical(oldController, newController)) {
+      oldController.removeListener(_onControllerChanged);
+      newController.addListener(_onControllerChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    _internalController.dispose();
+
+    super.dispose();
+  }
+
+  void _onControllerChanged() {
+    if (!_controller.isNearEnd) return;
+
+    _loadMoreCandles();
+  }
+
+  Future<void> _loadMoreCandles() async {
+    final onLoadMoreCandles = widget.onLoadMoreCandles;
+
+    if (_isLoadingMoreCandles) return;
+    if (onLoadMoreCandles == null) return;
+
+    _isLoadingMoreCandles = true;
+
+    try {
+      await onLoadMoreCandles();
+    } finally {
+      _isLoadingMoreCandles = false;
+    }
   }
 
   @override
@@ -73,25 +118,19 @@ class _CandlesticksState extends State<Candlesticks> {
         (Theme.of(context).brightness == Brightness.dark
             ? CandleSticksStyle.dark()
             : CandleSticksStyle.light());
+
     return CandleSticksStyleProvider(
       style: style,
-      child: (widget.candles.length == 0)
+      child: widget.candles.isEmpty
           ? Center(
               child: widget.loadingWidget ??
-                  CircularProgressIndicator(color: style.loadingColor),
+                  CircularProgressIndicator(
+                    color: style.loadingColor,
+                  ),
             )
           : ChartComposer(
               controller: _controller,
               chartAdjust: widget.chartAdjust,
-              onReachEnd: () {
-                if (isCallingLoadMore == false &&
-                    widget.onLoadMoreCandles != null) {
-                  isCallingLoadMore = true;
-                  widget.onLoadMoreCandles!().then((_) {
-                    isCallingLoadMore = false;
-                  });
-                }
-              },
               candles: widget.candles,
             ),
     );

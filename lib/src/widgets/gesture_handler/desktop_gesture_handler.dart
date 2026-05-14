@@ -7,12 +7,10 @@ import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'dart:math';
 
 class DesktopGestureHandler extends StatefulWidget {
   final double maxHeight;
   final double maxWidth;
-  final int candlesCount;
   final double candlesHighPrice;
   final double candlesLowPrice;
   final CandlesticksController controller;
@@ -33,7 +31,6 @@ class DesktopGestureHandler extends StatefulWidget {
     super.key,
     required this.maxHeight,
     required this.maxWidth,
-    required this.candlesCount,
     required this.builder,
     required this.candlesHighPrice,
     required this.candlesLowPrice,
@@ -91,7 +88,6 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
     widget.controller.zoomAround(
       zoomFactor: zoomFactor,
       anchorDistanceFromRight: mouseXFromRight,
-      candlesCount: widget.candlesCount,
     );
   }
 
@@ -100,8 +96,6 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
     x = x - mouseXpositionWhenUserStartsDragging;
     double newIndex =
         scrollIndexWhenUserStartsDragging + x / widget.viewPort.candleWidth;
-
-    newIndex = min(newIndex, widget.candlesCount - 1);
 
     widget.controller.jumpTo(newIndex);
     widget.onCrosshairXChange(update.localPosition.dx);
@@ -205,7 +199,6 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
                 else {
                   widget.controller.scrollByPixels(
                     deltaX: pointerSignal.scrollDelta.dx,
-                    candlesCount: widget.candlesCount,
                   );
                 }
               }

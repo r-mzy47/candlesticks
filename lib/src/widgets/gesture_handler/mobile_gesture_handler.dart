@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
@@ -11,7 +9,6 @@ import 'package:flutter/material.dart';
 class MobileGestureHandler extends StatefulWidget {
   final double maxHeight;
   final double maxWidth;
-  final int candlesCount;
   final double candlesHighPrice;
   final double candlesLowPrice;
   final CandlesticksController controller;
@@ -32,7 +29,6 @@ class MobileGestureHandler extends StatefulWidget {
     super.key,
     required this.maxHeight,
     required this.maxWidth,
-    required this.candlesCount,
     required this.builder,
     required this.candlesHighPrice,
     required this.candlesLowPrice,
@@ -100,7 +96,6 @@ class _MobileGestureHandlerState extends State<MobileGestureHandler> {
     widget.controller.zoomAround(
       zoomFactor: zoomFactor,
       anchorDistanceFromRight: anchorDistanceFromRight,
-      candlesCount: widget.candlesCount,
     );
   }
 
@@ -109,8 +104,6 @@ class _MobileGestureHandlerState extends State<MobileGestureHandler> {
 
     double newIndex =
         scrollIndexWhenScaleStarted + deltaX / widget.viewPort.candleWidth;
-
-    newIndex = min(newIndex, widget.candlesCount - 1);
 
     widget.controller.jumpTo(newIndex);
   }
