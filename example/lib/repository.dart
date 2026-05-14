@@ -5,6 +5,17 @@ import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class BinanceRepository {
+  Candle candleFromBinanceKline(List<dynamic> json) {
+    return Candle(
+      date: DateTime.fromMillisecondsSinceEpoch(json[0] as int),
+      open: double.parse(json[1]),
+      high: double.parse(json[2]),
+      low: double.parse(json[3]),
+      close: double.parse(json[4]),
+      volume: double.parse(json[5]),
+    );
+  }
+
   Future<List<Candle>> fetchCandles(
       {required String symbol, required String interval, int? endTime}) async {
     final uri = Uri.parse(
@@ -12,7 +23,7 @@ class BinanceRepository {
             (endTime != null ? "&endTime=$endTime" : ""));
     final res = await http.get(uri);
     return (jsonDecode(res.body) as List<dynamic>)
-        .map((e) => Candle.fromJson(e))
+        .map((e) => candleFromBinanceKline(e))
         .toList()
         .reversed
         .toList();
