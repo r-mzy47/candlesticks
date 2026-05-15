@@ -25,7 +25,7 @@ class Candle {
 
   bool get isBull => open <= close;
 
-  Candle({
+  const Candle({
     required this.date,
     required this.high,
     required this.low,
@@ -34,11 +34,25 @@ class Candle {
     required this.volume,
   });
 
-  Candle.fromJson(List<dynamic> json)
-      : date = DateTime.fromMillisecondsSinceEpoch(json[0]),
-        high = double.parse(json[2]),
-        low = double.parse(json[3]),
-        open = double.parse(json[1]),
-        close = double.parse(json[4]),
-        volume = double.parse(json[5]);
+  Map<String, dynamic> toJson() {
+    return {
+      'date': date.millisecondsSinceEpoch,
+      'high': high,
+      'low': low,
+      'open': open,
+      'close': close,
+      'volume': volume,
+    };
+  }
+
+  factory Candle.fromJson(Map<String, dynamic> json) {
+    return Candle(
+      date: DateTime.fromMillisecondsSinceEpoch(json['date'] as int),
+      high: (json['high'] as num).toDouble(),
+      low: (json['low'] as num).toDouble(),
+      open: (json['open'] as num).toDouble(),
+      close: (json['close'] as num).toDouble(),
+      volume: (json['volume'] as num).toDouble(),
+    );
+  }
 }

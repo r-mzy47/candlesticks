@@ -27,15 +27,16 @@ class HelperFunctions {
   }
 
   static String priceToString(double price) {
-    return price.abs() > 1000
-        ? price.toStringAsFixed(2)
-        : price.abs() > 100
-            ? price.toStringAsFixed(3)
-            : price.abs() > 10
-                ? price.toStringAsFixed(4)
-                : price.abs() > 1
-                    ? price.toStringAsFixed(5)
-                    : price.toStringAsFixed(7);
+    final absPrice = price.abs();
+
+    if (absPrice > 100000) return price.toStringAsFixed(0);
+    if (absPrice > 10000) return price.toStringAsFixed(1);
+    if (absPrice > 1000) return price.toStringAsFixed(2);
+    if (absPrice > 100) return price.toStringAsFixed(3);
+    if (absPrice > 10) return price.toStringAsFixed(4);
+    if (absPrice > 1) return price.toStringAsFixed(5);
+
+    return price.toStringAsFixed(7);
   }
 
   static double calculatePriceScale(double height, double high, double low) {

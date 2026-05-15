@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 class CandleSticksStyle {
+  final Color gridColor;
+
   final Color borderColor;
 
   final Color background;
@@ -26,6 +28,7 @@ class CandleSticksStyle {
   final Color toolBarColor;
 
   CandleSticksStyle({
+    required this.gridColor,
     required this.borderColor,
     required this.background,
     required this.primaryBull,
@@ -41,6 +44,7 @@ class CandleSticksStyle {
   });
 
   factory CandleSticksStyle.dark({
+    Color? gridColor,
     Color? borderColor,
     Color? background,
     Color? primaryBull,
@@ -55,8 +59,9 @@ class CandleSticksStyle {
     Color? toolBarColor,
   }) {
     return CandleSticksStyle(
+      gridColor: gridColor ?? Color(0xFF1C1C1C),
       borderColor: borderColor ?? Color(0xFF848E9C),
-      background: background ?? Color(0xFF191B20),
+      background: background ?? Color(0xFF0F0F0F),
       primaryBull: primaryBull ?? Color(0xFF26A69A),
       secondaryBull: secondaryBull ?? Color(0xFF005940),
       primaryBear: primaryBear ?? Color(0xFFEF5350),
@@ -73,6 +78,7 @@ class CandleSticksStyle {
   }
 
   factory CandleSticksStyle.light({
+    Color? gridColor,
     Color? borderColor,
     Color? background,
     Color? primaryBull,
@@ -87,8 +93,9 @@ class CandleSticksStyle {
     Color? toolBarColor,
   }) {
     return CandleSticksStyle(
+      gridColor: gridColor ?? Color(0xFFF3F3F3),
       borderColor: borderColor ?? Color(0xFF848E9C),
-      background: background ?? Color(0xFFFAFAFA),
+      background: background ?? Color(0xFFFFFFFF),
       primaryBull: primaryBull ?? Color(0xFF026A69A),
       secondaryBull: secondaryBull ?? Color(0xFF8CCCC6),
       primaryBear: primaryBear ?? Color(0xFFEF5350),

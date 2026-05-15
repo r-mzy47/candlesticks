@@ -1,16 +1,19 @@
 import 'package:candlesticks/src/models/candle.dart';
+import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:flutter/material.dart';
 
 class CandleStickWidget extends LeafRenderObjectWidget {
   final List<Candle> candles;
-  final int index;
+  final double index;
   final double candleWidth;
   final double high;
   final double low;
   final Color bullColor;
   final Color bearColor;
+  final PriceScale priceScale;
 
-  CandleStickWidget({
+  const CandleStickWidget({
+    super.key,
     required this.candles,
     required this.index,
     required this.candleWidth,
@@ -18,135 +21,312 @@ class CandleStickWidget extends LeafRenderObjectWidget {
     required this.high,
     required this.bearColor,
     required this.bullColor,
+    required this.priceScale,
   });
 
   @override
   RenderObject createRenderObject(BuildContext context) {
     return CandleStickRenderObject(
-      candles,
-      index,
-      candleWidth,
-      low,
-      high,
-      bullColor,
-      bearColor,
+      candles: candles,
+      index: index,
+      candleWidth: candleWidth,
+      low: low,
+      high: high,
+      bullColor: bullColor,
+      bearColor: bearColor,
+      priceScale: priceScale,
     );
   }
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant RenderObject renderObject) {
-    CandleStickRenderObject candlestickRenderObject =
-        renderObject as CandleStickRenderObject;
-
-    if (index <= 0 && candlestickRenderObject._close != candles[0].close) {
-      candlestickRenderObject._candles = candles;
-      candlestickRenderObject._index = index;
-      candlestickRenderObject._candleWidth = candleWidth;
-      candlestickRenderObject._high = high;
-      candlestickRenderObject._low = low;
-      candlestickRenderObject._bullColor = bullColor;
-      candlestickRenderObject._bearColor = bearColor;
-      candlestickRenderObject.markNeedsPaint();
-    } else if (candlestickRenderObject._index != index ||
-        candlestickRenderObject._candleWidth != candleWidth ||
-        candlestickRenderObject._high != high ||
-        candlestickRenderObject._low != low) {
-      candlestickRenderObject._candles = candles;
-      candlestickRenderObject._index = index;
-      candlestickRenderObject._candleWidth = candleWidth;
-      candlestickRenderObject._high = high;
-      candlestickRenderObject._low = low;
-      candlestickRenderObject._bullColor = bullColor;
-      candlestickRenderObject._bearColor = bearColor;
-      candlestickRenderObject.markNeedsPaint();
-    }
-    super.updateRenderObject(context, renderObject);
+    BuildContext context,
+    covariant CandleStickRenderObject renderObject,
+  ) {
+    renderObject
+      ..index = index
+      ..candles = candles
+      ..candleWidth = candleWidth
+      ..low = low
+      ..high = high
+      ..bullColor = bullColor
+      ..bearColor = bearColor
+      ..priceScale = priceScale;
   }
 }
 
 class CandleStickRenderObject extends RenderBox {
-  late List<Candle> _candles;
-  late int _index;
-  late double _candleWidth;
-  late double _low;
-  late double _high;
-  late double _close;
-  late Color _bullColor;
-  late Color _bearColor;
+  CandleStickRenderObject({
+    required List<Candle> candles,
+    required double index,
+    required double candleWidth,
+    required double low,
+    required double high,
+    required Color bullColor,
+    required Color bearColor,
+    required PriceScale priceScale,
+  })  : _candles = candles,
+        _index = index,
+        _candleWidth = candleWidth,
+        _low = low,
+        _high = high,
+        _bullColor = bullColor,
+        _bearColor = bearColor,
+        _priceScale = priceScale,
+        _latestClose = candles.isEmpty ? null : candles.first.close,
+        _candlesLength = candles.length;
 
-  CandleStickRenderObject(
-    List<Candle> candles,
-    int index,
-    double candleWidth,
-    double low,
-    double high,
-    Color bullColor,
-    Color bearColor,
-  ) {
-    _candles = candles;
-    _index = index;
-    _candleWidth = candleWidth;
-    _low = low;
-    _high = high;
-    _bearColor = bearColor;
-    _bullColor = bullColor;
+  List<Candle> _candles;
+  double _index;
+  double _candleWidth;
+  double _low;
+  double _high;
+  Color _bullColor;
+  Color _bearColor;
+  PriceScale _priceScale;
+
+  double? _latestClose;
+  int _candlesLength;
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  set candles(List<Candle> value) {
+    final oldLatestClose = _latestClose;
+    final oldCandlesLength = _candlesLength;
+
+    final newLatestClose = value.isEmpty ? null : value.first.close;
+    final newCandlesLength = value.length;
+
+    _candles = value;
+    _latestClose = newLatestClose;
+    _candlesLength = newCandlesLength;
+
+    final latestCandleChanged = oldLatestClose != newLatestClose;
+    final candlesLengthChanged = oldCandlesLength != newCandlesLength;
+
+    if (candlesLengthChanged || (_index <= 0 && latestCandleChanged)) {
+      markNeedsPaint();
+    }
   }
 
-  /// set size as large as possible
+  set index(double value) {
+    if (_index == value) return;
+
+    _index = value;
+    markNeedsPaint();
+  }
+
+  set candleWidth(double value) {
+    if (_candleWidth == value) return;
+
+    _candleWidth = value;
+    markNeedsPaint();
+  }
+
+  set low(double value) {
+    if (_low == value) return;
+
+    _low = value;
+    markNeedsPaint();
+  }
+
+  set high(double value) {
+    if (_high == value) return;
+
+    _high = value;
+    markNeedsPaint();
+  }
+
+  set bullColor(Color value) {
+    if (_bullColor == value) return;
+
+    _bullColor = value;
+    markNeedsPaint();
+  }
+
+  set bearColor(Color value) {
+    if (_bearColor == value) return;
+
+    _bearColor = value;
+    markNeedsPaint();
+  }
+
+  set priceScale(PriceScale value) {
+    if (identical(_priceScale, value)) return;
+
+    _priceScale = value;
+    markNeedsPaint();
+  }
+
   @override
   void performLayout() {
-    size = Size(constraints.maxWidth, constraints.maxHeight);
+    size = constraints.biggest;
   }
 
-  /// draws a single candle
-  void paintCandle(PaintingContext context, Offset offset, int index,
-      Candle candle, double range) {
-    Color color = candle.isBull ? _bullColor : _bearColor;
+  bool _isValidCandle(Candle candle) {
+    return _priceScale.isValid(candle.high) &&
+        _priceScale.isValid(candle.low) &&
+        _priceScale.isValid(candle.open) &&
+        _priceScale.isValid(candle.close);
+  }
 
-    Paint paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
+  double _priceToY({
+    required double price,
+    required Offset offset,
+    required double transformedHigh,
+    required double transformedValuePerPixel,
+  }) {
+    return offset.dy +
+        (transformedHigh - _priceScale.transform(price)) /
+            transformedValuePerPixel;
+  }
 
-    double x = size.width + offset.dx - (index + 0.5) * _candleWidth;
+  void _paintCandle(
+    Canvas canvas,
+    Offset offset,
+    double visibleIndex,
+    Candle candle,
+    Paint wickPaint,
+    Paint bodyPaint,
+    double transformedHigh,
+    double transformedValuePerPixel,
+  ) {
+    final color = candle.isBull ? _bullColor : _bearColor;
 
-    context.canvas.drawLine(
-      Offset(x, offset.dy + (_high - candle.high) / range),
-      Offset(x, offset.dy + (_high - candle.low) / range),
-      paint,
+    wickPaint.color = color;
+    bodyPaint.color = color;
+
+    final x = size.width + offset.dx - (visibleIndex + 0.5) * _candleWidth;
+
+    final highY = _priceToY(
+      price: candle.high,
+      offset: offset,
+      transformedHigh: transformedHigh,
+      transformedValuePerPixel: transformedValuePerPixel,
     );
 
-    final double openCandleY = offset.dy + (_high - candle.open) / range;
-    final double closeCandleY = offset.dy + (_high - candle.close) / range;
+    final lowY = _priceToY(
+      price: candle.low,
+      offset: offset,
+      transformedHigh: transformedHigh,
+      transformedValuePerPixel: transformedValuePerPixel,
+    );
 
-    if ((openCandleY - closeCandleY).abs() > 1) {
-      context.canvas.drawLine(
-        Offset(x, openCandleY),
-        Offset(x, closeCandleY),
-        paint..strokeWidth = _candleWidth * 0.8,
+    final openY = _priceToY(
+      price: candle.open,
+      offset: offset,
+      transformedHigh: transformedHigh,
+      transformedValuePerPixel: transformedValuePerPixel,
+    );
+
+    final closeY = _priceToY(
+      price: candle.close,
+      offset: offset,
+      transformedHigh: transformedHigh,
+      transformedValuePerPixel: transformedValuePerPixel,
+    );
+
+    if (!highY.isFinite ||
+        !lowY.isFinite ||
+        !openY.isFinite ||
+        !closeY.isFinite) {
+      return;
+    }
+
+    canvas.drawLine(
+      Offset(x, highY),
+      Offset(x, lowY),
+      wickPaint,
+    );
+
+    if (_candleWidth <= 1) return;
+
+    if ((openY - closeY).abs() > 1) {
+      canvas.drawLine(
+        Offset(x, openY),
+        Offset(x, closeY),
+        bodyPaint,
       );
     } else {
-      // if the candle body is too small
-      final double mid = (closeCandleY + openCandleY) / 2;
-      context.canvas.drawLine(
+      final mid = (openY + closeY) / 2;
+
+      canvas.drawLine(
         Offset(x, mid - 0.5),
         Offset(x, mid + 0.5),
-        paint..strokeWidth = _candleWidth * 0.8,
+        bodyPaint,
       );
     }
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    double range = (_high - _low) / size.height;
-    for (int i = 0; (i + 1) * _candleWidth < size.width; i++) {
-      if (i + _index >= _candles.length || i + _index < 0) continue;
-      var candle = _candles[i + _index];
-      paintCandle(context, offset, i, candle, range);
+    if (_candles.isEmpty ||
+        size.isEmpty ||
+        _candleWidth <= 0 ||
+        !_high.isFinite ||
+        !_low.isFinite ||
+        _high <= _low ||
+        !_priceScale.isValid(_high) ||
+        !_priceScale.isValid(_low)) {
+      return;
     }
-    _close = _candles[0].close;
-    context.canvas.save();
-    context.canvas.restore();
+
+    final transformedHigh = _priceScale.transform(_high);
+    final transformedLow = _priceScale.transform(_low);
+
+    if (!transformedHigh.isFinite ||
+        !transformedLow.isFinite ||
+        transformedHigh <= transformedLow) {
+      return;
+    }
+
+    final transformedValuePerPixel =
+        (transformedHigh - transformedLow) / size.height;
+
+    if (!transformedValuePerPixel.isFinite || transformedValuePerPixel <= 0) {
+      return;
+    }
+
+    final canvas = context.canvas;
+
+    canvas.save();
+    canvas.clipRect(offset & size);
+
+    final wickPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _candleWidth.clamp(0, 1);
+
+    final bodyPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = _candleWidth * 0.8;
+
+    final maxVisible = (size.width / _candleWidth).ceil();
+
+    final firstVisibleIndex = _index.floor();
+    final fractionalOffset = _index - firstVisibleIndex;
+
+    for (int i = 0; i < maxVisible; i++) {
+      final candleIndex = i + firstVisibleIndex;
+
+      if (candleIndex < 0 || candleIndex >= _candles.length) continue;
+
+      final candle = _candles[candleIndex];
+
+      if (!_isValidCandle(candle)) continue;
+
+      _paintCandle(
+        canvas,
+        offset,
+        i - fractionalOffset,
+        candle,
+        wickPaint,
+        bodyPaint,
+        transformedHigh,
+        transformedValuePerPixel,
+      );
+    }
+
+    canvas.restore();
   }
 }

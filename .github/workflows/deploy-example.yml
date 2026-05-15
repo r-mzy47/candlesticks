@@ -1,0 +1,83 @@
+name: Deploy example web
+
+on:
+  push:
+    branches-ignore:
+      - gh-pages
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v6
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Prepare branch path
+        run: |
+          BRANCH_NAME="${GITHUB_REF_NAME}"
+          BASE_HREF="/candlesticks/${BRANCH_NAME}/"
+
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "BASE_HREF=$BASE_HREF" >> $GITHUB_ENV
+
+      - name: Install package dependencies
+        run: flutter pub get
+
+      - name: Install example dependencies
+        working-directory: example
+        run: flutter pub get
+
+      - name: Analyze package
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+      - name: Upload golden failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-failures
+          path: test/failures/
+
+      - name: Build example web
+        working-directory: example
+        run: flutter build web --release --base-href "$BASE_HREF"
+
+      - name: Checkout gh-pages branch
+        run: |
+          git clone --depth=1 --branch gh-pages \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" site
+
+      - name: Copy build output
+        run: |
+          rm -rf "site/${BRANCH_NAME}"
+          mkdir -p "site/${BRANCH_NAME}"
+          cp -R example/build/web/. "site/${BRANCH_NAME}/"
+          touch site/.nojekyll
+
+      - name: Commit and push to gh-pages
+        run: |
+          cd site
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          git commit -m "deploy: ${GITHUB_REF_NAME}" || exit 0
+          git push origin gh-pages

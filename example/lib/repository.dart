@@ -5,14 +5,36 @@ import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class BinanceRepository {
-  Future<List<Candle>> fetchCandles(
-      {required String symbol, required String interval, int? endTime}) async {
-    final uri = Uri.parse(
-        "https://api.binance.com/api/v3/klines?symbol=$symbol&interval=$interval" +
-            (endTime != null ? "&endTime=$endTime" : ""));
+  Candle candleFromBinanceKline(List<dynamic> json) {
+    return Candle(
+      date: DateTime.fromMillisecondsSinceEpoch(json[0] as int),
+      open: double.parse(json[1]),
+      high: double.parse(json[2]),
+      low: double.parse(json[3]),
+      close: double.parse(json[4]),
+      volume: double.parse(json[5]),
+    );
+  }
+
+  Future<List<Candle>> fetchCandles({
+    required String symbol,
+    required String interval,
+    int? endTime,
+  }) async {
+    final uri = Uri.https(
+      'api.binance.com',
+      '/api/v3/klines',
+      {
+        'symbol': symbol,
+        'interval': interval,
+        if (endTime != null) 'endTime': endTime.toString(),
+      },
+    );
+
     final res = await http.get(uri);
+
     return (jsonDecode(res.body) as List<dynamic>)
-        .map((e) => Candle.fromJson(e))
+        .map((e) => candleFromBinanceKline(e))
         .toList()
         .reversed
         .toList();
@@ -34,7 +56,7 @@ class BinanceRepository {
       jsonEncode(
         {
           "method": "SUBSCRIBE",
-          "params": [symbol + "@kline_" + interval],
+          'params': ['$symbol@kline_$interval'],
           "id": 1
         },
       ),
