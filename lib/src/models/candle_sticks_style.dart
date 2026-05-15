@@ -141,11 +141,11 @@ class CandleSticksStyle {
           priceIndicatorBearBackgroundColor ?? bear,
       priceIndicatorTextColor: priceIndicatorTextColor ?? white,
       scaleButtonActiveBackgroundColor:
-          scaleButtonActiveBackgroundColor ?? labelBg,
-      scaleButtonActiveTextColor: scaleButtonActiveTextColor ?? white,
+          scaleButtonActiveBackgroundColor ?? white,
+      scaleButtonActiveTextColor: scaleButtonActiveTextColor ?? labelBg,
       scaleButtonInactiveBackgroundColor:
-          scaleButtonInactiveBackgroundColor ?? white,
-      scaleButtonInactiveTextColor: scaleButtonInactiveTextColor ?? labelBg,
+          scaleButtonInactiveBackgroundColor ?? labelBg,
+      scaleButtonInactiveTextColor: scaleButtonInactiveTextColor ?? white,
       loadingIndicatorColor: loadingIndicatorColor ?? const Color(0xFFF0B90A),
     );
   }
