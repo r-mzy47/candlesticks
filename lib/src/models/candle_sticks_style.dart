@@ -1,113 +1,210 @@
 import 'dart:ui';
 
+/// Visual colors used by a [Candlesticks] chart.
+///
+/// Each color maps to one clear chart role. Avoid reusing one field for
+/// unrelated widgets because it makes custom themes hard to understand.
 class CandleSticksStyle {
-  final Color gridColor;
+  /// Main chart background.
+  final Color chartBackgroundColor;
 
-  final Color borderColor;
+  /// Horizontal and vertical grid lines.
+  final Color gridLineColor;
 
-  final Color background;
+  /// Text used by the price and time axes.
+  final Color axisTextColor;
 
-  final Color primaryBull;
+  /// Bullish candle body and wick color.
+  final Color candleBullColor;
 
-  final Color secondaryBull;
+  /// Bearish candle body and wick color.
+  final Color candleBearColor;
 
-  final Color primaryBear;
+  /// Bullish volume bar color.
+  final Color volumeBullColor;
 
-  final Color secondaryBear;
+  /// Bearish volume bar color.
+  final Color volumeBearColor;
 
-  final Color hoverIndicatorBackgroundColor;
+  /// Dashed crosshair line color.
+  final Color crosshairLineColor;
 
-  final Color mobileCandleHoverColor;
+  /// Crosshair price/time label background color.
+  final Color crosshairLabelBackgroundColor;
 
-  final Color primaryTextColor;
+  /// Crosshair price/time label text color.
+  final Color crosshairLabelTextColor;
 
-  final Color secondaryTextColor;
+  /// OHLC info label text color.
+  final Color ohlcInfoTextColor;
 
-  final Color loadingColor;
+  /// Bullish OHLC value text color.
+  final Color ohlcInfoBullColor;
 
-  final Color toolBarColor;
+  /// Bearish OHLC value text color.
+  final Color ohlcInfoBearColor;
 
-  CandleSticksStyle({
-    required this.gridColor,
-    required this.borderColor,
-    required this.background,
-    required this.primaryBull,
-    required this.secondaryBull,
-    required this.primaryBear,
-    required this.secondaryBear,
-    required this.hoverIndicatorBackgroundColor,
-    required this.primaryTextColor,
-    required this.secondaryTextColor,
-    required this.mobileCandleHoverColor,
-    required this.loadingColor,
-    required this.toolBarColor,
+  /// Last price label background when the latest candle is bullish.
+  final Color priceIndicatorBullBackgroundColor;
+
+  /// Last price label background when the latest candle is bearish.
+  final Color priceIndicatorBearBackgroundColor;
+
+  /// Last price label text color.
+  final Color priceIndicatorTextColor;
+
+  /// Background color for an active scale button.
+  final Color scaleButtonActiveBackgroundColor;
+
+  /// Text color for an active scale button.
+  final Color scaleButtonActiveTextColor;
+
+  /// Background color for an inactive scale button.
+  final Color scaleButtonInactiveBackgroundColor;
+
+  /// Text color for an inactive scale button.
+  final Color scaleButtonInactiveTextColor;
+
+  /// Default loading indicator color.
+  final Color loadingIndicatorColor;
+
+  const CandleSticksStyle({
+    required this.chartBackgroundColor,
+    required this.gridLineColor,
+    required this.axisTextColor,
+    required this.candleBullColor,
+    required this.candleBearColor,
+    required this.volumeBullColor,
+    required this.volumeBearColor,
+    required this.crosshairLineColor,
+    required this.crosshairLabelBackgroundColor,
+    required this.crosshairLabelTextColor,
+    required this.ohlcInfoTextColor,
+    required this.ohlcInfoBullColor,
+    required this.ohlcInfoBearColor,
+    required this.priceIndicatorBullBackgroundColor,
+    required this.priceIndicatorBearBackgroundColor,
+    required this.priceIndicatorTextColor,
+    required this.scaleButtonActiveBackgroundColor,
+    required this.scaleButtonActiveTextColor,
+    required this.scaleButtonInactiveBackgroundColor,
+    required this.scaleButtonInactiveTextColor,
+    required this.loadingIndicatorColor,
   });
 
   factory CandleSticksStyle.dark({
-    Color? gridColor,
-    Color? borderColor,
-    Color? background,
-    Color? primaryBull,
-    Color? secondaryBull,
-    Color? primaryBear,
-    Color? secondaryBear,
-    Color? hoverIndicatorBackgroundColor,
-    Color? primaryTextColor,
-    Color? secondaryTextColor,
-    Color? mobileCandleHoverColor,
-    Color? loadingColor,
-    Color? toolBarColor,
+    Color? chartBackgroundColor,
+    Color? gridLineColor,
+    Color? axisTextColor,
+    Color? candleBullColor,
+    Color? candleBearColor,
+    Color? volumeBullColor,
+    Color? volumeBearColor,
+    Color? crosshairLineColor,
+    Color? crosshairLabelBackgroundColor,
+    Color? crosshairLabelTextColor,
+    Color? ohlcInfoTextColor,
+    Color? ohlcInfoBullColor,
+    Color? ohlcInfoBearColor,
+    Color? priceIndicatorBullBackgroundColor,
+    Color? priceIndicatorBearBackgroundColor,
+    Color? priceIndicatorTextColor,
+    Color? scaleButtonActiveBackgroundColor,
+    Color? scaleButtonActiveTextColor,
+    Color? scaleButtonInactiveBackgroundColor,
+    Color? scaleButtonInactiveTextColor,
+    Color? loadingIndicatorColor,
   }) {
+    const bull = Color(0xFF26A69A);
+    const bear = Color(0xFFEF5350);
+    const mutedText = Color(0xFF848E9C);
+    const white = Color(0xFFFFFFFF);
+    const labelBg = Color(0xFF4C525E);
+
     return CandleSticksStyle(
-      gridColor: gridColor ?? Color(0xFF1C1C1C),
-      borderColor: borderColor ?? Color(0xFF848E9C),
-      background: background ?? Color(0xFF0F0F0F),
-      primaryBull: primaryBull ?? Color(0xFF26A69A),
-      secondaryBull: secondaryBull ?? Color(0xFF005940),
-      primaryBear: primaryBear ?? Color(0xFFEF5350),
-      secondaryBear: secondaryBear ?? Color(0xFF82122B),
-      hoverIndicatorBackgroundColor:
-          hoverIndicatorBackgroundColor ?? Color(0xFF4C525E),
-      primaryTextColor: primaryTextColor ?? Color(0xFF848E9C),
-      secondaryTextColor: secondaryTextColor ?? Color(0XFFFFFFFF),
-      mobileCandleHoverColor:
-          mobileCandleHoverColor ?? Color(0xFFF0B90A).withValues(alpha: 0.2),
-      loadingColor: loadingColor ?? Color(0xFFF0B90A),
-      toolBarColor: toolBarColor ?? Color(0xFF191B20),
+      chartBackgroundColor: chartBackgroundColor ?? const Color(0xFF0F0F0F),
+      gridLineColor: gridLineColor ?? const Color(0xFF1C1C1C),
+      axisTextColor: axisTextColor ?? mutedText,
+      candleBullColor: candleBullColor ?? bull,
+      candleBearColor: candleBearColor ?? bear,
+      volumeBullColor: volumeBullColor ?? const Color(0xFF005940),
+      volumeBearColor: volumeBearColor ?? const Color(0xFF82122B),
+      crosshairLineColor: crosshairLineColor ?? mutedText,
+      crosshairLabelBackgroundColor: crosshairLabelBackgroundColor ?? labelBg,
+      crosshairLabelTextColor: crosshairLabelTextColor ?? white,
+      ohlcInfoTextColor: ohlcInfoTextColor ?? mutedText,
+      ohlcInfoBullColor: ohlcInfoBullColor ?? bull,
+      ohlcInfoBearColor: ohlcInfoBearColor ?? bear,
+      priceIndicatorBullBackgroundColor:
+          priceIndicatorBullBackgroundColor ?? bull,
+      priceIndicatorBearBackgroundColor:
+          priceIndicatorBearBackgroundColor ?? bear,
+      priceIndicatorTextColor: priceIndicatorTextColor ?? white,
+      scaleButtonActiveBackgroundColor:
+          scaleButtonActiveBackgroundColor ?? labelBg,
+      scaleButtonActiveTextColor: scaleButtonActiveTextColor ?? white,
+      scaleButtonInactiveBackgroundColor:
+          scaleButtonInactiveBackgroundColor ?? white,
+      scaleButtonInactiveTextColor: scaleButtonInactiveTextColor ?? labelBg,
+      loadingIndicatorColor: loadingIndicatorColor ?? const Color(0xFFF0B90A),
     );
   }
 
   factory CandleSticksStyle.light({
-    Color? gridColor,
-    Color? borderColor,
-    Color? background,
-    Color? primaryBull,
-    Color? secondaryBull,
-    Color? primaryBear,
-    Color? secondaryBear,
-    Color? hoverIndicatorBackgroundColor,
-    Color? primaryTextColor,
-    Color? secondaryTextColor,
-    Color? mobileCandleHoverColor,
-    Color? loadingColor,
-    Color? toolBarColor,
+    Color? chartBackgroundColor,
+    Color? gridLineColor,
+    Color? axisTextColor,
+    Color? candleBullColor,
+    Color? candleBearColor,
+    Color? volumeBullColor,
+    Color? volumeBearColor,
+    Color? crosshairLineColor,
+    Color? crosshairLabelBackgroundColor,
+    Color? crosshairLabelTextColor,
+    Color? ohlcInfoTextColor,
+    Color? ohlcInfoBullColor,
+    Color? ohlcInfoBearColor,
+    Color? priceIndicatorBullBackgroundColor,
+    Color? priceIndicatorBearBackgroundColor,
+    Color? priceIndicatorTextColor,
+    Color? scaleButtonActiveBackgroundColor,
+    Color? scaleButtonActiveTextColor,
+    Color? scaleButtonInactiveBackgroundColor,
+    Color? scaleButtonInactiveTextColor,
+    Color? loadingIndicatorColor,
   }) {
+    const bull = Color(0xFF26A69A);
+    const bear = Color(0xFFEF5350);
+    const black = Color(0xFF000000);
+    const white = Color(0xFFFFFFFF);
+    const labelBg = Color(0xFF131722);
+
     return CandleSticksStyle(
-      gridColor: gridColor ?? Color(0xFFF3F3F3),
-      borderColor: borderColor ?? Color(0xFF848E9C),
-      background: background ?? Color(0xFFFFFFFF),
-      primaryBull: primaryBull ?? Color(0xFF026A69A),
-      secondaryBull: secondaryBull ?? Color(0xFF8CCCC6),
-      primaryBear: primaryBear ?? Color(0xFFEF5350),
-      secondaryBear: secondaryBear ?? Color(0xFFF1A3A1),
-      hoverIndicatorBackgroundColor:
-          hoverIndicatorBackgroundColor ?? Color(0xFF131722),
-      primaryTextColor: primaryTextColor ?? Color(0XFF000000),
-      secondaryTextColor: secondaryTextColor ?? Color(0XFFFFFFFF),
-      mobileCandleHoverColor:
-          mobileCandleHoverColor ?? Color(0xFFF0B90A).withValues(alpha: 0.2),
-      loadingColor: loadingColor ?? Color(0xFFF0B90A),
-      toolBarColor: toolBarColor ?? Color(0xFFFAFAFA),
+      chartBackgroundColor: chartBackgroundColor ?? white,
+      gridLineColor: gridLineColor ?? const Color(0xFFF3F3F3),
+      axisTextColor: axisTextColor ?? black,
+      candleBullColor: candleBullColor ?? bull,
+      candleBearColor: candleBearColor ?? bear,
+      volumeBullColor: volumeBullColor ?? const Color(0xFF8CCCC6),
+      volumeBearColor: volumeBearColor ?? const Color(0xFFF1A3A1),
+      crosshairLineColor: crosshairLineColor ?? const Color(0xFF848E9C),
+      crosshairLabelBackgroundColor: crosshairLabelBackgroundColor ?? labelBg,
+      crosshairLabelTextColor: crosshairLabelTextColor ?? white,
+      ohlcInfoTextColor: ohlcInfoTextColor ?? black,
+      ohlcInfoBullColor: ohlcInfoBullColor ?? bull,
+      ohlcInfoBearColor: ohlcInfoBearColor ?? bear,
+      priceIndicatorBullBackgroundColor:
+          priceIndicatorBullBackgroundColor ?? bull,
+      priceIndicatorBearBackgroundColor:
+          priceIndicatorBearBackgroundColor ?? bear,
+      priceIndicatorTextColor: priceIndicatorTextColor ?? white,
+      scaleButtonActiveBackgroundColor:
+          scaleButtonActiveBackgroundColor ?? labelBg,
+      scaleButtonActiveTextColor: scaleButtonActiveTextColor ?? white,
+      scaleButtonInactiveBackgroundColor:
+          scaleButtonInactiveBackgroundColor ?? white,
+      scaleButtonInactiveTextColor: scaleButtonInactiveTextColor ?? labelBg,
+      loadingIndicatorColor: loadingIndicatorColor ?? const Color(0xFFF0B90A),
     );
   }
 }

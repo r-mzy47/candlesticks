@@ -1,6 +1,8 @@
 import 'package:candlesticks/candlesticks.dart';
+
 import 'package:candlesticks/src/widgets/candle_sticks_style_provider.dart';
 import 'package:candlesticks/src/widgets/chart_composer.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -9,33 +11,90 @@ final isDesktopLike = kIsWeb ||
     defaultTargetPlatform == TargetPlatform.windows ||
     defaultTargetPlatform == TargetPlatform.linux;
 
+/// Defines how the visible price range of the chart is calculated.
 enum ChartAdjust {
-  /// Will adjust chart size by max and min value from visible area.
+  /// Calculates the chart price range from the currently visible candles.
+  ///
+  /// This keeps the chart vertically focused on the visible data while the user
+  /// scrolls.
   visibleRange,
 
-  /// Will adjust chart size by max and min value from the whole data.
-  fullRange
+  /// Calculates the chart price range from the full candle list.
+  ///
+  /// This keeps the vertical scale stable while the user scrolls, but it may
+  /// make smaller visible price movements harder to see.
+  fullRange,
 }
 
-/// StatefulWidget that holds chart state.
+/// A Flutter candlestick chart widget.
+///
+/// The [Candlesticks] widget displays OHLCV candle data with price and volume
+/// areas. It supports scrolling, zooming, custom styles, programmatic control
+/// through [CandlesticksController], and lazy loading older candles with
+/// [onLoadMoreCandles].
+///
+/// The [candles] list must be ordered from newest to oldest. The newest candle
+/// should be at index `0`.
+///
+/// Example:
+///
+/// ```dart
+/// final controller = CandlesticksController();
+///
+/// Candlesticks(
+///   candles: candles,
+///   controller: controller,
+///   chartAdjust: ChartAdjust.visibleRange,
+///   onLoadMoreCandles: () async {
+///     final olderCandles = await fetchOlderCandles();
+///     setState(() {
+///       candles.addAll(olderCandles);
+///     });
+///   },
+/// )
+/// ```
 class Candlesticks extends StatefulWidget {
-  /// The arrangement of the array should be such that
-  /// the newest item is in position 0.
+  /// Candle data displayed by the chart.
+  ///
+  /// The list must be ordered from newest to oldest. The newest candle should
+  /// be at index `0`.
+  ///
+  /// The list can be empty to show [loadingWidget]. Otherwise, it must contain
+  /// at least two candles.
   final List<Candle> candles;
 
-  /// Called when the chart is close to the oldest loaded candle.
+  /// Called when the chart scroll position is close to the oldest loaded candle.
+  ///
+  /// Use this callback to load older candles and append them to [candles].
+  ///
+  /// The widget prevents overlapping calls while a previous load operation is
+  /// still running.
   final Future<void> Function()? onLoadMoreCandles;
 
-  /// How chart price range will be adjusted when moving chart.
+  /// Defines how the chart price range is calculated while scrolling.
   final ChartAdjust chartAdjust;
 
-  /// Custom loading widget.
+  /// Widget displayed when [candles] is empty.
+  ///
+  /// If this is null, a [CircularProgressIndicator] using the style loading
+  /// color is displayed.
   final Widget? loadingWidget;
 
+  /// Visual style used by the chart.
+  ///
+  /// If this is null, the chart uses [CandleSticksStyle.dark] or
+  /// [CandleSticksStyle.light] based on the current [ThemeData.brightness].
   final CandleSticksStyle? style;
 
+  /// Controller used to read or update the chart viewport.
+  ///
+  /// If this is null, the widget creates and manages an internal controller.
   final CandlesticksController? controller;
 
+  /// Creates a candlestick chart.
+  ///
+  /// The [candles] list can be empty while loading. When it is not empty, it
+  /// must contain at least two candles.
   const Candlesticks({
     super.key,
     required this.candles,
@@ -65,7 +124,6 @@ class _CandlesticksState extends State<Candlesticks> {
   @override
   void initState() {
     super.initState();
-
     _internalController = CandlesticksController();
     _controller.addListener(_onControllerChanged);
   }
@@ -87,7 +145,6 @@ class _CandlesticksState extends State<Candlesticks> {
   void dispose() {
     _controller.removeListener(_onControllerChanged);
     _internalController.dispose();
-
     super.dispose();
   }
 
@@ -125,7 +182,7 @@ class _CandlesticksState extends State<Candlesticks> {
           ? Center(
               child: widget.loadingWidget ??
                   CircularProgressIndicator(
-                    color: style.loadingColor,
+                    color: style.loadingIndicatorColor,
                   ),
             )
           : ChartComposer(

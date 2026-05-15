@@ -84,7 +84,8 @@ class _ChartComposerState extends State<ChartComposer> {
                     crosshairX == null ? null : chartsWidth - crosshairX!;
 
                 return Container(
-                  color: CandleSticksStyleProvider.of(context).background,
+                  color: CandleSticksStyleProvider.of(context)
+                      .chartBackgroundColor,
                   child: Stack(
                     children: [
                       Padding(

@@ -287,14 +287,14 @@ class TimeAxis extends StatelessWidget {
             child: Center(
               child: Container(
                 width: 1,
-                color: style.gridColor,
+                color: style.gridLineColor,
               ),
             ),
           ),
           _buildTickText(
             date: date,
             tickDuration: tickDuration,
-            color: style.primaryTextColor,
+            color: style.axisTextColor,
           ),
         ],
       ),
@@ -410,19 +410,19 @@ class TimeAxis extends StatelessWidget {
               size: Size(1, height),
               painter: DashLinePainter(
                 direction: Axis.vertical,
-                color: style.borderColor,
+                color: style.crosshairLineColor,
               ),
             ),
           ),
           Container(
             width: _crosshairTextWidth,
             height: _crosshairTextHeight,
-            color: style.hoverIndicatorBackgroundColor,
+            color: style.crosshairLabelBackgroundColor,
             alignment: Alignment.center,
             child: Text(
               _formatCrosshairDate(date),
               style: TextStyle(
-                color: style.secondaryTextColor,
+                color: style.crosshairLabelTextColor,
                 fontSize: _fontSize,
               ),
             ),

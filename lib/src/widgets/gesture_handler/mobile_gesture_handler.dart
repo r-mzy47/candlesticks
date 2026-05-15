@@ -259,7 +259,7 @@ class _MobileGestureHandlerState extends State<MobileGestureHandler> {
           width: PRICE_BAR_WIDTH,
           height: 22,
           child: Container(
-            color: style.background,
+            color: style.chartBackgroundColor,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -269,11 +269,11 @@ class _MobileGestureHandlerState extends State<MobileGestureHandler> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: manualScaleHigh == null
-                          ? style.hoverIndicatorBackgroundColor
-                          : style.secondaryTextColor,
+                          ? style.scaleButtonActiveBackgroundColor
+                          : style.scaleButtonInactiveBackgroundColor,
                       foregroundColor: manualScaleHigh == null
-                          ? style.secondaryTextColor
-                          : style.hoverIndicatorBackgroundColor,
+                          ? style.scaleButtonActiveTextColor
+                          : style.scaleButtonInactiveTextColor,
                       padding: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(3),
@@ -289,11 +289,11 @@ class _MobileGestureHandlerState extends State<MobileGestureHandler> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: widget.priceScale == log10PriceScale
-                          ? style.hoverIndicatorBackgroundColor
-                          : style.secondaryTextColor,
+                          ? style.scaleButtonActiveBackgroundColor
+                          : style.scaleButtonInactiveBackgroundColor,
                       foregroundColor: widget.priceScale == log10PriceScale
-                          ? style.secondaryTextColor
-                          : style.hoverIndicatorBackgroundColor,
+                          ? style.scaleButtonActiveTextColor
+                          : style.scaleButtonInactiveTextColor,
                       padding: EdgeInsets.zero,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(3),

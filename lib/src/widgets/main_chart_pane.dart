@@ -174,8 +174,8 @@ class _CandleSticksChartState extends State<MainChartPane> {
                     barWidth: widget.viewPort.candleWidth,
                     index: widget.viewPort.scrollIndex,
                     high: minMax.maxVolume,
-                    bearColor: style.secondaryBear,
-                    bullColor: style.secondaryBull,
+                    bearColor: style.volumeBearColor,
+                    bullColor: style.volumeBullColor,
                   ),
                 ),
                 Positioned(
@@ -193,8 +193,8 @@ class _CandleSticksChartState extends State<MainChartPane> {
                         index: widget.viewPort.scrollIndex,
                         high: high,
                         low: low,
-                        bearColor: style.primaryBear,
-                        bullColor: style.primaryBull,
+                        bearColor: style.candleBearColor,
+                        bullColor: style.candleBullColor,
                         priceScale: priceScale,
                       );
                     },

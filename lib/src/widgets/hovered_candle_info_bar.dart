@@ -20,10 +20,10 @@ class HoveredCandleInfoBar extends StatelessWidget {
       child: currentCandle != null
           ? CandleInfoText(
               candle: currentCandle!,
-              bullColor: style.primaryBull,
-              bearColor: style.primaryBear,
+              bullColor: style.ohlcInfoBullColor,
+              bearColor: style.ohlcInfoBearColor,
               defaultStyle: TextStyle(
-                color: style.primaryTextColor,
+                color: style.ohlcInfoTextColor,
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
               ),

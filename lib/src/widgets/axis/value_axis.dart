@@ -130,7 +130,7 @@ class _PriceColumnState extends State<ValueAxis> {
                                   Expanded(
                                     child: Container(
                                       height: 1,
-                                      color: style.gridColor,
+                                      color: style.gridLineColor,
                                     ),
                                   ),
                                   SizedBox(
@@ -145,7 +145,7 @@ class _PriceColumnState extends State<ValueAxis> {
                                           maxLines: 1,
                                           softWrap: false,
                                           style: TextStyle(
-                                            color: style.primaryTextColor,
+                                            color: style.axisTextColor,
                                             fontSize: 11,
                                           ),
                                         ),
@@ -165,8 +165,8 @@ class _PriceColumnState extends State<ValueAxis> {
                       top: calculatePriceIndicatorTopPadding(),
                       child: Container(
                         color: widget.lastCandle.isBull
-                            ? style.primaryBull
-                            : style.primaryBear,
+                            ? style.priceIndicatorBullBackgroundColor
+                            : style.priceIndicatorBearBackgroundColor,
                         width: PRICE_BAR_WIDTH,
                         height: PRICE_INDICATOR_HEIGHT,
                         child: Center(
@@ -174,7 +174,7 @@ class _PriceColumnState extends State<ValueAxis> {
                             HelperFunctions.priceToString(
                                 widget.lastCandle.close),
                             style: TextStyle(
-                              color: style.secondaryTextColor,
+                              color: style.priceIndicatorTextColor,
                               fontSize: 11,
                             ),
                           ),
@@ -196,18 +196,18 @@ class _PriceColumnState extends State<ValueAxis> {
                   size: Size(widget.width - PRICE_BAR_WIDTH, 1),
                   painter: DashLinePainter(
                     direction: Axis.horizontal,
-                    color: style.borderColor,
+                    color: style.crosshairLineColor,
                   ),
                 ),
                 Container(
-                  color: style.hoverIndicatorBackgroundColor,
+                  color: style.crosshairLabelBackgroundColor,
                   width: PRICE_BAR_WIDTH,
                   height: 20,
                   child: Center(
                     child: Text(
                       calculateHoveredNumber(widget.crosshairY!),
                       style: TextStyle(
-                        color: style.secondaryTextColor,
+                        color: style.crosshairLabelTextColor,
                         fontSize: 12,
                       ),
                     ),
