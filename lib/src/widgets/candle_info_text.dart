@@ -20,15 +20,11 @@ class CandleInfoText extends StatelessWidget {
     return "${value < 10 ? 0 : ""}$value";
   }
 
-  String dateFormatter(DateTime date) {
-    return "${date.year}-${numberFormat(date.month)}-${numberFormat(date.day)} ${numberFormat(date.hour)}:${numberFormat(date.minute)}";
-  }
-
   @override
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        text: dateFormatter(candle.date),
+        text: "",
         style: defaultStyle,
         children: <TextSpan>[
           TextSpan(text: " O:"),
@@ -55,6 +51,20 @@ class CandleInfoText extends StatelessWidget {
           TextSpan(text: " C:"),
           TextSpan(
             text: HelperFunctions.priceToString(candle.close),
+            style: TextStyle(
+              color: candle.isBull ? bullColor : bearColor,
+            ),
+          ),
+          TextSpan(text: " "),
+          TextSpan(
+            text: HelperFunctions.priceToString(candle.close - candle.open),
+            style: TextStyle(
+              color: candle.isBull ? bullColor : bearColor,
+            ),
+          ),
+          TextSpan(text: " "),
+          TextSpan(
+            text: "(" + ((candle.close - candle.open) / candle.open * 100).toStringAsFixed(2) + "%)",
             style: TextStyle(
               color: candle.isBull ? bullColor : bearColor,
             ),
