@@ -205,7 +205,7 @@ const Candlesticks({
 | `controller` | `CandlesticksController?` | Optional controller for programmatic viewport control. |
 | `style` | `CandleSticksStyle?` | Optional visual style for the chart. |
 
-## Loading State
+### Loading State
 
 When `candles` is empty, the chart shows a loading indicator by default.
 
@@ -224,7 +224,7 @@ Candlesticks(
 )
 ```
 
-## Load More Candles
+### Load More Candles
 
 Use `onLoadMoreCandles` to fetch older candles when the user scrolls near the end of the loaded history.
 
@@ -252,7 +252,7 @@ candles = [
 ];
 ```
 
-## Chart Range Adjustment
+### Chart Range Adjustment
 
 `chartAdjust` controls how the vertical price range is calculated.
 
@@ -270,7 +270,7 @@ ChartAdjust.visibleRange
 ChartAdjust.fullRange
 ```
 
-### `ChartAdjust.visibleRange`
+#### `ChartAdjust.visibleRange`
 
 Calculates the chart price range from the currently visible candles.
 
@@ -283,7 +283,7 @@ Candlesticks(
 )
 ```
 
-### `ChartAdjust.fullRange`
+#### `ChartAdjust.fullRange`
 
 Calculates the chart price range from the full candle list.
 
@@ -296,7 +296,7 @@ Candlesticks(
 )
 ```
 
-## Controller
+### Controller
 
 Use `CandlesticksController` when you want to control the chart viewport manually.
 
@@ -321,7 +321,7 @@ void dispose() {
 }
 ```
 
-### Controller Example
+#### Controller Example
 
 ```dart
 class ControlledChartPage extends StatefulWidget {
@@ -372,7 +372,7 @@ class _ControlledChartPageState extends State<ControlledChartPage> {
 }
 ```
 
-### Common Controller Members
+#### Common Controller Members
 
 | Member | Description |
 |---|---|
@@ -443,13 +443,20 @@ Candlesticks(
 | `scaleButtonInactiveTextColor` | Inactive scale button text. |
 | `loadingIndicatorColor` | Default loading indicator color. |
 
-## Complete Example
-
-```dart
 
 ## Example App
 
-The repository includes an example app that demonstrates chart interaction, zooming, panning, scale toggling, and loading more candles.
+The repository includes a complete example app that demonstrates the core features of this package in a real project.
+
+The example app is connected to the Binance API and includes:
+
+- Symbol search
+- Timeframe selection
+- Historical candle loading
+- Real-time price updates
+- Chart zooming and panning
+- Logarithmic and linear scale toggling
+- Mobile and desktop gesture support
 
 Run it locally:
 
