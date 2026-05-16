@@ -11,21 +11,6 @@ final isDesktopLike = kIsWeb ||
     defaultTargetPlatform == TargetPlatform.windows ||
     defaultTargetPlatform == TargetPlatform.linux;
 
-/// Defines how the visible price range of the chart is calculated.
-enum ChartAdjust {
-  /// Calculates the chart price range from the currently visible candles.
-  ///
-  /// This keeps the chart vertically focused on the visible data while the user
-  /// scrolls.
-  visibleRange,
-
-  /// Calculates the chart price range from the full candle list.
-  ///
-  /// This keeps the vertical scale stable while the user scrolls, but it may
-  /// make smaller visible price movements harder to see.
-  fullRange,
-}
-
 /// A Flutter candlestick chart widget.
 ///
 /// The [Candlesticks] widget displays OHLCV candle data with price and volume
@@ -44,7 +29,6 @@ enum ChartAdjust {
 /// Candlesticks(
 ///   candles: candles,
 ///   controller: controller,
-///   chartAdjust: ChartAdjust.visibleRange,
 ///   onLoadMoreCandles: () async {
 ///     final olderCandles = await fetchOlderCandles();
 ///     setState(() {
@@ -71,9 +55,6 @@ class Candlesticks extends StatefulWidget {
   /// still running.
   final Future<void> Function()? onLoadMoreCandles;
 
-  /// Defines how the chart price range is calculated while scrolling.
-  final ChartAdjust chartAdjust;
-
   /// Widget displayed when [candles] is empty.
   ///
   /// If this is null, a [CircularProgressIndicator] using the style loading
@@ -99,7 +80,6 @@ class Candlesticks extends StatefulWidget {
     super.key,
     required this.candles,
     this.onLoadMoreCandles,
-    this.chartAdjust = ChartAdjust.visibleRange,
     this.loadingWidget,
     this.controller,
     this.style,
@@ -187,7 +167,6 @@ class _CandlesticksState extends State<Candlesticks> {
             )
           : ChartComposer(
               controller: _controller,
-              chartAdjust: widget.chartAdjust,
               candles: widget.candles,
             ),
     );

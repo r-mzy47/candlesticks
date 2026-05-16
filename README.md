@@ -187,7 +187,6 @@ const Candlesticks({
   super.key,
   required this.candles,
   this.onLoadMoreCandles,
-  this.chartAdjust = ChartAdjust.visibleRange,
   this.loadingWidget,
   this.controller,
   this.style,
@@ -200,7 +199,6 @@ const Candlesticks({
 |---|---|---|
 | `candles` | `List<Candle>` | Candle data. The list must be ordered from newest to oldest. |
 | `onLoadMoreCandles` | `Future<void> Function()?` | Called when the chart scroll position is close to the oldest loaded candle. |
-| `chartAdjust` | `ChartAdjust` | Defines how the chart price range is calculated. |
 | `loadingWidget` | `Widget?` | Widget displayed when `candles` is empty. |
 | `controller` | `CandlesticksController?` | Optional controller for programmatic viewport control. |
 | `style` | `CandleSticksStyle?` | Optional visual style for the chart. |
@@ -250,50 +248,6 @@ candles = [
   olderCandle,
   evenOlderCandle,
 ];
-```
-
-### Chart Range Adjustment
-
-`chartAdjust` controls how the vertical price range is calculated.
-
-```dart
-Candlesticks(
-  candles: candles,
-  chartAdjust: ChartAdjust.visibleRange,
-)
-```
-
-Available values:
-
-```dart
-ChartAdjust.visibleRange
-ChartAdjust.fullRange
-```
-
-#### `ChartAdjust.visibleRange`
-
-Calculates the chart price range from the currently visible candles.
-
-This keeps the chart vertically focused on the visible data while the user scrolls.
-
-```dart
-Candlesticks(
-  candles: candles,
-  chartAdjust: ChartAdjust.visibleRange,
-)
-```
-
-#### `ChartAdjust.fullRange`
-
-Calculates the chart price range from the full candle list.
-
-This keeps the vertical scale more stable while scrolling, but smaller visible price movements may be harder to see.
-
-```dart
-Candlesticks(
-  candles: candles,
-  chartAdjust: ChartAdjust.fullRange,
-)
 ```
 
 ### Controller

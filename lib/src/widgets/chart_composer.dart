@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport_tween.dart';
-import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/widgets/axis/time_axis.dart';
 import 'package:candlesticks/src/widgets/candle_stick_widget.dart';
@@ -19,15 +18,10 @@ class ChartComposer extends StatefulWidget {
   /// list of all candles to display in chart
   final List<Candle> candles;
 
-  /// Will chart resize vertically by visible range
-  /// or by the whole dataset
-  final ChartAdjust chartAdjust;
-
   final CandlesticksController controller;
 
   ChartComposer({
     required this.candles,
-    required this.chartAdjust,
     required this.controller,
   });
 
@@ -107,7 +101,6 @@ class _ChartComposerState extends State<ChartComposer> {
                             Expanded(
                               child: MainChartPane(
                                 candles: widget.candles,
-                                chartAdjust: widget.chartAdjust,
                                 controller: widget.controller,
                                 viewPort: animatedViewport,
                                 onCrosshairXChange: onCrosshairXChange,

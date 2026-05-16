@@ -20,7 +20,6 @@ class MainChartPane extends StatefulWidget {
   const MainChartPane({
     super.key,
     required this.candles,
-    required this.chartAdjust,
     required this.controller,
     required this.viewPort,
     required this.onCrosshairXChange,
@@ -28,8 +27,6 @@ class MainChartPane extends StatefulWidget {
   });
 
   final List<Candle> candles;
-
-  final ChartAdjust chartAdjust;
 
   final CandlesticksController controller;
 
@@ -105,19 +102,10 @@ class _CandleSticksChartState extends State<MainChartPane> {
             .getRange(candlesStartIndex, candlesEndIndex + 1)
             .toList();
 
-        late RangeMinMax minMax;
-
-        if (widget.chartAdjust == ChartAdjust.visibleRange) {
-          minMax = cache.queryByTime(
-            inRangeCandles.first.date,
-            inRangeCandles.last.date,
-          );
-        } else {
-          minMax = cache.queryByTime(
-            widget.candles.first.date,
-            widget.candles.last.date,
-          );
-        }
+        final RangeMinMax minMax = cache.queryByTime(
+          inRangeCandles.first.date,
+          inRangeCandles.last.date,
+        );
 
         double candlesHighPrice = minMax.maxHigh;
         double candlesLowPrice = minMax.minLow;
