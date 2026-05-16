@@ -5,6 +5,7 @@ class CandleSticksStyleProvider extends InheritedWidget {
   final CandleSticksStyle style;
 
   const CandleSticksStyleProvider({
+    super.key,
     required this.style,
     required super.child,
   });

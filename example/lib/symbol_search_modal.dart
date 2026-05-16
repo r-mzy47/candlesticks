@@ -16,7 +16,7 @@ class SymbolsSearchModal extends StatefulWidget {
 }
 
 class _SymbolSearchModalState extends State<SymbolsSearchModal> {
-  String symbolSearch = "";
+  String symbolSearch = '';
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +42,11 @@ class _SymbolSearchModalState extends State<SymbolsSearchModal> {
               Expanded(
                 child: ListView(
                   children: widget.symbols
-                      .where((element) => element
-                          .toLowerCase()
-                          .contains(symbolSearch.toLowerCase()))
+                      .where(
+                        (element) => element
+                            .toLowerCase()
+                            .contains(symbolSearch.toLowerCase()),
+                      )
                       .map(
                         (e) => Padding(
                           padding: const EdgeInsets.all(8.0),

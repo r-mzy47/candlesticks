@@ -20,7 +20,8 @@ class ChartComposer extends StatefulWidget {
 
   final CandlesticksController controller;
 
-  ChartComposer({
+  const ChartComposer({
+    super.key,
     required this.candles,
     required this.controller,
   });

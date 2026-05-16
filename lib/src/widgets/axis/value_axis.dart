@@ -125,35 +125,38 @@ class _PriceColumnState extends State<ValueAxis> {
                               height: priceTileHeight,
                               width: double.infinity,
                               child: Center(
-                                  child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      height: 1,
-                                      color: style.gridLineColor,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        height: 1,
+                                        color: style.gridLineColor,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: PRICE_BAR_WIDTH,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 4),
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        alignment: Alignment.centerLeft,
-                                        child: Text(
-                                          HelperFunctions.priceToString(price),
-                                          maxLines: 1,
-                                          softWrap: false,
-                                          style: TextStyle(
-                                            color: style.axisTextColor,
-                                            fontSize: 11,
+                                    SizedBox(
+                                      width: PRICE_BAR_WIDTH,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 4),
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          alignment: Alignment.centerLeft,
+                                          child: Text(
+                                            HelperFunctions.priceToString(
+                                              price,
+                                            ),
+                                            maxLines: 1,
+                                            softWrap: false,
+                                            style: TextStyle(
+                                              color: style.axisTextColor,
+                                              fontSize: 11,
+                                            ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              )),
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),
@@ -172,7 +175,8 @@ class _PriceColumnState extends State<ValueAxis> {
                         child: Center(
                           child: Text(
                             HelperFunctions.priceToString(
-                                widget.lastCandle.close),
+                              widget.lastCandle.close,
+                            ),
                             style: TextStyle(
                               color: style.priceIndicatorTextColor,
                               fontSize: 11,

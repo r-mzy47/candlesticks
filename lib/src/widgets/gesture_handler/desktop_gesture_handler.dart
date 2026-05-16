@@ -194,9 +194,9 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
                 }
 
                 if (pointerSignal.scrollDelta.dy.abs() >
-                    pointerSignal.scrollDelta.dx.abs())
+                    pointerSignal.scrollDelta.dx.abs()) {
                   onScaleUpdate(pointerSignal.scrollDelta.dy * -1);
-                else {
+                } else {
                   widget.controller.scrollByPixels(
                     deltaX: pointerSignal.scrollDelta.dx,
                   );
@@ -256,7 +256,7 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Container(
+                SizedBox(
                   width: 22,
                   height: 22,
                   child: ElevatedButton(
@@ -283,7 +283,7 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
                     child: const Text('A'),
                   ),
                 ),
-                Container(
+                SizedBox(
                   width: 22,
                   height: 22,
                   child: ElevatedButton(
@@ -310,7 +310,7 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
                     },
                     child: const Text('L'),
                   ),
-                )
+                ),
               ],
             ),
           ),

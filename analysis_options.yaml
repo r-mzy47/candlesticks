@@ -1,0 +1,24 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - example/build/**
+
+linter:
+  rules:
+    # Package quality
+    # public_member_api_docs: true
+
+    # Style consistency
+    prefer_single_quotes: true
+    require_trailing_commas: true
+
+    # Safer code
+    always_declare_return_types: true
+    avoid_dynamic_calls: true
+    avoid_print: true
+    unawaited_futures: true
+    constant_identifier_names: false
+    
+  

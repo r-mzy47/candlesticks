@@ -41,10 +41,10 @@ class BinanceRepository {
   }
 
   Future<List<String>> fetchSymbols() async {
-    final uri = Uri.parse("https://api.binance.com/api/v3/ticker/price");
+    final uri = Uri.parse('https://api.binance.com/api/v3/ticker/price');
     final res = await http.get(uri);
-    return (jsonDecode(res.body) as List<dynamic>)
-        .map((e) => e["symbol"] as String)
+    return (jsonDecode(res.body) as List<Map<String, dynamic>>)
+        .map((e) => e['symbol'] as String)
         .toList();
   }
 
@@ -55,9 +55,9 @@ class BinanceRepository {
     channel.sink.add(
       jsonEncode(
         {
-          "method": "SUBSCRIBE",
+          'method': 'SUBSCRIBE',
           'params': ['$symbol@kline_$interval'],
-          "id": 1
+          'id': 1,
         },
       ),
     );

@@ -5,19 +5,26 @@ class CandleTickerModel {
   final String symbol;
   final Candle candle;
 
-  const CandleTickerModel(
-      {required this.eventTime, required this.symbol, required this.candle});
+  const CandleTickerModel({
+    required this.eventTime,
+    required this.symbol,
+    required this.candle,
+  });
 
   factory CandleTickerModel.fromJson(Map<String, dynamic> json) {
+    final kline = json['k'] as Map<String, dynamic>;
+
     return CandleTickerModel(
-        eventTime: json['E'] as int,
-        symbol: json['s'] as String,
-        candle: Candle(
-            date: DateTime.fromMillisecondsSinceEpoch(json["k"]["t"]),
-            high: double.parse(json["k"]["h"]),
-            low: double.parse(json["k"]["l"]),
-            open: double.parse(json["k"]["o"]),
-            close: double.parse(json["k"]["c"]),
-            volume: double.parse(json["k"]["v"])));
+      eventTime: json['E'] as int,
+      symbol: json['s'] as String,
+      candle: Candle(
+        date: DateTime.fromMillisecondsSinceEpoch(kline['t'] as int),
+        high: double.parse(kline['h'] as String),
+        low: double.parse(kline['l'] as String),
+        open: double.parse(kline['o'] as String),
+        close: double.parse(kline['c'] as String),
+        volume: double.parse(kline['v'] as String),
+      ),
+    );
   }
 }

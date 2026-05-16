@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:candlesticks/candlesticks.dart';
@@ -105,7 +106,7 @@ class _MyAppState extends State<MyApp> {
       );
 
       if (!mounted) {
-        channel.sink.close();
+        unawaited(channel.sink.close());
         return;
       }
 
@@ -313,7 +314,7 @@ class _MyAppState extends State<MyApp> {
                               ? Icons.wb_sunny_sharp
                               : Icons.nightlight_round_outlined,
                         ),
-                      )
+                      ),
                     ],
                   ),
                   Expanded(
