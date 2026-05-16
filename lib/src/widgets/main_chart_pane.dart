@@ -2,7 +2,6 @@ import 'package:candlesticks/src/constant/view_constants.dart';
 import 'package:candlesticks/src/controller/candlesticks_controller.dart';
 import 'package:candlesticks/src/controller/candlesticks_viewport.dart';
 import 'package:candlesticks/src/data/minmax_cache.dart';
-import 'package:candlesticks/src/main.dart';
 import 'package:candlesticks/src/models/candle_sticks_style.dart';
 import 'package:candlesticks/src/models/price_scale.dart';
 import 'package:candlesticks/src/widgets/axis/value_axis.dart';
