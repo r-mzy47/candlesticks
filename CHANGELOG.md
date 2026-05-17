@@ -1,4 +1,4 @@
-[3.0.0] - May 17, 2026
+## [3.0.0] - May 17, 2026
 
 - [Breaking] Remove the `actions` parameter from `Candlesticks`. Consumers should now provide toolbar/actions UI outside the widget.
 
