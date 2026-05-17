@@ -55,6 +55,7 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
   double mouseXpositionWhenUserStartsDragging = 0;
 
   void _onMouseExit(PointerEvent details) {
+    widget.onCrosshairXChange(null);
     setState(() {
       crosshairY = null;
     });
@@ -186,7 +187,8 @@ class _DesktopGestureHandlerState extends State<DesktopGestureHandler> {
                 final isAnchoredZoomModifierPressed =
                     HardwareKeyboard.instance.isMetaPressed || // macOS Command
                         HardwareKeyboard
-                            .instance.isControlPressed; // Windows/Linux Ctrl
+                            .instance.isControlPressed || // Windows/Linux Ctrl
+                        HardwareKeyboard.instance.isAltPressed; // web
 
                 if (isAnchoredZoomModifierPressed) {
                   onAnchoredZoomScroll(pointerSignal);

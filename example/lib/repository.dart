@@ -43,8 +43,11 @@ class BinanceRepository {
   Future<List<String>> fetchSymbols() async {
     final uri = Uri.parse('https://api.binance.com/api/v3/ticker/price');
     final res = await http.get(uri);
-    return (jsonDecode(res.body) as List<Map<String, dynamic>>)
-        .map((e) => e['symbol'] as String)
+
+    final data = jsonDecode(res.body) as List<dynamic>;
+
+    return data
+        .map((e) => (e as Map<String, dynamic>)['symbol'] as String)
         .toList();
   }
 
