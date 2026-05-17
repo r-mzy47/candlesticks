@@ -1,3 +1,21 @@
+[3.0.0] - May 17, 2026
+
+- [Breaking] Remove the `actions` parameter from `Candlesticks`. Consumers should now provide toolbar/actions UI outside the widget.
+
+- [Feature] add [CandlesticksController] for external chart control
+- [Feature] add logarithmic scale support
+- [Feature] add custom chart styling with [CandleSticksStyle]
+- [Feature] add customizable [loadingWidget]
+- [Feature] Add anchored zoom with `Ctrl`/`Command` + scroll. On web, use `Alt`/`Option` + scroll.
+- [Feature] add free chart dragging for horizontal scrolling and vertical price adjustment
+
+- [Improvement] simplify [Candlesticks] public API
+- [Improvement] move toolbar responsibility outside chart widget
+- [Improvement] improve mobile and desktop gesture handling
+- [Improvement] improve code structure
+- [Improvement] improve performance
+- [Improvement] update documentation and examples
+
 ## [2.1.0] - Feb 22, 2022
 
 - document correction

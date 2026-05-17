@@ -43,6 +43,10 @@ Try the live web example:
 
 [https://r-mzy47.github.io/candlesticks/master/](https://r-mzy47.github.io/candlesticks/master/)
 
+On web, use **Alt/Option + scroll** for anchored zoom.
+
+> Note: `Ctrl + scroll` is currently avoided on web because browsers may intercept it for page zoom.
+
 ### Mobile Preview
 
 |  |  |
