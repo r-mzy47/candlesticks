@@ -8,7 +8,9 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white" alt="Flutter">
   <img src="https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white" alt="Dart">
-  <img src="https://img.shields.io/badge/version-3.0.0-5FC9F8" alt="Version 3.0.0">
+  <a href="https://pub.dev/packages/candlesticks">
+    <img src="https://img.shields.io/pub/v/candlesticks.svg" alt="pub package version">
+  </a>
 </p>
 
 <p align="center">
@@ -33,17 +35,17 @@
 
 `candlesticks` is a Flutter package for rendering interactive OHLCV candlestick charts.
 
-It supports mobile and desktop gestures, crosshair interaction, panning, zooming, logarithmic and linear scale toggling, volume bars, controller-based viewport control, lazy loading, and custom chart styling.
+It supports mobile and desktop gestures, crosshair interaction, panning, zooming, switching between logarithmic and linear price scales, volume bars, controller-based viewport control, lazy loading, and custom chart styling.
 
 ## Preview
 
 ### Web Preview
 
-Try the live web example:
+Try the live web demo:
 
 [https://r-mzy47.github.io/candlesticks/master/](https://r-mzy47.github.io/candlesticks/master/)
 
-On web, use **Alt/Option + scroll** for anchored zoom.
+On the web, use **Alt/Option + scroll** for anchored zoom.
 
 > Note: `Ctrl + scroll` is currently avoided on web because browsers may intercept it for page zoom.
 
@@ -51,7 +53,7 @@ On web, use **Alt/Option + scroll** for anchored zoom.
 
 |  |  |
 |---|---|
-| **Logarithmic and linear scales**<br><img src="https://raw.githubusercontent.com/r-mzy47/candlesticks/master/docs/assets/1.gif" width="360" alt="Logarithmic and linear scale demo"><br> | **Long press for crosshair**<br><img src="https://raw.githubusercontent.com/r-mzy47/candlesticks/master/docs/assets/2.gif" width="360" alt="Long press crosshair demo"><br> |
+| **Linear and logarithmic scales**<br><img src="https://raw.githubusercontent.com/r-mzy47/candlesticks/master/docs/assets/1.gif" width="360" alt="Logarithmic and linear scale demo"><br> | **Long press for crosshair**<br><img src="https://raw.githubusercontent.com/r-mzy47/candlesticks/master/docs/assets/2.gif" width="360" alt="Long press crosshair demo"><br> |
 | **Advanced gestures: pan in any direction**<br><img src="https://raw.githubusercontent.com/r-mzy47/candlesticks/master/docs/assets/3.gif" width="360" alt="Advanced chart gesture demo"><br> | **Anchored and regular zoom**<br><img src="https://raw.githubusercontent.com/r-mzy47/candlesticks/master/docs/assets/4.gif" width="360" alt="Anchored and regular zoom demo"><br> |
 
 ## Installation
@@ -60,7 +62,7 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  candlesticks: ^3.0.0
+  candlesticks: ^3.0.1
 ```
 
 Then run:
@@ -118,8 +120,7 @@ class ChartPage extends StatelessWidget {
 }
 ```
 
-> The candle list must be ordered from newest to oldest.  
-> The newest candle should be at index `0`.
+The candle list must be ordered from newest to oldest. The newest candle should be at index `0`.
 
 ```dart
 final candles = [
@@ -157,32 +158,7 @@ final candle = Candle(
 | `isBull` | `bool` | Returns `true` when `open <= close`. |
 
 
-## Parsing API Data
-
-The package focuses on chart rendering. Exchange-specific parsing should be handled in your own app or repository layer.
-
-Example for Binance kline data:
-
-```dart
-Candle candleFromBinanceKline(List<dynamic> json) {
-  return Candle(
-    date: DateTime.fromMillisecondsSinceEpoch(json[0] as int),
-    open: double.parse(json[1] as String),
-    high: double.parse(json[2] as String),
-    low: double.parse(json[3] as String),
-    close: double.parse(json[4] as String),
-    volume: double.parse(json[5] as String),
-  );
-}
-```
-
 ## Candlesticks Widget
-
-```dart
-Candlesticks(
-  candles: candles,
-)
-```
 
 ### Constructor
 
@@ -302,12 +278,6 @@ class _ControlledChartPageState extends State<ControlledChartPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
-          child: Candlesticks(
-            candles: candles,
-            controller: controller,
-          ),
-        ),
         Row(
           children: [
             IconButton(
@@ -323,6 +293,12 @@ class _ControlledChartPageState extends State<ControlledChartPage> {
               icon: const Icon(Icons.keyboard_double_arrow_right),
             ),
           ],
+        ),
+        Expanded(
+          child: Candlesticks(
+            candles: candles,
+            controller: controller,
+          ),
         ),
       ],
     );
@@ -406,28 +382,18 @@ Candlesticks(
 
 The repository includes a complete example app that demonstrates the core features of this package in a real project.
 
-The example app is connected to the Binance API and includes:
+The example app uses the Binance API and includes:  
 
 - Symbol search
 - Timeframe selection
 - Historical candle loading
 - Real-time price updates
-- Chart zooming and panning
-- Logarithmic and linear scale toggling
-- Mobile and desktop gesture support
 
 Run it locally:
 
 ```bash
 cd example
 flutter run
-```
-
-Run it on web:
-
-```bash
-cd example
-flutter run -d chrome
 ```
 
 Live web example:
