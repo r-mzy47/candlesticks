@@ -50,7 +50,7 @@ class TimeAxis extends StatelessWidget {
 
   static const double _crosshairTextWidth = 110;
   static const double _crosshairTextHeight = 20;
-  static const double _fontSize = 12;
+  static const double _fontSize = 10;
 
   final List<Candle> candles;
   final CandlesticksViewport viewport;
