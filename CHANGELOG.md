@@ -1,3 +1,7 @@
+## [3.0.1] - May 22, 2026
+
+- [BugFix] Fixed an issue where the hovered date label text could overflow.
+
 ## [3.0.0] - May 17, 2026
 
 - [Breaking] Remove the `actions` parameter from `Candlesticks`. Consumers should now provide toolbar/actions UI outside the widget.
