@@ -217,7 +217,9 @@ class _MyAppState extends State<MyApp> {
               width: 200,
               color: Theme.of(context).colorScheme.surface,
               child: Wrap(
-                children: _intervals.map(_buildIntervalButton).toList(),
+                children: _intervals
+                    .map((interval) => _buildIntervalButton(interval, context))
+                    .toList(),
               ),
             ),
           ),
@@ -226,7 +228,7 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Widget _buildIntervalButton(String interval) {
+  Widget _buildIntervalButton(String interval, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8),
       child: SizedBox(
